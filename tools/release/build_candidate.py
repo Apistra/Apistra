@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 from datetime import UTC, datetime
@@ -11,6 +12,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "artifacts" / "cap00-candidate"
+VERSION_FILE = ROOT / "VERSION"
+RELEASE_VERSION_PATTERN = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-(?:alpha|beta|rc)\.(0|[1-9]\d*))?$"
+)
 
 
 def run(*command: str, capture: bool = False) -> str:
@@ -35,6 +41,15 @@ def assert_clean_commit() -> str:
     if len(commit) != 40:
         raise SystemExit("Could not resolve a full commit SHA.")
     return commit
+
+
+def release_version() -> str:
+    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+    if not RELEASE_VERSION_PATTERN.fullmatch(version):
+        raise SystemExit(
+            "VERSION must contain a supported SemVer value without build metadata."
+        )
+    return version
 
 
 def packages(image: str, runtime: str) -> list[dict[str, str]]:
@@ -70,7 +85,8 @@ def packages(image: str, runtime: str) -> list[dict[str, str]]:
 
 def main() -> int:
     commit = assert_clean_commit()
-    version = "0.0.0+" + commit[:12]
+    base_version = release_version()
+    version = f"{base_version}+{commit[:12]}"
     if ARTIFACTS.exists():
         shutil.rmtree(ARTIFACTS)
     ARTIFACTS.mkdir(parents=True)
@@ -162,6 +178,7 @@ def main() -> int:
         "schema_version": "1.0",
         "capability": "CAP-00",
         "source_commit": commit,
+        "base_version": base_version,
         "version": version,
         "created_at": datetime.now(UTC).isoformat(),
         "images": manifest_images,

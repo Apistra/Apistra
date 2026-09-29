@@ -10,6 +10,10 @@ from pathlib import Path
 EXPECTED_FLOW = ["feature/*", "test", "staging", "main"]
 AUTOMATIC_DEPLOYMENT_PATTERN = re.compile(r"\b(deploy|deployment)\b", re.IGNORECASE)
 MARKDOWN_LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+RELEASE_VERSION_PATTERN = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-(?:alpha|beta|rc)\.(0|[1-9]\d*))?$"
+)
 EXPECTED_WORKORDER_COUNTS = {
     "CAP-00": 7,
     "CAP-01": 5,
@@ -61,6 +65,16 @@ WORKORDER_REQUIRED_SECTIONS = {
     "## Deployment and staging evidence",
     "## Definition of Done",
 }
+TEST_CONCEPT_REQUIRED_SECTIONS = {
+    "## 1. Control summary",
+    "## 5. Test organisation and responsibilities",
+    "## 7. Test levels and ownership",
+    "## 12. Entry criteria",
+    "## 13. Exit and gate criteria",
+    "## 15. Defect and deviation management",
+    "## 20. Evidence and reporting",
+    "## 23. Current CAP-00 application",
+}
 
 
 def validate_contract(contract: dict[str, object]) -> list[str]:
@@ -100,6 +114,54 @@ def validate_workflows(root: Path) -> list[str]:
                     f"{path}:{line_number}: workflow contains deployment language"
                 )
     return errors
+
+
+def validate_version_values(version: str, backend_version: str, web_version: str) -> list[str]:
+    errors: list[str] = []
+    if not RELEASE_VERSION_PATTERN.fullmatch(version):
+        errors.append(
+            "VERSION must contain supported SemVer without build metadata"
+        )
+    if backend_version != version:
+        errors.append("backend/pyproject.toml version must match VERSION")
+    if web_version != version:
+        errors.append("apps/web/package.json version must match VERSION")
+    return errors
+
+
+def validate_version_policy(root: Path) -> list[str]:
+    errors: list[str] = []
+    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+
+    backend_text = (root / "backend/pyproject.toml").read_text(encoding="utf-8")
+    backend_match = re.search(r'^version\s*=\s*"([^"]+)"', backend_text, re.MULTILINE)
+    if backend_match is None:
+        errors.append("backend/pyproject.toml must declare a project version")
+
+    web_package = json.loads((root / "apps/web/package.json").read_text(encoding="utf-8"))
+    errors.extend(
+        validate_version_values(
+            version,
+            backend_match.group(1) if backend_match else "",
+            str(web_package.get("version", "")),
+        )
+    )
+
+    changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+    if "## [Unreleased]" not in changelog:
+        errors.append("CHANGELOG.md must contain an Unreleased section")
+    if not (root / "VERSIONING.md").is_file():
+        errors.append("VERSIONING.md must define the version policy")
+    return errors
+
+
+def validate_test_concept(root: Path) -> list[str]:
+    path = root / "docs/testing/test-concept.md"
+    text = path.read_text(encoding="utf-8")
+    missing = _missing_sections(text, TEST_CONCEPT_REQUIRED_SECTIONS)
+    if missing:
+        return [f"{path}: missing sections: {', '.join(missing)}"]
+    return []
 
 
 def _missing_sections(text: str, required: set[str]) -> list[str]:
@@ -175,9 +237,13 @@ def validate_local_planning_links(root: Path) -> list[str]:
     errors: list[str] = []
     paths = [
         root / "README.md",
+        root / "CHANGELOG.md",
+        root / "VERSIONING.md",
         root / "docs/planning/README.md",
+        root / "docs/planning/06-test-architecture.md",
         root / "docs/planning/08-capabilities-and-roadmap.md",
         root / "docs/planning/09-workorders.md",
+        root / "docs/testing/test-concept.md",
         *(root / "docs/capabilities").glob("*.md"),
         *(root / "docs/workorders").glob("**/*.md"),
     ]
@@ -201,6 +267,8 @@ def main() -> int:
     errors = (
         validate_contract(repository_contract(root))
         + validate_workflows(root)
+        + validate_version_policy(root)
+        + validate_test_concept(root)
         + validate_planning_catalogues(root)
         + validate_local_planning_links(root)
     )
@@ -219,6 +287,10 @@ def main() -> int:
             errors.append("positive contract fixture must pass")
         if not validate_contract(negative):
             errors.append("negative contract fixture must fail")
+        if validate_version_values("0.1.0", "0.1.0", "0.1.0"):
+            errors.append("positive version fixture must pass")
+        if not validate_version_values("0.1.0+local", "0.1.0", "0.2.0"):
+            errors.append("negative version fixture must fail")
     for error in errors:
         print(error)
     if errors:

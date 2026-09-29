@@ -1,6 +1,6 @@
 # System-Centred Test Architecture
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 
 ## 1. Test purpose and scope
@@ -8,6 +8,8 @@ Status: DRAFT
 Testing must demonstrate that Apistra preserves project isolation, executes versioned workflows durably, applies human and automated policy correctly, exposes stable APIs, manages knowledge provenance, operates offline, and can be delivered and recovered reproducibly.
 
 Implementation-derived tests are not the sole authority. Expected behaviour is derived from the approved product, architecture, security, delivery, and design contracts.
+
+This document defines the system-centred test architecture: test boundaries, layers, models, and technical evidence paths. The operational rules for planning, executing, evaluating, and accepting tests are defined in the [Test Concept](../testing/test-concept.md).
 
 ## 2. System test map
 
@@ -298,12 +300,15 @@ Logs, metrics, traces, and audit records must allow failure localisation without
 ## 13. Test gate status
 
 - Test architecture definition: DRAFT
-- Automated tests: NOT IMPLEMENTED
-- Manual test definitions: NOT YET EXPANDED
-- Fixtures: NOT IMPLEMENTED
-- Softwaretest.it project and plan: NOT CREATED OR VERIFIED
-- Test execution: NOT STARTED
-- Capability acceptance: BLOCKED
+- Test concept: DRAFT
+- CAP-00 automated architecture, contract, unit, integration, BDD, security, recovery, packaging, and evidence checks: IMPLEMENTED AND HOSTED VERIFIED
+- Business capability automated tests: NOT IMPLEMENTED
+- CAP-00 manual test definition: IMPLEMENTED; independent execution and human acceptance remain PENDING
+- Business capability manual packages: NOT YET EXPANDED OR PUBLISHED
+- CAP-00 synthetic engineering fixtures: IMPLEMENTED; business fixtures expand with their owning capabilities
+- Softwaretest.it public API contract: VERIFIED; authenticated project, plan, and result round-trip remains BLOCKED
+- CAP-00 formal acceptance: BLOCKED on repository protection, authenticated Softwaretest.it evidence, independent review, and human acceptance
+- Business capability acceptance: NOT STARTED
 
 ## 14. Review obligations
 

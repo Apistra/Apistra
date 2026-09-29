@@ -1,6 +1,6 @@
 # Apistra BuildBySpec Planning Baseline
 
-Version: 0.2-draft
+Version: 0.3-draft
 Date: 2026-09-29
 Language: English
 Assurance profile: EXTENDED
@@ -18,12 +18,15 @@ No document in this baseline is implementation evidence. No capability is implem
 - 03-architecture.md — arc42 architecture, binding ARCH rules, and architecture diagrams
 - 04-security-concept.md — system-wide security concept and SEC rules
 - 05-delivery-ci-contract.md — branch, build, evidence, staging, recovery, and promotion contract
-- 06-test-architecture.md — system-centred test model, BPMN process references, and Softwaretest.it contract
+- 06-test-architecture.md — system-centred test model, BPMN process references, and technical evidence paths
+- ../testing/test-concept.md — test governance, levels, entry and exit criteria, defect handling, execution, evidence, and acceptance rules
 - 07-design-contract.md — brand, interaction, accessibility, and rendered visual design references
 - 08-capabilities-and-roadmap.md — gate-based release index; detailed contracts are in `../capabilities/`
 - 09-workorders.md — readiness/index view; one execution contract per file is in `../workorders/`
 - 10-traceability-and-gates.md — requirement-to-evidence mappings and release gates
 - 11-architecture-decisions-and-patterns.md — concrete ADRs, pattern scope, prohibitions, and verification
+- ../../VERSIONING.md — product version authority, compatibility meaning, and release procedure
+- ../../CHANGELOG.md — curated history of user-visible, contract, security, and operational changes
 
 ## Governing rules
 
@@ -43,6 +46,8 @@ No document in this baseline is implementation evidence. No capability is implem
 - Security baseline: DRAFT
 - Delivery contract: DRAFT
 - Test architecture: DRAFT
+- Test concept: DRAFT
+- Versioning and changelog policy: DEFINED; no product release exists
 - Design direction: DECIDED, design evidence still PENDING
 - Independent expectation review: PENDING
 - CAP-00 implementation: IMPLEMENTED AND HOSTED VERIFIED; formal external and human acceptance gates remain

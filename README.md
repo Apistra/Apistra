@@ -27,6 +27,12 @@ Granular product slices are maintained as [one file per capability](docs/capabil
 
 The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. The final CAP-00 gate still requires repository branch protection, an authorised Softwaretest.it round-trip, independent review, and explicit human acceptance.
 
+The operational test rules are defined in the [Test Concept](docs/testing/test-concept.md); the system test structure remains in the [Test Architecture](docs/planning/06-test-architecture.md).
+
+## Versioning and changes
+
+The authoritative development version is stored in [VERSION](VERSION). Version meaning and release rules are defined in [VERSIONING.md](VERSIONING.md), and curated changes are recorded in [CHANGELOG.md](CHANGELOG.md). Version `0.0.0` denotes the unreleased CAP-00 development baseline, not a product release.
+
 ## Architecture foundation
 
 The initial monorepo layout, dependency rules, retained positive and negative fixtures, and CI integration are documented in [docs/architecture/testing.md](docs/architecture/testing.md).
