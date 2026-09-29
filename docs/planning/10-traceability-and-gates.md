@@ -1,6 +1,6 @@
 # Traceability and Gates
 
-Version: 0.3-draft
+Version: 0.4-draft
 Status: DRAFT
 
 ## 1. Stable requirement catalogue
@@ -25,6 +25,17 @@ REQ-017 — AGPL and commercial offline licence
 REQ-018 — English documentation and English or German UI
 REQ-019 — Controlled branch promotion without automatic deployment
 REQ-020 — Softwaretest.it test management and complete result reporting
+REQ-021 — Durable advanced control flow
+REQ-022 — Scheduled and authenticated event-triggered execution
+REQ-023 — Expanded trusted connector catalogue
+REQ-024 — Secret-safe import, export, and templates
+REQ-025 — Versioned evaluation datasets and provenance
+REQ-026 — Calibrated evaluation policies and human review
+REQ-027 — Reproducible candidate comparison
+REQ-028 — Role-based administration and enterprise identity
+REQ-029 — Signed, permission-bounded third-party plugins
+REQ-030 — Supported Kubernetes deployment profile
+REQ-031 — Commercial operations and optional managed-service boundaries
 
 ## 2. Requirement to capability mapping
 
@@ -37,6 +48,17 @@ REQ-020 — Softwaretest.it test management and complete result reporting
 - REQ-012 → CAP-07
 - REQ-017 → CAP-01 and later commercial operations
 - REQ-019, REQ-020 → CAP-00 and every capability gate
+- REQ-021 → CAP-08
+- REQ-022 → CAP-09
+- REQ-023 → CAP-10
+- REQ-024 → CAP-11
+- REQ-025 → CAP-12
+- REQ-026 → CAP-13
+- REQ-027 → CAP-14
+- REQ-028 → CAP-15
+- REQ-029 → CAP-16
+- REQ-030 → CAP-17
+- REQ-017, REQ-031 → CAP-18
 
 ## 3. Architecture and security mapping
 
@@ -65,6 +87,13 @@ Concrete implementation patterns and their boundaries are defined in `11-archite
 - PRC-05 → CAP-07 → MTP-PRC-05 → BDD-APPROVAL-001 through BDD-APPROVAL-003
 - PRC-06 → CAP-12 through CAP-14 → MTP-PRC-06
 - PRC-07 → CAP-00 and operations → MTP-PRC-07 → BDD-OFFLINE-001
+- PRC-08 → CAP-08 → MTP-PRC-08 → BDD-FLOW-001 through BDD-FLOW-006 (planned)
+- PRC-09 → CAP-09 → MTP-PRC-09 → BDD-TRIGGER-001 through BDD-TRIGGER-004 (planned)
+- PRC-10 → CAP-11 → MTP-PRC-10 → BDD-PORTABLE-001 through BDD-PORTABLE-004 (planned)
+- PRC-11 → CAP-15 → MTP-PRC-11 → BDD-IAM-001 through BDD-IAM-005 (planned)
+- PRC-12 → CAP-16 → MTP-PRC-12 → BDD-PLUGIN-001 through BDD-PLUGIN-005 (planned)
+- PRC-13 → CAP-17 → MTP-PRC-13 → BDD-K8S-001 through BDD-K8S-003 (planned)
+- PRC-14 → CAP-18 → MTP-PRC-14 → BDD-LIC-001 through BDD-LIC-003 and BDD-MANAGED-001 (planned)
 
 ## 5. Gate sequence
 
@@ -195,7 +224,7 @@ Every executed test or gate must bind:
 - Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; GitHub Actions run 36618729112 accepted the committed candidate, while independent implementation review remains pending
 - GitHub Actions run 36618729112 built the clean committed immutable candidate and passed staging health, controlled failure, and unchanged-image recovery
 - The manual case is defined but has not received an independent human ACCEPTED decision
-- Branch protection is specified but the live `test`, `staging`, and protected-branch settings are not configured
+- The live `test` and `staging` branches exist, but protected-branch settings are not configured
 - The official AGPLv3 text is present; commercial terms, rights-holder details, and legal review remain pending before commercial release
 
 These are expected planning gaps and must not be represented as failures of implemented software. They remain blockers for their assigned future gates.

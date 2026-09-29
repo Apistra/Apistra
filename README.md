@@ -23,6 +23,8 @@ Apistra is intended for developers, AI engineers, and technical solution archite
 
 The current BuildBySpec planning package starts at [docs/planning/README.md](docs/planning/README.md).
 
+Granular product slices are maintained as [one file per capability](docs/capabilities/README.md) and [one execution contract per workorder](docs/workorders/README.md).
+
 The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. The final CAP-00 gate still requires repository branch protection, an authorised Softwaretest.it round-trip, independent review, and explicit human acceptance.
 
 ## Architecture foundation

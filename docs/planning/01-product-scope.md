@@ -63,6 +63,16 @@ An AI engineer executes versioned test datasets, compares candidates, reviews co
 
 An Administrator observes health and runs, backs up state, restores it, and diagnoses or recovers a failed deployment without losing auditability.
 
+### Later 0.x journeys
+
+- PRC-08 — Author and recover advanced control flow: an Administrator uses bounded parallelism, loops, subflows, fallback, human input, and human edit while retaining deterministic recovery.
+- PRC-09 — Configure scheduled or event-triggered execution: an Administrator creates, pauses, disables, and diagnoses authenticated triggers with explicit replay and catch-up policy.
+- PRC-10 — Move reviewed assets between installations: an Administrator previews, exports, maps, resolves, and imports compatible project assets without secrets.
+- PRC-11 — Administer roles and enterprise identity: an authorised identity administrator manages provider configuration, membership, roles, revocation, and separation of duties.
+- PRC-12 — Install and govern a trusted plugin: an Administrator verifies provenance, permissions, compatibility, isolation, update, and revocation.
+- PRC-13 — Operate the Kubernetes profile: an operator installs, observes, upgrades, restores, and recovers an immutable candidate on a supported Kubernetes environment.
+- PRC-14 — Administer commercial operations: an authorised operator applies an offline licence, exports a redacted support bundle, and, only under a separate approved contract, operates a managed-service environment.
+
 ## 5. Product scope
 
 ### Initial 0.x product arc

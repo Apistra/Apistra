@@ -1,60 +1,64 @@
 # Human Control Overview
 
-Version: 0.2-draft
+Version: 0.4-draft
 Date: 2026-09-29
-Scope: Initial Apistra product planning baseline
+Scope: Apistra planning baseline and CAP-00 delivery evidence
 Profile: EXTENDED
 
 ## 1. Intended result
 
-Apistra will be a public, build-in-public platform for designing, testing, publishing, and operating AI-assisted business processes. Published workflow versions expose reliable, versioned APIs and support long-running execution, configurable AI endpoints, knowledge retrieval, tools, and human approvals.
-
-The current deliverable is planning only. It does not include product code, deployment, test execution, Softwaretest.it mutation, or release approval.
+Apistra is planned as a public build-in-public platform for designing, testing, publishing, and operating AI-assisted business processes. The immediate result is a reviewable, traceable product plan with one canonical file per capability and one execution contract per workorder.
 
 ## 2. Change from the prior state
 
-The repository contained a textual planning baseline but lacked concrete architecture decisions, architecture diagrams, canonical BPMN models, and rendered product-design references. Version 0.2 adds those planning artefacts while leaving implementation and evidence gates unchanged.
+The previous roadmap and workorder catalogue contained compact summaries. Version 0.4 adds nineteen detailed capability contracts under ../capabilities/ and 140 individual workorder contracts under ../workorders/, extends later-0.x requirements and journeys, and makes their file/section/link structure executable in the repository contract validator. The former monolithic documents are now indexes.
 
 ## 3. Status by control dimension
 
 Implementation:
-- No product implementation exists.
-- No CI/CD workflow, container image, database schema, or runtime service exists.
+
+- CAP-00 health-only web, API, worker, packaging, local-staging, recovery, fixture, and reporting-adapter foundations are implemented.
+- CAP-01 through CAP-18 contain planning contracts only; no business capability implementation is claimed.
+- No production environment or automatic deployment exists.
 
 Evidence:
-- Repository presence and initial assets were inspected.
-- Versioned architecture diagrams, BPMN sources, rendered design references, and concrete ADR and pattern decisions now exist as planning evidence.
-- No application-code conformance, build, test execution, security-effectiveness, deployment, recovery, or Softwaretest.it evidence exists yet.
-- The public Softwaretest.it OpenAPI endpoint could not be retrieved through the available web reader; API preflight remains a CAP-00 obligation.
+
+- GitHub Actions run 36619441457 passed all five required jobs for commit 15d258a.
+- The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, required sections, catalogue membership, and local planning links.
+- The public Softwaretest.it OpenAPI preflight and dry-run adapter tests pass; an authenticated project/test-plan round-trip remains unavailable.
+- Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
 
 Approval:
-- Product-owner decisions captured in 02-decision-register.md are DECIDED.
-- This planning baseline is DRAFT until reviewed by the product owner.
-- Qualified architecture and security review remain PENDING.
-- No production approval exists or is requested.
+
+- Confirmed product decisions remain recorded in 02-decision-register.md.
+- ADR-019 is approved and implemented; ADR-001 through ADR-018 still require qualified review.
+- Design sources exist but the product-owner design gate remains pending.
+- No business capability, release, or production approval exists.
 
 ## 4. Blocking obligations
 
-1. The planning package requires human product review.
-2. EXTENDED assurance requires an independent expectation review before workorders can become READY.
-3. CAP-00 must establish the protected CI path, immutable candidate, local staging deployment, diagnostics, recovery, and evidence reporting.
-4. Softwaretest.it OpenAPI, authentication, scopes, resource model, idempotency, and round-trip behaviour must be verified before any write.
-5. UI references are present but remain unapproved; logo rights and production variants, accessibility evidence, detailed state views, manual UI test publication, and product-owner design approval still block the design gate.
-6. No business workorder may start until CAP-00 and the publishing-readiness gate have passed.
+1. Configure live branch protection for test, staging, and main.
+2. Complete the authorised Softwaretest.it project/test-plan write and field-level read-back.
+3. Complete independent expectation and CAP-00 implementation reviews.
+4. Record human CAP-00 bootstrap acceptance.
+5. Before each business workorder becomes READY, close its named architecture, security, design, test-management, and prerequisite decisions.
 
 ## 5. Next responsible steps
 
-Product owner:
-- Review the architecture diagrams, BPMN models, concrete pattern decisions, and design references.
-- Either approve planning version 0.2 for expectation review or request changes.
+Repository administrator:
 
-Independent reviewer:
-- Derive expectations from the confirmed source decisions without using implementation as authority.
-- Compare the result with this baseline and record discrepancies.
+- Configure branch protection without creating an impossible solo-review policy.
 
-CAP-00 implementer, only after readiness:
-- Implement the minimal walking skeleton and delivery foundation without adding business behaviour.
+Authorised test-management operator:
+
+- Provide the protected Softwaretest.it project, plan/cycle, and token context for the round-trip.
+
+Independent reviewer and product owner:
+
+- Review CAP-00 evidence and the version 0.4 planning delta.
+- Resolve the remaining architecture/design decisions for the next selected capability.
+- Approve no more than one or two independent first workorders as READY.
 
 ## 6. Decision required now
 
-Human review is now required for the visual and architecture-decision baseline. Approval of version 0.2 does not approve implementation, CAP-00, a capability, or production.
+No business implementation should begin yet. The next human decision is how branch review will work with the current single repository owner and who performs the independent CAP-00 acceptance review.
