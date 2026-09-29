@@ -1,9 +1,9 @@
 # Workorder Catalogue
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 
-All workorders use EXTENDED assurance unless a later reviewed delta justifies a lower profile. Every workorder requires approved expectations, implementation evidence, and the specified gate. No workorder is currently READY.
+All workorders use EXTENDED assurance unless a later reviewed delta justifies a lower profile. Every workorder requires approved expectations, implementation evidence, and the specified gate. CAP-00 implementation is ready for independent and external acceptance, but CAP-00 is not DONE.
 
 ## Common stop conditions
 
@@ -22,7 +22,7 @@ Stop and report when:
 
 ### WO-CAP-00-01 — Establish repository governance and planning checks
 
-Status: DRAFT
+Status: IMPLEMENTED — live branch protection remains blocked pending repository-administrator authorisation
 
 Result:
 
@@ -48,7 +48,7 @@ Tests: CI-TS-01, CI-TS-02, CI-TS-10.
 
 ### WO-CAP-00-02 — Create the monorepo walking skeleton
 
-Status: DRAFT — repository layout and architecture-test foundation implemented; service health behaviour, complete clean-clone build evidence, and independent implementation review remain
+Status: IMPLEMENTED — clean committed candidate, hosted CI evidence, and independent review remain acceptance evidence
 
 Result:
 
@@ -71,13 +71,13 @@ Acceptance:
 - architecture tests prove ARCH-001, ARCH-010, ARCH-011, and ARCH-013;
 - forbidden dependency fixture fails.
 
-Implementation note: ADR-019 resolves the repository-layout decision. The structural tests and CI-TS-03 integration are present, but this workorder is not DONE because the API and worker health processes, complete bootstrap matrix, hosted CI evidence, and independent review are separate remaining evidence.
+Implementation note: ADR-019 resolves the repository-layout decision. Web, API, and worker health processes, the complete local test matrix, and packaging path are implemented. This workorder is not DONE until the clean committed candidate, hosted CI run, and independent review are accepted.
 
 Tests: CI-TS-02 through CI-TS-07, CI-TS-15.
 
 ### WO-CAP-00-03 — Package immutable container candidates
 
-Status: BLOCKED by WO-CAP-00-02
+Status: IMPLEMENTED — clean committed candidate evidence pending
 
 Result:
 
@@ -94,7 +94,7 @@ Tests: CI-TS-10, CI-TS-15.
 
 ### WO-CAP-00-04 — Establish isolated local staging and recovery
 
-Status: BLOCKED by WO-CAP-00-03
+Status: IMPLEMENTED AND LOCALLY VERIFIED — unchanged committed candidate acceptance pending
 
 Result:
 
@@ -112,7 +112,7 @@ Tests: CI-TS-11, CI-TS-13, CI-TS-15; manual bootstrap smoke.
 
 ### WO-CAP-00-05 — Establish Softwaretest.it publishing readiness
 
-Status: BLOCKED pending authorised API access
+Status: PARTIALLY IMPLEMENTED — public contract, client, outbox, redaction, status and idempotency tests pass; authenticated round-trip blocked pending authorised API access
 
 Result:
 
@@ -132,7 +132,7 @@ Tests: contract tests, CI-TS-16, negative duplicate and partial-failure cases.
 
 ### WO-CAP-00-06 — Provide synthetic staging fixtures
 
-Status: BLOCKED by WO-CAP-00-04
+Status: IMPLEMENTED — descriptors are engineering-only and do not introduce CAP-01 authentication behavior
 
 Result:
 
@@ -149,7 +149,7 @@ Tests: CI-TS-07, CI-TS-09, fixture self-tests.
 
 ### WO-CAP-00-07 — Complete bootstrap candidate gate
 
-Status: BLOCKED by all preceding CAP-00 workorders
+Status: BLOCKED — branch protection, clean hosted candidate evidence, authorised Softwaretest.it round-trip, independent review, and human acceptance remain
 
 Result:
 

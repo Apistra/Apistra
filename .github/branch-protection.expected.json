@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "flow": ["feature/*", "test", "staging", "main"],
+  "branches": {
+    "test": {
+      "pull_request_reviews": 1,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "require_conversation_resolution": true,
+      "required_checks": ["Contract and static checks", "Architecture", "Tests", "Security and supply chain", "Package candidate"]
+    },
+    "staging": {
+      "pull_request_reviews": 1,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "require_conversation_resolution": true,
+      "required_checks": ["Contract and static checks", "Architecture", "Tests", "Security and supply chain", "Package candidate"]
+    },
+    "main": {
+      "pull_request_reviews": 1,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "require_conversation_resolution": true,
+      "required_checks": ["Contract and static checks", "Architecture", "Tests", "Security and supply chain", "Package candidate"]
+    }
+  },
+  "deployment": { "automatic": false }
+}

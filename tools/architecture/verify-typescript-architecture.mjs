@@ -9,7 +9,7 @@ function collectTypeScriptFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) return collectTypeScriptFiles(path);
-    return entry.isFile() && entry.name.endsWith(".ts") ? [path] : [];
+    return entry.isFile() && /\.tsx?$/.test(entry.name) ? [path] : [];
   });
 }
 

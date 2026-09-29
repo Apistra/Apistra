@@ -10,7 +10,10 @@
   "scripts": {
     "architecture": "node tools/architecture/verify-typescript-architecture.mjs && node tools/architecture/verify-typescript-fixtures.mjs",
     "architecture:typescript": "node tools/architecture/verify-typescript-architecture.mjs",
-    "architecture:typescript-fixtures": "node tools/architecture/verify-typescript-fixtures.mjs"
+    "architecture:typescript-fixtures": "node tools/architecture/verify-typescript-fixtures.mjs",
+    "build:web": "corepack pnpm --filter @apistra/web build",
+    "test:web": "corepack pnpm --filter @apistra/web test",
+    "typecheck": "corepack pnpm --filter @apistra/web typecheck"
   },
   "devDependencies": {
     "dependency-cruiser": "18.4.0",

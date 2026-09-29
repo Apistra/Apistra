@@ -8,10 +8,9 @@ from __future__ import annotations
 
 import argparse
 import ast
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
-
 
 LAYER_ALLOWED_DEPENDENCIES = {
     "domain": {"domain"},
@@ -57,7 +56,7 @@ def _imports(
                 imported = node.module
             else:
                 keep = len(package_parts) - (node.level - 1)
-                prefix = package_parts[:max(keep, 0)]
+                prefix = package_parts[: max(keep, 0)]
                 suffix = node.module.split(".") if node.module else []
                 imported = ".".join([*prefix, *suffix])
             if imported:
@@ -70,7 +69,9 @@ def _source_location(path: Path, source_root: Path) -> tuple[str | None, str | N
     if len(parts) < 4 or parts[0:2] != ("apistra", "modules"):
         return None, None
     module_name = parts[2]
-    layer = parts[3] if len(parts) > 3 and parts[3] in LAYER_ALLOWED_DEPENDENCIES else None
+    layer = (
+        parts[3] if len(parts) > 3 and parts[3] in LAYER_ALLOWED_DEPENDENCIES else None
+    )
     return module_name, layer
 
 
@@ -78,16 +79,29 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
     source_root = source_root.resolve()
     python_files = sorted(source_root.rglob("*.py"))
     if not python_files:
-        return [Violation("ARCH-SCOPE", source_root, 1, "architecture scope contains no Python files")]
+        return [
+            Violation(
+                "ARCH-SCOPE",
+                source_root,
+                1,
+                "architecture scope contains no Python files",
+            )
+        ]
 
     modules_root = source_root / "apistra" / "modules"
-    module_directories = sorted(
-        directory
-        for directory in modules_root.iterdir()
-        if directory.is_dir() and not directory.name.startswith("_")
-    ) if modules_root.is_dir() else []
+    module_directories = (
+        sorted(
+            directory
+            for directory in modules_root.iterdir()
+            if directory.is_dir() and not directory.name.startswith("_")
+        )
+        if modules_root.is_dir()
+        else []
+    )
     if not module_directories:
-        return [Violation("ARCH-SCOPE", modules_root, 1, "no business module is present")]
+        return [
+            Violation("ARCH-SCOPE", modules_root, 1, "no business module is present")
+        ]
 
     violations: list[Violation] = []
     module_graph: dict[str, set[str]] = {
@@ -119,7 +133,9 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
         try:
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except SyntaxError as error:
-            violations.append(Violation("ARCH-SYNTAX", path, error.lineno or 1, error.msg))
+            violations.append(
+                Violation("ARCH-SYNTAX", path, error.lineno or 1, error.msg)
+            )
             continue
 
         source_module, source_layer = _source_location(path, source_root)
@@ -131,9 +147,16 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
         )
 
         for imported, imported_names, line in _imports(tree, path, source_root):
-            if source_layer == "domain" and imported.startswith(DOMAIN_FORBIDDEN_PREFIXES):
+            if source_layer == "domain" and imported.startswith(
+                DOMAIN_FORBIDDEN_PREFIXES
+            ):
                 violations.append(
-                    Violation("ARCH-001", path, line, f"domain imports outer dependency {imported!r}")
+                    Violation(
+                        "ARCH-001",
+                        path,
+                        line,
+                        f"domain imports outer dependency {imported!r}",
+                    )
                 )
 
             target_parts = imported.split(".")
@@ -142,7 +165,9 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
                 if source_module and target_module != source_module:
                     module_graph.setdefault(source_module, set()).add(target_module)
                     public_path = target_parts[3:] == ["public"]
-                    public_from_package = target_parts[3:] == [] and imported_names == ("public",)
+                    public_from_package = target_parts[3:] == [] and imported_names == (
+                        "public",
+                    )
                     if not (public_path or public_from_package):
                         violations.append(
                             Violation(
@@ -153,7 +178,11 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
                             )
                         )
 
-                if source_module == target_module and source_layer and len(target_parts) >= 4:
+                if (
+                    source_module == target_module
+                    and source_layer
+                    and len(target_parts) >= 4
+                ):
                     target_layer = target_parts[3]
                     if (
                         target_layer in LAYER_ALLOWED_DEPENDENCIES
@@ -195,7 +224,7 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
 
     def visit(module_name: str) -> None:
         if module_name in active:
-            cycle = active[active.index(module_name):] + [module_name]
+            cycle = active[active.index(module_name) :] + [module_name]
             violations.append(
                 Violation(
                     "ARCH-013",
@@ -221,7 +250,9 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Verify Apistra Python architecture rules.")
+    parser = argparse.ArgumentParser(
+        description="Verify Apistra Python architecture rules."
+    )
     parser.add_argument("source_root", type=Path)
     args = parser.parse_args()
     violations = analyse_source_root(args.source_root)

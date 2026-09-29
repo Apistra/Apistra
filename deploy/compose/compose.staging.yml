@@ -1,0 +1,71 @@
+name: ${APISTRA_COMPOSE_PROJECT:?set APISTRA_COMPOSE_PROJECT}
+
+x-security: &security
+  read_only: true
+  user: "10001:10001"
+  cap_drop: ["ALL"]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp:size=16m,mode=1777"]
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50"
+        memory: 256M
+        pids: 100
+
+services:
+  api:
+    <<: *security
+    image: ${APISTRA_API_IMAGE:?set APISTRA_API_IMAGE}
+    environment:
+      APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
+      APISTRA_FORCE_NOT_READY: ${APISTRA_API_FORCE_NOT_READY:-false}
+    ports: ["127.0.0.1:${APISTRA_API_PORT:?set APISTRA_API_PORT}:8080"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    networks: [edge, bootstrap]
+
+  worker:
+    <<: *security
+    image: ${APISTRA_WORKER_IMAGE:?set APISTRA_WORKER_IMAGE}
+    environment:
+      APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
+      APISTRA_FORCE_NOT_READY: ${APISTRA_WORKER_FORCE_NOT_READY:-false}
+      APISTRA_HEARTBEAT_PATH: /tmp/apistra-worker-heartbeat
+    healthcheck:
+      test: ["CMD", "python", "-m", "apistra.entrypoints.worker.main", "--healthcheck", "--max-age-seconds", "15"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    networks: [bootstrap]
+    volumes: [bootstrap-state:/var/lib/apistra]
+
+  web:
+    <<: *security
+    image: ${APISTRA_WEB_IMAGE:?set APISTRA_WEB_IMAGE}
+    environment:
+      APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
+    ports: ["127.0.0.1:${APISTRA_WEB_PORT:?set APISTRA_WEB_PORT}:3000"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    networks: [edge, bootstrap]
+
+networks:
+  edge:
+    name: ${APISTRA_COMPOSE_PROJECT}_edge
+  bootstrap:
+    name: ${APISTRA_COMPOSE_PROJECT}_bootstrap
+    internal: true
+
+volumes:
+  bootstrap-state:
+    name: ${APISTRA_COMPOSE_PROJECT}_state

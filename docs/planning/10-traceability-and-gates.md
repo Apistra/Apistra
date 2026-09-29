@@ -1,6 +1,6 @@
 # Traceability and Gates
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 
 ## 1. Stable requirement catalogue
@@ -176,7 +176,7 @@ Every executed test or gate must bind:
 - GATE-PLN-01: PENDING
 - GATE-EXP-01: PENDING
 - GATE-DES-01: PENDING
-- GATE-CAP00-READY: BLOCKED
+- GATE-CAP00-READY: READY FOR INDEPENDENT REVIEW
 - GATE-CAP00-DONE: BLOCKED
 - GATE-WO-READY: BLOCKED
 - GATE-WO-DONE: BLOCKED
@@ -190,14 +190,12 @@ Every executed test or gate must bind:
 - No approved ADR for durable execution
 - No authentication implementation ADR
 - ADR-019 repository layout is approved and implemented; the remaining pattern ADRs still require qualified architecture review
-- No verified Softwaretest.it API contract or authorised project
+- Public Softwaretest.it OpenAPI contract is verified; authorised project/cycle binding and write/read round-trip are pending
 - Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
-- Architecture test tooling and CI definitions exist; independent implementation review and accepted hosted-run evidence remain pending
-- No security control evidence
-- No immutable candidate
-- No local staging deployment
-- No fixture generator
-- No automated or manual test execution
-- No legal approval of licence texts
+- Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; independent implementation review and accepted hosted-run evidence remain pending
+- Local development images passed staging health and controlled recovery, but a clean committed immutable candidate must refresh the evidence
+- The manual case is defined but has not received an independent human ACCEPTED decision
+- Branch protection is specified but the live `test`, `staging`, and protected-branch settings are not configured
+- The official AGPLv3 text is present; commercial terms, rights-holder details, and legal review remain pending before commercial release
 
 These are expected planning gaps and must not be represented as failures of implemented software. They remain blockers for their assigned future gates.

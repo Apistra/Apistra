@@ -1,0 +1,5 @@
+{
+  "flow": ["feature/*", "main"],
+  "automatic_deployment": true,
+  "external_contributions": true
+}
