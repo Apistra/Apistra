@@ -1,7 +1,7 @@
 # Apistra BuildBySpec Planning Baseline
 
-Version: 0.5-draft
-Date: 2026-09-29
+Version: 0.6-draft
+Date: 2026-09-30
 Language: English
 Assurance profile: EXTENDED
 Status: DRAFT
@@ -20,6 +20,7 @@ No document in this baseline is implementation evidence. No capability is implem
 - 05-delivery-ci-contract.md — branch, build, evidence, staging, recovery, and promotion contract
 - 06-test-architecture.md — system-centred test model, BPMN process references, and technical evidence paths
 - ../testing/test-concept.md — test governance, levels, entry and exit criteria, defect handling, execution, evidence, and acceptance rules
+- ../testing/test-id-catalog.md — canonical behavioural scenario IDs, manual package namespaces, and allocation rules
 - 07-design-contract.md — brand, interaction, accessibility, and rendered visual design references
 - 08-capabilities-and-roadmap.md — gate-based release index; detailed contracts are in `../capabilities/`
 - 09-workorders.md — readiness/index view; one execution contract per file is in `../workorders/`
@@ -50,5 +51,5 @@ No document in this baseline is implementation evidence. No capability is implem
 - Versioning and changelog policy: DEFINED; no product release exists
 - Design direction: DECIDED, design evidence still PENDING
 - Independent expectation review: PENDING
-- CAP-00 implementation: IMPLEMENTED AND HOSTED VERIFIED; formal external and human acceptance gates remain
+- CAP-00 implementation: IMPLEMENTED; version 0.5 is hosted verified, while the version 0.6 contract correction needs a new hosted run; formal external and human acceptance gates remain
 - Business implementation: BLOCKED until CAP-00 and Softwaretest.it publishing readiness pass

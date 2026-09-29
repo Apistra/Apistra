@@ -1,7 +1,11 @@
 # WO-CAP-18-01 — Define commercial entitlement model
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-18](../../capabilities/CAP-18-commercial-operations-and-optional-managed-service.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: contract-definition
 - Owned verification group: TST-WO-CAP-18-01
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-003, ARCH-005, ARCH-010 through ARCH-012, ARCH-014
+- Rules: ARCH-003, ARCH-005, ARCH-012
+- Applicability: the versioned boundary/policy defined by this workorder; runtime-only rules remain with consuming implementations.
 - ADRs/patterns: ADR-002 through ADR-005, ADR-009 through ADR-011, ADR-013, ADR-017, ADR-018 plus production ADRs
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-011 through SEC-015
+- Rules: SEC-001, SEC-002, SEC-007, SEC-012, SEC-015
+- Applicability: the versioned boundary/policy defined by this workorder; runtime-only rules remain with consuming implementations.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** A supported example of commercial entitlement model validates and round-trips without semantic loss.
 - **Negative oracle:** A malformed, incompatible, unauthorised, or unknown-version example of commercial entitlement model is rejected before any consumer mutation.
 - **Boundary oracle:** Minimum and maximum supported versions, sizes, counts, ownership scopes, and compatibility edges have explicit valid or rejected outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

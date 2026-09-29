@@ -1,7 +1,11 @@
 # WO-CAP-00-02 — Create the monorepo walking skeleton
 
-Version: 0.5-draft
-Status: IMPLEMENTED AND HOSTED VERIFIED; independent review remains
+Version: 0.6-draft
+Status: BLOCKED
+Status reason: the 0.6 expectation and independent implementation reviews are incomplete
+Implementation state: IMPLEMENTED
+Evidence state: STALE — hosted run 36637376129 passed revision 0.5; revision 0.6 requires change-impact revalidation
+Approval state: NOT APPROVED
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-00-02
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -84,6 +88,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 ## ARCH rules and pattern limits
 
 - Rules: ARCH-001, ARCH-010, ARCH-011, ARCH-013, ARCH-014
+- Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
 - ADRs/patterns: ADR-017 and ADR-019
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
@@ -91,6 +96,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 ## SEC rules and safe test conditions
 
 - Rules: SEC-011, SEC-012, SEC-013
+- Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The API, worker, and web packages start through their declared entrypoints and expose only the approved health behavior while architecture checks discover non-empty source scopes.
 - **Negative oracle:** A missing package, bypassed boundary, empty architecture scope, or undeclared business behavior fails the bootstrap contract.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -119,14 +125,14 @@ No new UI is authorised unless the capability design contract explicitly assigns
 ## Required tests
 
 - TST-WO-CAP-00-02: focused unit/component tests for the named invariants, state transitions, boundary values, and safe error taxonomy.
-- BDD-CAP-00-02: automated Given/When/Then journey for the positive and negative externally observable behavior when applicable.
+- Canonical BDD coverage: BDD-OFFLINE-001; WO-CAP-00-05 owns the exact scenario definitions and traceability before READY.
 - Contract and compatibility fixtures for each changed public/persisted schema, including unknown-version rejection.
 - Architecture and security tests for the listed ARCH/SEC rules, including own-project success and foreign/anonymous/revoked denial where access exists.
 - Capability regression selected by recorded change impact; WO-CAP-00-07 still owns the final complete unchanged-candidate matrix.
 
 ## BDD and manual tests
 
-WO-CAP-00-05 must define and publish BDD-CAP-00-02 before this workorder becomes READY when the behavior is externally observable. Manual case MT-CAP-00-02 is required only when this result has a user/process observation that cannot be fully established by the capability package; its execution owner is WO-CAP-00-07 unless explicitly assigned here.
+WO-CAP-00-05 must define and publish the applicable catalog-listed scenarios (BDD-OFFLINE-001) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-07`; individual `MT-PRC-07-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-00-07 unless a case is explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 
@@ -150,7 +156,7 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 ## Definition of Done
 
 - The four acceptance criteria and TST-WO-CAP-00-02 pass against the identified implementation snapshot
-- Any assigned BDD-CAP-00-02 execution and workorder-owned manual/security evidence are complete
+- Any assigned catalogue-listed BDD execution and workorder-owned manual/security evidence are complete
 - Applicable ARCH/SEC checks, migrations, documentation, result reporting, and EXTENDED implementation review are complete
 - Remaining capability-level execution stays explicitly owned by WO-CAP-00-07
 

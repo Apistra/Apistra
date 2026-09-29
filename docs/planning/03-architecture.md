@@ -1,6 +1,6 @@
 # Apistra Architecture
 
-Version: 0.3-draft
+Version: 0.4-draft
 Status: DRAFT
 Architecture profile: EXTENDED
 
@@ -430,6 +430,13 @@ ARCH-014 — Local-first runtime
 - Status: DECIDED
 - Rule: Product startup and configured local execution must not require an external SaaS call.
 - Verification: offline Compose acceptance test.
+
+ARCH-015 — Explicit versioned policy decisions
+- Status: DECIDED
+- Rule: Authorisation, approval, evaluation, licensing, and other consequential policies are immutable versioned policy objects evaluated through side-effect-free decision services. Every decision returns a typed outcome, reason, and policy version; missing or invalid policy fails closed.
+- Allowed: an application use case applies the returned decision and records the selected policy version with the resulting state transition.
+- Violation: a route, model response, adapter, or global bypass flag deciding a protected action without a pinned policy and attributable decision record.
+- Verification: decision-table tests, policy-version binding tests, deny-by-default counterexamples, audit assertions, and dependency review against ADR-011.
 
 ## 11. Risks and technical debt
 

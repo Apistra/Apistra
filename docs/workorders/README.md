@@ -1,22 +1,24 @@
 # Workorder Catalogue
 
-Version: 0.5-draft
+Version: 0.6-draft
 Status: DRAFT
 
 Each file is one execution contract. A file is not implementation permission: its Status, prerequisites, expectation review, and gates remain binding.
 
-Version 0.5 assigns every workorder a delivery class, one owned verification group, explicit positive/negative/boundary oracles, expectation sources, counterexamples, and a dependency graph. Workorder numbers are stable identifiers, not execution order: the declared prerequisites govern readiness, and test-definition publication may intentionally precede lower-numbered implementation work.
+Version 0.6 assigns every workorder a delivery class, one owned verification group, explicit positive/negative/boundary oracles, expectation sources, counterexamples, and a dependency graph. Workorder numbers are stable identifiers, not execution order: the declared prerequisites govern readiness, and test-definition publication may intentionally precede lower-numbered implementation work.
+
+Only `DRAFT`, `BLOCKED`, `READY`, and `DONE` are valid workflow statuses. Implementation, evidence, and approval are recorded separately. Behavioural scenarios and manual package namespaces are governed by the [canonical test-ID catalogue](../testing/test-id-catalog.md); individual manual cases are allocated only by the owning publication workorder.
 
 While a workorder is DRAFT/BLOCKED, its allowed paths remain deliberately unassigned. READY review must replace that placeholder with observed existing paths and approved additions; an agent may not invent repository structure to satisfy a draft.
 
 ## CAP-00
 
-- [WO-CAP-00-01 — Establish repository governance and planning checks](CAP-00/WO-CAP-00-01.md) — IMPLEMENTED; live branch protection remains blocked
-- [WO-CAP-00-02 — Create the monorepo walking skeleton](CAP-00/WO-CAP-00-02.md) — IMPLEMENTED AND HOSTED VERIFIED; independent review remains
-- [WO-CAP-00-03 — Package immutable container candidates](CAP-00/WO-CAP-00-03.md) — IMPLEMENTED AND HOSTED VERIFIED
-- [WO-CAP-00-04 — Establish isolated local staging and recovery](CAP-00/WO-CAP-00-04.md) — IMPLEMENTED AND HOSTED VERIFIED
-- [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — PARTIALLY IMPLEMENTED; authenticated round-trip is blocked
-- [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — IMPLEMENTED
+- [WO-CAP-00-01 — Establish repository governance and planning checks](CAP-00/WO-CAP-00-01.md) — BLOCKED; implementation exists, live branch protection and review remain open
+- [WO-CAP-00-02 — Create the monorepo walking skeleton](CAP-00/WO-CAP-00-02.md) — BLOCKED; implementation and hosted evidence exist, independent review remains
+- [WO-CAP-00-03 — Package immutable container candidates](CAP-00/WO-CAP-00-03.md) — BLOCKED; implementation and hosted evidence require 0.6 change-impact revalidation
+- [WO-CAP-00-04 — Establish isolated local staging and recovery](CAP-00/WO-CAP-00-04.md) — BLOCKED; implementation and hosted evidence require 0.6 change-impact revalidation
+- [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — BLOCKED; partial implementation exists, authenticated round-trip is absent
+- [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — BLOCKED; implementation exists, 0.6 evidence/approval remains open
 - [WO-CAP-00-07 — Complete bootstrap candidate gate](CAP-00/WO-CAP-00-07.md) — BLOCKED; external and human gates remain
 
 ## CAP-01

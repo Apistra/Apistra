@@ -1,7 +1,11 @@
 # WO-CAP-03-07 — Accept CAP-03 on local staging
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-03](../../capabilities/CAP-03-connector-foundation-and-trusted-sources.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-03-07
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-009, ARCH-012, ARCH-014
+- Rules: ARCH-002, ARCH-005, ARCH-008, ARCH-009, ARCH-010, ARCH-011, ARCH-012, ARCH-014, ARCH-015
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
 - ADRs/patterns: ADR-002, ADR-003, ADR-005, ADR-008 through ADR-011, ADR-013, ADR-017, ADR-018
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-004, SEC-006, SEC-007, SEC-015
+- Rules: SEC-001, SEC-003, SEC-004, SEC-006, SEC-007, SEC-009, SEC-011, SEC-012, SEC-015, SEC-016
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -125,7 +131,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-Execute the complete published capability BDD catalogue and `MTP-PRC-02` manual package. Missing, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
+Execute the complete applicable scenario set (BDD-KNOW-001, BDD-KNOW-002) and every published `MT-PRC-02-NNN` case in `MTP-PRC-02`. Missing, unallocated, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
 
 ## Softwaretest.it and CI reporting
 

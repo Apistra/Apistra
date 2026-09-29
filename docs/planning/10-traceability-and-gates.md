@@ -1,6 +1,6 @@
 # Traceability and Gates
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT
 
 ## 1. Stable requirement catalogue
@@ -69,6 +69,7 @@ REQ-031 — Commercial operations and optional managed-service boundaries
 - Immutable publication: ARCH-007; SEC-005; CAP-05
 - Durable execution: ARCH-008 and ARCH-009; SEC-006; CAP-06
 - Human approval: SEC-003 and SEC-015; CAP-07
+- Consequential policy decisions: ARCH-015 and ADR-011; CAP-07, CAP-13, CAP-14, and CAP-18
 - Egress: ARCH-003; SEC-004 and SEC-016; CAP-02, CAP-03, CAP-06
 - Limits: SEC-007; CAP-02 and CAP-06
 - Provenance and deletion: SEC-010; CAP-04
@@ -80,20 +81,22 @@ Concrete implementation patterns and their boundaries are defined in `11-archite
 
 ## 4. Process and test mapping
 
+The stable identifier definitions and intents are governed by the [Canonical Test ID Catalogue](../testing/test-id-catalog.md). A range below is descriptive; each referenced ID remains an individual catalogue entry.
+
 - PRC-01 → CAP-01 → MTP-PRC-01 → BDD-AUTH-001 and BDD-PROJ-001
-- PRC-02 → CAP-03 and CAP-04 → MTP-PRC-02 → BDD-KNOW-001 and BDD-KNOW-002
+- PRC-02 → CAP-03, CAP-04, and CAP-10 → MTP-PRC-02 → BDD-KNOW-001 and BDD-KNOW-002
 - PRC-03 → CAP-05 → MTP-PRC-03 → BDD-WF-001 and BDD-WF-002
 - PRC-04 → CAP-06 → MTP-PRC-04 → BDD-RUN-001 through BDD-RUN-003
 - PRC-05 → CAP-07 → MTP-PRC-05 → BDD-APPROVAL-001 through BDD-APPROVAL-003
-- PRC-06 → CAP-12 through CAP-14 → MTP-PRC-06
+- PRC-06 → CAP-12 through CAP-14 → MTP-PRC-06 → BDD-EVAL-001 through BDD-EVAL-004
 - PRC-07 → CAP-00 and operations → MTP-PRC-07 → BDD-OFFLINE-001
-- PRC-08 → CAP-08 → MTP-PRC-08 → BDD-FLOW-001 through BDD-FLOW-006 (planned)
-- PRC-09 → CAP-09 → MTP-PRC-09 → BDD-TRIGGER-001 through BDD-TRIGGER-004 (planned)
-- PRC-10 → CAP-11 → MTP-PRC-10 → BDD-PORTABLE-001 through BDD-PORTABLE-004 (planned)
-- PRC-11 → CAP-15 → MTP-PRC-11 → BDD-IAM-001 through BDD-IAM-005 (planned)
-- PRC-12 → CAP-16 → MTP-PRC-12 → BDD-PLUGIN-001 through BDD-PLUGIN-005 (planned)
-- PRC-13 → CAP-17 → MTP-PRC-13 → BDD-K8S-001 through BDD-K8S-003 (planned)
-- PRC-14 → CAP-18 → MTP-PRC-14 → BDD-LIC-001 through BDD-LIC-003 and BDD-MANAGED-001 (planned)
+- PRC-08 → CAP-08 → MTP-PRC-08 → BDD-FLOW-001 through BDD-FLOW-006
+- PRC-09 → CAP-09 → MTP-PRC-09 → BDD-TRIGGER-001 through BDD-TRIGGER-004
+- PRC-10 → CAP-11 → MTP-PRC-10 → BDD-PORTABLE-001 through BDD-PORTABLE-004
+- PRC-11 → CAP-15 → MTP-PRC-11 → BDD-IAM-001 through BDD-IAM-005
+- PRC-12 → CAP-16 → MTP-PRC-12 → BDD-PLUGIN-001 through BDD-PLUGIN-005
+- PRC-13 → CAP-17 → MTP-PRC-13 → BDD-K8S-001 through BDD-K8S-003
+- PRC-14 → CAP-18 → MTP-PRC-14 → BDD-LIC-001 through BDD-LIC-003 and BDD-MANAGED-001
 
 ## 5. Gate sequence
 

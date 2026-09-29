@@ -1,7 +1,11 @@
 # WO-CAP-04-07 — Publish and verify PRC-02 test definitions
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-04](../../capabilities/CAP-04-knowledge-and-cited-retrieval.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-04-07
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001 through ARCH-005, ARCH-009, ARCH-012, ARCH-014
+- Rules: ARCH-010, ARCH-012
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
 - ADRs/patterns: ADR-002 through ADR-005, ADR-008 through ADR-011, ADR-013, ADR-017, ADR-018
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-006, SEC-007, SEC-010, SEC-015
+- Rules: SEC-002, SEC-011, SEC-012, SEC-015
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The complete PRC-02 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
 - **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -125,7 +131,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-This workorder owns definition/publication of all planned `BDD-CAP-*`, `BDD-WO-*`, `MTP-PRC-02`, and `MT-*` IDs for the capability. Execution remains with the owning implementation workorder or WO-CAP-04-08 as explicitly assigned in each definition.
+This workorder owns definition and publication of the catalog-listed scenarios (BDD-KNOW-001, BDD-KNOW-002) and manual package `MTP-PRC-02`. Individual manual cases use `MT-PRC-02-NNN`, receive concrete atomic steps before READY, and are recorded in the published package and its traceability index. Execution remains with the owning implementation workorder or WO-CAP-04-08 as explicitly assigned in each definition.
 
 ## Softwaretest.it and CI reporting
 

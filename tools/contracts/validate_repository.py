@@ -102,6 +102,14 @@ TEST_CONCEPT_REQUIRED_SECTIONS = {
     "## 20. Evidence and reporting",
     "## 23. Current CAP-00 application",
 }
+VALID_WORKORDER_STATUSES = {"DRAFT", "BLOCKED", "READY", "DONE"}
+PLACEHOLDER_ALLOWED_PATH = (
+    "No implementation path is authorised while this workorder is DRAFT/BLOCKED."
+)
+PROHIBITED_TEST_ALIASES = ("BDD-CAP-", "BDD-WO-", "MT-CAP-")
+BDD_ID_PATTERN = re.compile(r"\bBDD-[A-Z]+-\d{3}\b")
+MTP_ID_PATTERN = re.compile(r"\bMTP-PRC-\d{2}\b")
+WORKORDER_ID_PATTERN = re.compile(r"\bWO-CAP-\d{2}-\d{2}\b")
 
 
 def validate_contract(contract: dict[str, object]) -> list[str]:
@@ -202,30 +210,108 @@ def _workorder_delivery_class(text: str) -> str | None:
     return match.group(1) if match else None
 
 
+def _rule_ids(text: str, heading: str, prefix: str) -> set[str]:
+    section = text.split(heading, 1)
+    if len(section) != 2:
+        return set()
+    section_text = section[1].split("\n## ", 1)[0]
+    match = re.search(r"^- Rules: (.+)$", section_text, re.MULTILINE)
+    if match is None:
+        return set()
+    return set(re.findall(rf"\b{prefix}-\d{{3}}\b", match.group(1)))
+
+
+def _required_workorders(text: str) -> set[str]:
+    match = re.search(r"^- Required workorders: (.+)$", text, re.MULTILINE)
+    if match is None or match.group(1) == "none within this capability":
+        return set()
+    return set(WORKORDER_ID_PATTERN.findall(match.group(1)))
+
+
 def validate_workorder_contract(
-    path: Path, workorder_id: str, text: str
-) -> tuple[list[str], str | None]:
+    path: Path,
+    workorder_id: str,
+    text: str,
+    canonical_bdd_ids: set[str],
+    canonical_mtp_ids: set[str],
+    defined_arch_ids: set[str],
+    defined_sec_ids: set[str],
+) -> tuple[list[str], str | None, set[str]]:
     errors: list[str] = []
-    if "Version: 0.5-draft" not in text:
-        errors.append(f"{path}: workorder contract must use Version: 0.5-draft")
+    if "Version: 0.6-draft" not in text:
+        errors.append(f"{path}: workorder contract must use Version: 0.6-draft")
+
+    status_match = re.search(r"^Status: (.+)$", text, re.MULTILINE)
+    status = status_match.group(1) if status_match else ""
+    if status not in VALID_WORKORDER_STATUSES:
+        errors.append(
+            f"{path}: Status must be exactly one of {sorted(VALID_WORKORDER_STATUSES)}"
+        )
+    for field in (
+        "Status reason",
+        "Implementation state",
+        "Evidence state",
+        "Approval state",
+    ):
+        if re.search(rf"^{field}: \S.+$", text, re.MULTILINE) is None:
+            errors.append(f"{path}: missing separate {field} field")
 
     delivery_class = _workorder_delivery_class(text)
     if delivery_class not in WORKORDER_DELIVERY_CLASSES:
         errors.append(f"{path}: missing or unsupported delivery class")
     if f"- Owned verification group: TST-{workorder_id}" not in text:
         errors.append(f"{path}: owned verification group must be TST-{workorder_id}")
-    if "- Specification revision: 0.5-draft" not in text:
-        errors.append(f"{path}: missing 0.5 specification revision binding")
+    if "- Specification revision: 0.6-draft" not in text:
+        errors.append(f"{path}: missing 0.6 specification revision binding")
     if "- **Positive oracle:**" not in text or "- **Negative oracle:**" not in text:
         errors.append(f"{path}: positive and negative test oracles are mandatory")
     if "- Positive expectation:" not in text or "- Counterexample:" not in text:
         errors.append(f"{path}: independent expectation inputs are mandatory")
     if "- Required workorders:" not in text:
         errors.append(f"{path}: explicit workorder dependencies are mandatory")
+    if (
+        "- Applicability:"
+        not in text.split("## ARCH rules and pattern limits", 1)[-1].split(
+            "## SEC rules", 1
+        )[0]
+    ):
+        errors.append(f"{path}: ARCH rule applicability is mandatory")
+    if (
+        "- Applicability:"
+        not in text.split("## SEC rules and safe test conditions", 1)[-1].split(
+            "## Acceptance criteria", 1
+        )[0]
+    ):
+        errors.append(f"{path}: SEC rule applicability is mandatory")
+
+    arch_ids = _rule_ids(text, "## ARCH rules and pattern limits", "ARCH")
+    sec_ids = _rule_ids(text, "## SEC rules and safe test conditions", "SEC")
+    for rule_id in sorted(arch_ids - defined_arch_ids):
+        errors.append(f"{path}: undefined architecture rule {rule_id}")
+    for rule_id in sorted(sec_ids - defined_sec_ids):
+        errors.append(f"{path}: undefined security rule {rule_id}")
+
+    referenced_bdd_ids = set(BDD_ID_PATTERN.findall(text))
+    referenced_mtp_ids = set(MTP_ID_PATTERN.findall(text))
+    for test_id in sorted(referenced_bdd_ids - canonical_bdd_ids):
+        errors.append(f"{path}: undefined canonical behavioural test ID {test_id}")
+    for package_id in sorted(referenced_mtp_ids - canonical_mtp_ids):
+        errors.append(f"{path}: undefined canonical manual package ID {package_id}")
+    for alias in PROHIBITED_TEST_ALIASES:
+        if alias in text:
+            errors.append(f"{path}: prohibited generated test alias {alias}")
+    if re.search(r"\b(?:BDD|MT)-[^\s`,;)]+\*", text):
+        errors.append(f"{path}: wildcard test identifiers are prohibited")
+
+    if status in {"READY", "DONE"}:
+        if PLACEHOLDER_ALLOWED_PATH in text:
+            errors.append(f"{path}: READY/DONE workorder still has placeholder paths")
+        if "NOT ALLOCATED" in text:
+            errors.append(f"{path}: READY/DONE workorder has unallocated test IDs")
     for phrase in sorted(WORKORDER_FORBIDDEN_BOILERPLATE):
         if phrase in text:
             errors.append(f"{path}: forbidden generic boilerplate remains: {phrase}")
-    return errors, delivery_class
+    return errors, delivery_class, _required_workorders(text)
 
 
 def validate_planning_catalogues(root: Path) -> list[str]:
@@ -234,6 +320,29 @@ def validate_planning_catalogues(root: Path) -> list[str]:
     workorders = root / "docs/workorders"
     capability_index = (capabilities / "README.md").read_text(encoding="utf-8")
     workorder_index = (workorders / "README.md").read_text(encoding="utf-8")
+    test_catalog_path = root / "docs/testing/test-id-catalog.md"
+    test_catalog = test_catalog_path.read_text(encoding="utf-8")
+    canonical_bdd_ids = set(BDD_ID_PATTERN.findall(test_catalog))
+    canonical_mtp_ids = set(MTP_ID_PATTERN.findall(test_catalog))
+    architecture = (root / "docs/planning/03-architecture.md").read_text(
+        encoding="utf-8"
+    )
+    security = (root / "docs/planning/04-security-concept.md").read_text(
+        encoding="utf-8"
+    )
+    defined_arch_ids = set(re.findall(r"^(ARCH-\d{3}) —", architecture, re.MULTILINE))
+    defined_sec_ids = set(re.findall(r"^(SEC-\d{3}) —", security, re.MULTILINE))
+
+    if "Version: 0.6-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
+        errors.append(f"{test_catalog_path}: must declare the 0.6 draft authority")
+    if len(canonical_bdd_ids) != 47:
+        errors.append(
+            f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
+        )
+    if canonical_mtp_ids != {f"MTP-PRC-{number:02d}" for number in range(1, 15)}:
+        errors.append(
+            f"{test_catalog_path}: manual package catalogue must be PRC-01 through PRC-14"
+        )
 
     capability_files = sorted(capabilities.glob("CAP-*.md"))
     observed_capability_ids = [path.name[:6] for path in capability_files]
@@ -271,6 +380,8 @@ def validate_planning_catalogues(root: Path) -> list[str]:
                 f"{directory}: expected {expected_names!r}, observed {observed_names!r}"
             )
         delivery_classes: list[str] = []
+        workorder_dependencies: dict[str, set[str]] = {}
+        workorder_classes: dict[str, str] = {}
         for name in expected_names:
             workorder_path = directory / name
             if not workorder_path.is_file():
@@ -286,12 +397,22 @@ def validate_planning_catalogues(root: Path) -> list[str]:
                 errors.append(
                     f"{workorder_path}: missing sections: {', '.join(missing)}"
                 )
-            workorder_errors, delivery_class = validate_workorder_contract(
-                workorder_path, workorder_id, workorder_text
+            workorder_errors, delivery_class, dependencies = (
+                validate_workorder_contract(
+                    workorder_path,
+                    workorder_id,
+                    workorder_text,
+                    canonical_bdd_ids,
+                    canonical_mtp_ids,
+                    defined_arch_ids,
+                    defined_sec_ids,
+                )
             )
             errors.extend(workorder_errors)
             if delivery_class is not None:
                 delivery_classes.append(delivery_class)
+                workorder_classes[workorder_id] = delivery_class
+            workorder_dependencies[workorder_id] = dependencies
             if f"{capability_id}/{name}" not in workorder_index:
                 errors.append(f"{workorder_path}: missing from workorder index")
             if f"../workorders/{capability_id}/{name}" not in text:
@@ -305,6 +426,62 @@ def validate_planning_catalogues(root: Path) -> list[str]:
             errors.append(
                 f"{directory}: capability must own exactly one capability-acceptance workorder"
             )
+
+        known_workorders = set(workorder_dependencies)
+        for workorder_id, dependencies in workorder_dependencies.items():
+            if workorder_id in dependencies:
+                errors.append(f"{directory}: {workorder_id} depends on itself")
+            for dependency in sorted(dependencies - known_workorders):
+                errors.append(
+                    f"{directory}: {workorder_id} has missing or cross-capability dependency {dependency}"
+                )
+
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(workorder_id: str) -> None:
+            if workorder_id in visiting:
+                errors.append(f"{directory}: dependency cycle includes {workorder_id}")
+                return
+            if workorder_id in visited:
+                return
+            visiting.add(workorder_id)
+            for dependency in sorted(workorder_dependencies.get(workorder_id, set())):
+                if dependency in known_workorders:
+                    visit(dependency)
+            visiting.remove(workorder_id)
+            visited.add(workorder_id)
+
+        for workorder_id in sorted(known_workorders):
+            visit(workorder_id)
+
+        publication_ids = {
+            workorder_id
+            for workorder_id, delivery_class in workorder_classes.items()
+            if delivery_class == "test-definition-and-publication"
+        }
+        acceptance_ids = {
+            workorder_id
+            for workorder_id, delivery_class in workorder_classes.items()
+            if delivery_class == "capability-acceptance"
+        }
+        if len(publication_ids) == 1 and capability_id != "CAP-00":
+            publication_id = next(iter(publication_ids))
+            for workorder_id, delivery_class in workorder_classes.items():
+                if (
+                    delivery_class == "implementation"
+                    and publication_id not in workorder_dependencies[workorder_id]
+                ):
+                    errors.append(
+                        f"{directory}: implementation {workorder_id} must depend on {publication_id}"
+                    )
+        if len(acceptance_ids) == 1:
+            acceptance_id = next(iter(acceptance_ids))
+            expected_dependencies = known_workorders - {acceptance_id}
+            if workorder_dependencies[acceptance_id] != expected_dependencies:
+                errors.append(
+                    f"{directory}: acceptance {acceptance_id} must depend on every other workorder"
+                )
 
     return errors
 
@@ -320,6 +497,7 @@ def validate_local_planning_links(root: Path) -> list[str]:
         root / "docs/planning/08-capabilities-and-roadmap.md",
         root / "docs/planning/09-workorders.md",
         root / "docs/testing/test-concept.md",
+        root / "docs/testing/test-id-catalog.md",
         *(root / "docs/capabilities").glob("*.md"),
         *(root / "docs/workorders").glob("**/*.md"),
     ]
@@ -367,6 +545,42 @@ def main() -> int:
             errors.append("positive version fixture must pass")
         if not validate_version_values("0.1.0+local", "0.1.0", "0.2.0"):
             errors.append("negative version fixture must fail")
+        catalogue_text = (root / "docs/testing/test-id-catalog.md").read_text(
+            encoding="utf-8"
+        )
+        architecture_text = (root / "docs/planning/03-architecture.md").read_text(
+            encoding="utf-8"
+        )
+        security_text = (root / "docs/planning/04-security-concept.md").read_text(
+            encoding="utf-8"
+        )
+        fixture_path = root / "docs/workorders/CAP-01/WO-CAP-01-01.md"
+        fixture_text = fixture_path.read_text(encoding="utf-8")
+        fixture_args = (
+            fixture_path,
+            "WO-CAP-01-01",
+            set(BDD_ID_PATTERN.findall(catalogue_text)),
+            set(MTP_ID_PATTERN.findall(catalogue_text)),
+            set(re.findall(r"^(ARCH-\d{3}) —", architecture_text, re.MULTILINE)),
+            set(re.findall(r"^(SEC-\d{3}) —", security_text, re.MULTILINE)),
+        )
+        fixture_errors, _, _ = validate_workorder_contract(
+            fixture_args[0], fixture_args[1], fixture_text, *fixture_args[2:]
+        )
+        if fixture_errors:
+            errors.append("positive workorder contract fixture must pass")
+        invalid_workorder = fixture_text.replace(
+            "Status: DRAFT", "Status: PLANNED", 1
+        ).replace("BDD-AUTH-001", "BDD-CAP-01-01")
+        invalid_errors, _, _ = validate_workorder_contract(
+            fixture_args[0], fixture_args[1], invalid_workorder, *fixture_args[2:]
+        )
+        if not any("Status must be exactly" in error for error in invalid_errors):
+            errors.append("negative workorder status fixture must fail")
+        if not any(
+            "prohibited generated test alias" in error for error in invalid_errors
+        ):
+            errors.append("negative workorder test-ID fixture must fail")
     for error in errors:
         print(error)
     if errors:

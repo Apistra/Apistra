@@ -1,7 +1,11 @@
 # WO-CAP-00-01 — Establish repository governance and planning checks
 
-Version: 0.5-draft
-Status: IMPLEMENTED; live branch protection remains blocked
+Version: 0.6-draft
+Status: BLOCKED
+Status reason: live branch protection and the 0.6 independent review are incomplete
+Implementation state: IMPLEMENTED
+Evidence state: STALE — implementation exists, but branch protection and 0.6 change-impact revalidation remain open
+Approval state: NOT APPROVED
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: repository-governance
 - Owned verification group: TST-WO-CAP-00-01
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -83,7 +87,8 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-010, ARCH-011, ARCH-013, ARCH-014
+- Rules: ARCH-010, ARCH-013, ARCH-014
+- Applicability: repository/engineering isolation, acyclic structure, local-first delivery, supply chain, and evidence confidentiality.
 - ADRs/patterns: ADR-017 and ADR-019
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
@@ -91,6 +96,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 ## SEC rules and safe test conditions
 
 - Rules: SEC-011, SEC-012, SEC-013
+- Applicability: repository/engineering isolation, acyclic structure, local-first delivery, supply chain, and evidence confidentiality.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The approved repository governance and planning checks package makes only source-backed claims and names roles, decisions, limitations, and review triggers.
 - **Negative oracle:** An unsupported legal/support/security/release claim, unresolved contradiction, or missing qualified approval remains visibly blocking.
 - **Boundary oracle:** Every named audience, distribution mode, support boundary, licence case, and approval trigger is either covered or explicitly out of scope.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

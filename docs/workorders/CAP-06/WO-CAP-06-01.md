@@ -1,7 +1,11 @@
 # WO-CAP-06-01 — Select durable execution engine through approved ADR
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-06](../../capabilities/CAP-06-durable-process-api.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: architecture-decision
 - Owned verification group: TST-WO-CAP-06-01
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001 through ARCH-005, ARCH-008 through ARCH-014
+- Rules: ARCH-008, ARCH-014
+- Applicability: durable execution selection, local/offline operability, bounded recovery, and recorded decision authority.
 - ADRs/patterns: ADR-001 through ADR-011, ADR-013, ADR-015, ADR-017, ADR-018, ADR-PENDING-001
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-004, SEC-006, SEC-007, SEC-009, SEC-013, SEC-015, SEC-016
+- Rules: SEC-006, SEC-007, SEC-013, SEC-015
+- Applicability: durable execution selection, local/offline operability, bounded recovery, and recorded decision authority.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** A qualified review approves durable execution engine with explicit drivers, alternatives, consequences, and exit strategy.
 - **Negative oracle:** A mandatory driver without evidence or an unresolved material trade-off keeps the ADR proposed/blocked and every dependent workorder non-READY.
 - **Boundary oracle:** Every mandatory decision driver is evaluated; an unevaluated driver or unresolved tie remains explicitly blocking.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

@@ -1,7 +1,11 @@
 # WO-CAP-00-07 — Complete bootstrap candidate gate
 
-Version: 0.5-draft
-Status: BLOCKED; external and human gates remain
+Version: 0.6-draft
+Status: BLOCKED
+Status reason: branch protection, authenticated reporting, independent review, and human bootstrap acceptance remain open
+Implementation state: NOT COMPLETE
+Evidence state: PARTIAL — constituent technical checks exist, but the complete acceptance package is absent
+Approval state: NOT APPROVED
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-00-07
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-010, ARCH-011, ARCH-013, ARCH-014
+- Rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-010, ARCH-011, ARCH-012, ARCH-014
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
 - ADRs/patterns: ADR-017 and ADR-019
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-011, SEC-012, SEC-013
+- Rules: SEC-001, SEC-002, SEC-007, SEC-011, SEC-012, SEC-015
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -125,7 +131,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-Execute the complete published capability BDD catalogue and `MTP-PRC-07` manual package. Missing, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
+Execute the complete applicable scenario set (BDD-OFFLINE-001) and every published `MT-PRC-07-NNN` case in `MTP-PRC-07`. Missing, unallocated, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
 
 ## Softwaretest.it and CI reporting
 

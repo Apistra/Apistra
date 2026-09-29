@@ -1,7 +1,11 @@
 # WO-CAP-05-03 — Review, refine, and approve visual design references
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-05](../../capabilities/CAP-05-workflow-authoring-and-publication.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: design-decision
 - Owned verification group: TST-WO-CAP-05-03
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ This UI workorder additionally requires an approved design reference, named view
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-002, ARCH-005 through ARCH-007, ARCH-011 through ARCH-013
+- Rules: ARCH-006, ARCH-012
+- Applicability: canonical workflow representation, stable UI contracts, project-aware states, and traceable approval.
 - ADRs/patterns: ADR-001, ADR-003 through ADR-005, ADR-011 through ADR-018
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-005, SEC-007, SEC-015
+- Rules: SEC-001, SEC-015
+- Applicability: canonical workflow representation, stable UI contracts, project-aware states, and traceable approval.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ This UI workorder additionally requires an approved design reference, named view
 - **Positive oracle:** The approved source and rendered workflow-editor references cover every named state and viewport with traceable accessibility annotations.
 - **Negative oracle:** A missing error/conflict/permission state, inaccessible interaction, source/render mismatch, or absent product-owner approval blocks UI implementation READY.
 - **Boundary oracle:** The narrowest and widest approved viewports, 200% text zoom, keyboard-only use, reduced motion, and longest supported labels remain operable.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -124,7 +130,7 @@ This UI workorder additionally requires an approved design reference, named view
 
 ## BDD and manual tests
 
-No automated BDD execution is owned. MT-CAP-05-03 is the planned design-review case; WO-CAP-05-08 must publish its atomic steps before dependent UI work becomes READY.
+No automated BDD execution is owned. The design-review case belongs to `MTP-PRC-03`; WO-CAP-05-08 must allocate and publish its concrete `MT-PRC-03-NNN` ID and atomic steps before dependent UI work becomes READY.
 
 ## Softwaretest.it and CI reporting
 

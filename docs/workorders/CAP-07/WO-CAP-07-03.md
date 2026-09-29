@@ -1,7 +1,11 @@
 # WO-CAP-07-03 — Implement human-task inbox and decision UI
 
-Version: 0.5-draft
-Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+Version: 0.6-draft
+Status: DRAFT
+Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Implementation state: NOT STARTED
+Evidence state: NOT EXECUTED
+Approval state: NOT APPROVED
 Capability: [CAP-07](../../capabilities/CAP-07-human-approval-and-controlled-writes.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-07-03
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -33,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
@@ -83,14 +87,16 @@ This UI workorder additionally requires an approved design reference, named view
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-002, ARCH-005, ARCH-008, ARCH-009, ARCH-011, ARCH-015
+- Rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-011, ARCH-012
+- Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
 - ADRs/patterns: ADR-003 through ADR-008, ADR-011, ADR-014, ADR-015, ADR-017, ADR-018
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-001, SEC-002, SEC-003, SEC-006, SEC-007, SEC-015
+- Rules: SEC-001, SEC-002, SEC-007, SEC-012, SEC-015
+- Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ This UI workorder additionally requires an approved design reference, named view
 - **Positive oracle:** The inbox shows only project-owned tasks and approved states with keyboard-accessible decision flows.
 - **Negative oracle:** Loading, empty, error, permission, conflict, or stale-task states never expose another project or lose the user's entered reason.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -119,14 +125,14 @@ This UI workorder additionally requires an approved design reference, named view
 ## Required tests
 
 - TST-WO-CAP-07-03: focused unit/component tests for the named invariants, state transitions, boundary values, and safe error taxonomy.
-- BDD-CAP-07-03: automated Given/When/Then journey for the positive and negative externally observable behavior when applicable.
+- Canonical BDD coverage: BDD-APPROVAL-001, BDD-APPROVAL-002, BDD-APPROVAL-003; WO-CAP-07-06 owns the exact scenario definitions and traceability before READY.
 - Contract and compatibility fixtures for each changed public/persisted schema, including unknown-version rejection.
 - Architecture and security tests for the listed ARCH/SEC rules, including own-project success and foreign/anonymous/revoked denial where access exists.
 - Capability regression selected by recorded change impact; WO-CAP-07-07 still owns the final complete unchanged-candidate matrix.
 
 ## BDD and manual tests
 
-WO-CAP-07-06 must define and publish BDD-CAP-07-03 before this workorder becomes READY when the behavior is externally observable. Manual case MT-CAP-07-03 is required only when this result has a user/process observation that cannot be fully established by the capability package; its execution owner is WO-CAP-07-07 unless explicitly assigned here.
+WO-CAP-07-06 must define and publish the applicable catalog-listed scenarios (BDD-APPROVAL-001, BDD-APPROVAL-002, BDD-APPROVAL-003) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-05`; individual `MT-PRC-05-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-07-07 unless a case is explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 
@@ -150,7 +156,7 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 ## Definition of Done
 
 - The four acceptance criteria and TST-WO-CAP-07-03 pass against the identified implementation snapshot
-- Any assigned BDD-CAP-07-03 execution and workorder-owned manual/security evidence are complete
+- Any assigned catalogue-listed BDD execution and workorder-owned manual/security evidence are complete
 - Applicable ARCH/SEC checks, migrations, documentation, result reporting, and EXTENDED implementation review are complete
 - Remaining capability-level execution stays explicitly owned by WO-CAP-07-07
 

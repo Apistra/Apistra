@@ -20,16 +20,20 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - AGPLv3 licence, commercial-licence notice, contribution policy, security policy, issue templates, pull-request template, CODEOWNERS, and expected branch-protection contract.
 - System-centred test architecture and operational test concept.
 - Repository-wide Semantic Versioning policy and central `VERSION` authority.
+- Canonical semantic behavioural test-ID and process-level manual package catalogue.
+- ARCH-015 for explicit, versioned, fail-closed policy decisions.
 
 ### Changed
 
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
-- All 140 workorders now use the version 0.5 execution contract with delivery classes, explicit outcomes, examples and counterexamples, test oracles, owned verification groups, dependency graphs, and evidence invalidation rules.
-- Repository contract validation now checks the complete planning catalogue, required sections, delivery classes, owned test IDs, expectation/oracle fields, dependencies, IDs, membership, local links, and obsolete generic boilerplate.
+- All 140 workorders now use the version 0.6 execution contract with exact workflow status, separate implementation/evidence/approval state, delivery classes, explicit outcomes, examples and counterexamples, canonical test references, workorder-specific architecture/security applicability, dependency graphs, and evidence invalidation rules.
+- Repository contract validation now checks the complete planning catalogue, exact status fields, canonical test IDs, defined ARCH/SEC references, dependency existence and cycles, delivery-class ordering, READY/DONE preconditions, membership, local links, and obsolete generic boilerplate.
 
 ### Fixed
 
 - Applied Ruff-compatible formatting to the repository contract validator.
+- Removed generated `BDD-CAP-*`, `BDD-WO-*`, and `MT-CAP-*` aliases from workorders and reconciled process mappings with the canonical catalogue.
+- Reconciled the control overview with successful GitHub Actions run 36637376129 while keeping version 0.6 evidence explicitly local until hosted validation.
 
 ### Security
 

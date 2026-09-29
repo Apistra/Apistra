@@ -1,7 +1,11 @@
 # WO-CAP-00-05 — Establish Softwaretest.it publishing readiness
 
-Version: 0.5-draft
-Status: PARTIALLY IMPLEMENTED; authenticated round-trip is blocked
+Version: 0.6-draft
+Status: BLOCKED
+Status reason: authorised Softwaretest.it publication and field-level read-back remain unavailable
+Implementation state: PARTIALLY IMPLEMENTED
+Evidence state: PARTIAL — public preflight and dry-run checks pass; authenticated write/read round-trip is absent
+Approval state: NOT APPROVED
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -14,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-00-05
-- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -83,14 +87,16 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## ARCH rules and pattern limits
 
-- Rules: ARCH-001, ARCH-010, ARCH-011, ARCH-013, ARCH-014
+- Rules: ARCH-010, ARCH-012
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
 - ADRs/patterns: ADR-017 and ADR-019
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
 ## SEC rules and safe test conditions
 
-- Rules: SEC-011, SEC-012, SEC-013
+- Rules: SEC-002, SEC-011, SEC-012, SEC-015
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
 - Tests use only authorised local/staging targets and synthetic project-scoped data.
 - Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
 - Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
@@ -107,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The complete PRC-07 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
 - **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -125,7 +131,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-This workorder owns definition/publication of all planned `BDD-CAP-*`, `BDD-WO-*`, `MTP-PRC-07`, and `MT-*` IDs for the capability. Execution remains with the owning implementation workorder or WO-CAP-00-07 as explicitly assigned in each definition.
+This workorder owns definition and publication of the catalog-listed scenarios (BDD-OFFLINE-001) and manual package `MTP-PRC-07`. Individual manual cases use `MT-PRC-07-NNN`, receive concrete atomic steps before READY, and are recorded in the published package and its traceability index. Execution remains with the owning implementation workorder or WO-CAP-00-07 as explicitly assigned in each definition.
 
 ## Softwaretest.it and CI reporting
 
