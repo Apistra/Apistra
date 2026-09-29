@@ -1,6 +1,6 @@
 # Human Control Overview
 
-Version: 0.4-draft
+Version: 0.5-draft
 Date: 2026-09-29
 Scope: Apistra planning baseline and CAP-00 delivery evidence
 Profile: EXTENDED
@@ -11,7 +11,7 @@ Apistra is planned as a public build-in-public platform for designing, testing, 
 
 ## 2. Change from the prior state
 
-The previous roadmap and workorder catalogue contained compact summaries. Version 0.4 adds nineteen detailed capability contracts under ../capabilities/ and 140 individual workorder contracts under ../workorders/, extends later-0.x requirements and journeys, and makes their file/section/link structure executable in the repository contract validator. The former monolithic documents are now indexes.
+The previous roadmap and workorder catalogue contained compact summaries. Version 0.5 strengthens all 140 individual workorder contracts with delivery-class-specific results, examples and counterexamples, objective oracles, independent expectation inputs, owned verification groups, explicit dependencies, and evidence invalidation rules. The repository validator now rejects missing contract fields and the former generic boilerplate.
 
 ## 3. Status by control dimension
 
@@ -23,8 +23,8 @@ Implementation:
 
 Evidence:
 
-- GitHub Actions run 36619441457 passed all five required jobs for commit 15d258a.
-- The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, required sections, catalogue membership, and local planning links.
+- Earlier GitHub Actions run 36619441457 passed all five required jobs for commit 15d258a. The later run 36629669025 failed only the Ruff format check; the formatting repair and version 0.5 workorder validation require a new hosted run before they are hosted evidence.
+- The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, required sections, delivery classes, owned test IDs, positive/negative oracles, dependency declarations, catalogue membership, local planning links, and forbidden generic boilerplate.
 - The public Softwaretest.it OpenAPI preflight and dry-run adapter tests pass; an authenticated project/test-plan round-trip remains unavailable.
 - Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
 
@@ -55,7 +55,7 @@ Authorised test-management operator:
 
 Independent reviewer and product owner:
 
-- Review CAP-00 evidence and the version 0.4 planning delta.
+- Review CAP-00 evidence and the version 0.5 workorder-contract delta.
 - Resolve the remaining architecture/design decisions for the next selected capability.
 - Approve no more than one or two independent first workorders as READY.
 

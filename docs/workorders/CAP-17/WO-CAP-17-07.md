@@ -1,6 +1,6 @@
 # WO-CAP-17-07 — Accept CAP-17 on Kubernetes staging
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-17](../../capabilities/CAP-17-kubernetes-deployment-profile.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-17-kubernetes-deployment-profile.md
 - CI test group: TST-WO-CAP-17-07
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: capability-acceptance
+- Owned verification group: TST-WO-CAP-17-07
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects secrets, delivery_control, irreversible_data, and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Accept CAP-17 on Kubernetes staging is available as one integrated, reviewable result consumed by the remaining CAP-17 workorders. It must not silently implement adjacent catalogue items.
+One immutable capability candidate is fully tested, manually deployed to the named isolated staging environment, recovered, reported, independently reviewed, and presented for explicit human capability acceptance.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Accept CAP-17 on Kubernetes staging is available as one integrated, reviewable r
 
 ## Scope
 
-- Implement or specify exactly: Accept CAP-17 on Kubernetes staging.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Freeze candidate identity and execute the complete capability-required CI, architecture, security, contract, BDD, migration, packaging, and recovery matrix once on that unchanged candidate.
+- Manually deploy the exact digests, verify environment/fixture identity, then execute every assigned manual process/UI/security case and record step evidence, defects, and retests.
+- Confirm Softwaretest.it receipts and request human capability acceptance; do not promote to production.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Accept CAP-17 on Kubernetes staging is available as one integrated, reviewable r
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,35 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. Every preceding workorder in the capability is DONE or has an explicitly approved non-blocking exception.
-2. The complete scope test matrix passes once against the unchanged candidate and all results are reported.
-3. That exact candidate is manually deployed to the named staging environment; health, smoke, diagnostics, recovery, and required manual tests pass.
-4. The authorised human records the capability acceptance; no production promotion occurs.
+1. Every prerequisite workorder is DONE and no blocking or expired exception remains.
+2. The complete required matrix passes on one unchanged commit/candidate with current suite and input fingerprints.
+3. The same digests are staged manually; migration, health, smoke, observability, controlled failure, recovery, and all assigned manual cases pass with confirmed reporting.
+4. An authorised human accepts the exact capability/candidate/environment evidence package; no production approval is inferred.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
+- **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
+- **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-030, process PRC-13, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
+- Counterexample: A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-17-07 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-17-07: gate completeness, candidate/digest equality, evidence freshness, and receipt validation.
+- Full capability CI and BDD matrix on the unchanged candidate; no selective reuse substitutes for this final run.
+- Every published `MT-*` case for PRC-13 executed on staging with atomic step results.
+- Recovery and rollback/roll-forward drill appropriate to the capability's state and external effects.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+Execute the complete published capability BDD catalogue and `MTP-PRC-13` manual package. Missing, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +137,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder owns the capability staging gate: deploy the exact candidate manually, verify marker/digests, fixtures, health, smoke, observability, recovery, all required manual tests, Softwaretest.it receipts, and human acceptance.
+This workorder owns the capability staging gate. Candidate manifest, image digests, configuration, fixture version, deployment marker, health/smoke, diagnostics, recovery, Softwaretest.it receipts, and human decision must identify the same attempt.
 
 ## Documentation and evidence
 
@@ -137,11 +148,10 @@ This workorder owns the capability staging gate: deploy the exact candidate manu
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- All prerequisite workorders are DONE with current evidence
+- Full matrix and required manual cases pass on the exact staged candidate
+- Reporting receipts, recovery evidence, and independent implementation review are complete
+- Authorised human capability acceptance is recorded; production remains separately unapproved
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +163,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: Accepted release 0.1. Downstream: the next numbered CAP-17 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: Accepted release 0.1
+- Required workorders: WO-CAP-17-01, WO-CAP-17-02, WO-CAP-17-03, WO-CAP-17-04, WO-CAP-17-05, WO-CAP-17-06
+- Downstream acceptance owner: none; this is the capability acceptance workorder
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

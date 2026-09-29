@@ -1,6 +1,6 @@
 # WO-CAP-18-07 — Complete legal and commercial operations documentation
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-18](../../capabilities/CAP-18-commercial-operations-and-optional-managed-service.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-18-commercial-operations-and-optional-managed-service.md
 - CI test group: TST-WO-CAP-18-07
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: legal-governance
+- Owned verification group: TST-WO-CAP-18-07
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects authorization, secrets, delivery_control, and irreversible_data. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Complete legal and commercial operations documentation is available as one integrated, reviewable result consumed by the remaining CAP-18 workorders. It must not silently implement adjacent catalogue items.
+The approved legal and commercial operations documentation package states enforceable responsibilities, boundaries, processes, and unresolved decisions without claiming legal, operational, or technical capabilities that are not evidenced.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Complete legal and commercial operations documentation is available as one integ
 
 ## Scope
 
-- Implement or specify exactly: Complete legal and commercial operations documentation.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Define the bounded governance documents, responsible roles, decision rights, review triggers, compatibility with existing licences/contracts, and required operational evidence.
+- Reconcile contradictions across repository policy, licensing, security, delivery, support, and public statements.
+- Obtain the qualified human/legal review required by the subject; do not create runtime behavior.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Complete legal and commercial operations documentation is available as one integ
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,35 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. The named result is exposed only through the declared application/public contract and remains within the capability boundary.
-2. Happy path, negative path, boundary conditions, project isolation, safe errors, and retry behavior have objective tests.
-3. Relevant state, audit, metrics, and diagnostics identify project, resource, operation, attempt, and result without secrets.
-4. A clean migration/compatibility path exists or the workorder proves that no persisted/public contract changes occur.
+1. Every public or operator-facing claim identifies its authority, scope, effective revision, and unresolved limitations.
+2. Conflicting licensing, contribution, support, warranty, privacy, security, or release statements are resolved or explicitly blocking.
+3. Required roles, decision rights, escalation, review triggers, and evidence retention are actionable.
+4. Qualified human/legal approval is recorded where required; automated checks do not substitute for it.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The approved legal and commercial operations documentation package makes only source-backed claims and names roles, decisions, limitations, and review triggers.
+- **Negative oracle:** An unsupported legal/support/security/release claim, unresolved contradiction, or missing qualified approval remains visibly blocking.
+- **Boundary oracle:** Every named audience, distribution mode, support boundary, licence case, and approval trigger is either covered or explicitly out of scope.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-017, REQ-031, process PRC-14, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The approved legal and commercial operations documentation package makes only source-backed claims and names roles, decisions, limitations, and review triggers.
+- Counterexample: An unsupported legal/support/security/release claim, unresolved contradiction, or missing qualified approval remains visibly blocking.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-18-07 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-18-07: repository policy, link, version, contradiction, and required-section validation in CI-TS-01.
+- Structured qualified review of legal/security/operations claims and their source authority.
+- Negative fixture or review case proving unsupported claims and absent approvals remain visible.
+- No BDD or manual product test is invented for a documentation-only result.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+BDD and manual product cases are not applicable to the governance artifact itself. Any operational procedure introduced by it must receive a separate executable test/workorder before use.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +137,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+No product deployment is owned. Published documentation must remain bound to the repository revision and cannot constitute production authorisation.
 
 ## Documentation and evidence
 
@@ -137,11 +148,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- Governance documents are internally consistent, source-backed, and qualified-review approved
+- Required decisions, roles, escalation, and limitations are explicit
+- Repository checks pass and affected downstream contracts are updated
+- No legal approval, support promise, certification, or production capability is invented
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +163,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-01 and legal/production approvals. Downstream: the next numbered CAP-18 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-01 and legal/production approvals
+- Required workorders: WO-CAP-18-01, WO-CAP-18-05, WO-CAP-18-06
+- Downstream acceptance owner: WO-CAP-18-09
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

@@ -1,6 +1,6 @@
 # WO-CAP-05-01 — Define canonical versioned workflow schema
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-05](../../capabilities/CAP-05-workflow-authoring-and-publication.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-05-workflow-authoring-and-publication.md
 - CI test group: TST-WO-CAP-05-01
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: contract-definition
+- Owned verification group: TST-WO-CAP-05-01
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects tenant_isolation and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Define canonical versioned workflow schema is available as one integrated, reviewable result consumed by the remaining CAP-05 workorders. It must not silently implement adjacent catalogue items.
+A versioned, review-approved definition for canonical versioned workflow schema provides unambiguous valid, invalid, compatibility, ownership, and failure semantics to every named consumer.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Define canonical versioned workflow schema is available as one integrated, revie
 
 ## Scope
 
-- Implement or specify exactly: Define canonical versioned workflow schema.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Define the canonical versioned schema or policy, invariants, ownership, lifecycle, compatibility, unknown-version behavior, safe errors, and consumer obligations.
+- Retain valid, boundary, invalid, and incompatible examples as fixtures where machine validation is possible.
+- Update traceability and only those ADR/ARCH/SEC references changed by this contract.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Define canonical versioned workflow schema is available as one integrated, revie
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,35 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. The contract is versioned, schema-valid, and identifies compatibility and unknown-version behavior.
-2. Allowed and forbidden examples plus boundary cases are retained as executable fixtures where automatable.
-3. All consuming workorders can use the contract without inventing a product, architecture, or security decision.
-4. A qualified review approves any new architecture decision before dependent implementation becomes READY.
+1. The contract has one canonical representation, explicit version semantics, ownership, invariants, and unknown-version behavior.
+2. At least one valid, boundary, malformed, incompatible, and unauthorised example has an objective expected result.
+3. Every named consumer can implement against the contract without choosing a new product, architecture, security, or compatibility rule.
+4. A qualified review approves the contract and its impact before dependent implementation becomes READY.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** A supported example of canonical versioned workflow schema validates and round-trips without semantic loss.
+- **Negative oracle:** A malformed, incompatible, unauthorised, or unknown-version example of canonical versioned workflow schema is rejected before any consumer mutation.
+- **Boundary oracle:** Minimum and maximum supported versions, sizes, counts, ownership scopes, and compatibility edges have explicit valid or rejected outcomes.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-008, REQ-009, REQ-018, process PRC-03, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: A supported example of canonical versioned workflow schema validates and round-trips without semantic loss.
+- Counterexample: A malformed, incompatible, unauthorised, or unknown-version example of canonical versioned workflow schema is rejected before any consumer mutation.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-05-01 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-05-01: schema/policy validation and valid/boundary/invalid/unknown-version fixtures in CI-TS-01 or the owning contract stage.
+- Architecture dependency review for every consumer and applicable ARCH rule.
+- Security review for ownership, identity, secret, egress, and failure semantics named by applicable SEC rules.
+- No product BDD or manual UI test is assigned until a dependent workorder exposes behavior.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+No BDD or manual case is required for a contract with no independently observable journey. Behavioral consumers receive their own stable IDs; the contract fixtures remain this workorder's evidence.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +137,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+No staging acceptance is owned unless this workorder explicitly changes a deployed contract reader. The final capability gate verifies the contract through its consuming behavior.
 
 ## Documentation and evidence
 
@@ -137,11 +148,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- Canonical contract, fixtures, compatibility policy, and consumer list are approved
+- Assigned contract, architecture, and security checks pass
+- Dependent workorders reference the exact contract revision
+- No runtime behavior or external resource is represented as implemented
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +163,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-01 through CAP-04 and GATE-DES-01. Downstream: the next numbered CAP-05 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-01 through CAP-04 and GATE-DES-01
+- Required workorders: none within this capability
+- Downstream acceptance owner: WO-CAP-05-09
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

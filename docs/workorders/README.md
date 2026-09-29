@@ -1,9 +1,13 @@
 # Workorder Catalogue
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT
 
 Each file is one execution contract. A file is not implementation permission: its Status, prerequisites, expectation review, and gates remain binding.
+
+Version 0.5 assigns every workorder a delivery class, one owned verification group, explicit positive/negative/boundary oracles, expectation sources, counterexamples, and a dependency graph. Workorder numbers are stable identifiers, not execution order: the declared prerequisites govern readiness, and test-definition publication may intentionally precede lower-numbered implementation work.
+
+While a workorder is DRAFT/BLOCKED, its allowed paths remain deliberately unassigned. READY review must replace that placeholder with observed existing paths and approved additions; an agent may not invent repository structure to satisfy a draft.
 
 ## CAP-00
 

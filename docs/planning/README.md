@@ -1,6 +1,6 @@
 # Apistra BuildBySpec Planning Baseline
 
-Version: 0.3-draft
+Version: 0.5-draft
 Date: 2026-09-29
 Language: English
 Assurance profile: EXTENDED

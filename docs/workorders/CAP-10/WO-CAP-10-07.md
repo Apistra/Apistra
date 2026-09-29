@@ -1,6 +1,6 @@
 # WO-CAP-10-07 — Publish and verify expanded-connector test definitions
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-10](../../capabilities/CAP-10-expanded-connector-catalogue.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-10-expanded-connector-catalogue.md
 - CI test group: TST-WO-CAP-10-07
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: test-definition-and-publication
+- Owned verification group: TST-WO-CAP-10-07
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects authorization, tenant_isolation, secrets, and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Publish and verify expanded-connector test definitions is available as one integrated, reviewable result consumed by the remaining CAP-10 workorders. It must not silently implement adjacent catalogue items.
+The complete PRC-02 capability test package is versioned locally, idempotently published to Softwaretest.it, and verified by field- and step-level read-back before behavioral implementation becomes READY.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Publish and verify expanded-connector test definitions is available as one integ
 
 ## Scope
 
-- Implement or specify exactly: Publish and verify expanded-connector test definitions.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Derive automated BDD scenarios, independent manual process/UI/security cases, atomic steps, fixtures, roles, data, requirement/risk links, and CI-stage mappings from the approved capability contracts.
+- Publish or update definitions idempotently through the verified API and read back identifiers, fields, ordering, and links.
+- Preserve a lossless local manifest/outbox when authorised publication is unavailable; do not execute the tests in this workorder.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Publish and verify expanded-connector test definitions is available as one integ
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,35 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. Every capability acceptance rule has positive, negative, boundary, security, permission, and compatibility coverage or a justified not-applicable decision.
-2. Stable BDD and independent manual test IDs are defined; manual steps start at sign-in and remain atomic.
-3. Definitions are published idempotently to the authorised Softwaretest.it test plan and field-level round-trip is verified.
-4. Fixture, execution, and CI-report mappings are explicit and contain no secrets.
+1. Every externally observable capability acceptance criterion has a stable BDD ID or an explicit not-applicable rationale.
+2. Every business process has a complete manual package starting at logged-out sign-in, with atomic role-prefixed action/observation steps, concrete synthetic data, and one matching expected result per step.
+3. Publication is idempotent and field-/order-level read-back matches the local version and checksums.
+4. Definition, publication, fixture readiness, execution, result reporting, and capability acceptance remain distinct statuses.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The complete PRC-02 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
+- **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
+- **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-023, process PRC-02, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The complete PRC-02 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
+- Counterexample: A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-10-07 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-10-07: definition schema, ID uniqueness, traceability, atomic-step structure, and local manifest validation in CI-TS-01/CI-TS-06.
+- Softwaretest.it adapter contract and idempotency tests in CI-TS-06 and CI-TS-16.
+- Authorised live round-trip proving project/plan/case fields and manual-step order.
+- No behavioral test result is created by publishing a definition.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+This workorder owns definition/publication of all planned `BDD-CAP-*`, `BDD-WO-*`, `MTP-PRC-02`, and `MT-*` IDs for the capability. Execution remains with the owning implementation workorder or WO-CAP-10-08 as explicitly assigned in each definition.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +137,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+No product candidate is accepted. Only the engineering test-management target is changed, using minimum authorised project-scoped credentials and a lossless local outbox on failure.
 
 ## Documentation and evidence
 
@@ -137,11 +148,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- Complete local test package and traceability manifest pass structural review
+- Authorised Softwaretest.it publication and field-/step-level read-back are confirmed, or the workorder remains BLOCKED
+- Consumer workorders reference stable IDs and execution ownership
+- No unexecuted definition is reported as a passed test
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +163,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-03 and CAP-04. Downstream: the next numbered CAP-10 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-03 and CAP-04
+- Required workorders: WO-CAP-10-01
+- Downstream acceptance owner: WO-CAP-10-08
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

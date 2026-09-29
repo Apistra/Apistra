@@ -1,6 +1,6 @@
 # WO-CAP-06-01 — Select durable execution engine through approved ADR
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-06](../../capabilities/CAP-06-durable-process-api.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-06-durable-process-api.md
 - CI test group: TST-WO-CAP-06-01
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: architecture-decision
+- Owned verification group: TST-WO-CAP-06-01
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects authorization, tenant_isolation, delivery_control, and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Select durable execution engine through approved ADR is available as one integrated, reviewable result consumed by the remaining CAP-06 workorders. It must not silently implement adjacent catalogue items.
+An approved ADR selects durable execution engine from explicit alternatives and gives every dependent workorder one implementable decision without adding runtime behavior.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Select durable execution engine through approved ADR is available as one integra
 
 ## Scope
 
-- Implement or specify exactly: Select durable execution engine through approved ADR.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Record decision drivers, viable alternatives, comparative evidence, selected option, rejected options, consequences, migration/exit strategy, and affected ARCH/SEC rules.
+- Obtain qualified architecture review and human confirmation of the critical choice.
+- Update only the decision, architecture, traceability, and directly affected workorder references.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Select durable execution engine through approved ADR is available as one integra
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,35 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. The contract is versioned, schema-valid, and identifies compatibility and unknown-version behavior.
-2. Allowed and forbidden examples plus boundary cases are retained as executable fixtures where automatable.
-3. All consuming workorders can use the contract without inventing a product, architecture, or security decision.
-4. A qualified review approves any new architecture decision before dependent implementation becomes READY.
+1. At least two viable alternatives are evaluated against the approved decision drivers, including offline operation, PostgreSQL fit, licensing, failure recovery, operations, and exit cost.
+2. The selected option has explicit consequences, constraints, and verification obligations for every dependent workorder.
+3. Unresolved evidence or a failed mandatory driver leaves the ADR `PROPOSED` or `BLOCKED`; it is not decided by implementation convenience.
+4. A qualified reviewer and the responsible human approve the exact ADR revision.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** A qualified review approves durable execution engine with explicit drivers, alternatives, consequences, and exit strategy.
+- **Negative oracle:** A mandatory driver without evidence or an unresolved material trade-off keeps the ADR proposed/blocked and every dependent workorder non-READY.
+- **Boundary oracle:** Every mandatory decision driver is evaluated; an unevaluated driver or unresolved tie remains explicitly blocking.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-010, REQ-011, REQ-013, REQ-015, REQ-016, process PRC-04, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: A qualified review approves durable execution engine with explicit drivers, alternatives, consequences, and exit strategy.
+- Counterexample: A mandatory driver without evidence or an unresolved material trade-off keeps the ADR proposed/blocked and every dependent workorder non-READY.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-06-01 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-06-01: ADR completeness and cross-reference validation in CI-TS-01.
+- Structured architecture comparison against the decision drivers; this is review evidence, not an invented unit test.
+- Architecture rule/fixture impact review for each changed ARCH rule.
+- No BDD or manual UI execution is applicable because this workorder changes no product behavior.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+BDD and manual process cases are not applicable to the decision itself. Dependent implementation workorders own behavioral IDs after this ADR is approved.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +137,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+No candidate deployment is owned. The approved ADR becomes an input fingerprint for dependent candidates and invalidates their prior READY review when materially changed.
 
 ## Documentation and evidence
 
@@ -137,11 +148,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- The exact ADR revision is approved with alternatives, evidence, consequences, and exit strategy
+- Every affected ARCH/SEC rule and dependent workorder is updated
+- Independent expectation comparison and qualified architecture review are recorded
+- No runtime implementation, dependency installation, or provider account mutation was performed
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +163,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-01, CAP-02, CAP-04, CAP-05. Downstream: the next numbered CAP-06 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-01, CAP-02, CAP-04, CAP-05
+- Required workorders: none within this capability
+- Downstream acceptance owner: WO-CAP-06-10
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

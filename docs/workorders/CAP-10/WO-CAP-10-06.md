@@ -1,6 +1,6 @@
 # WO-CAP-10-06 — Implement Confluence connector
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-10](../../capabilities/CAP-10-expanded-connector-catalogue.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-10-expanded-connector-catalogue.md
 - CI test group: TST-WO-CAP-10-06
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: implementation
+- Owned verification group: TST-WO-CAP-10-06
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects authorization, tenant_isolation, secrets, and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Implement Confluence connector is available as one integrated, reviewable result consumed by the remaining CAP-10 workorders. It must not silently implement adjacent catalogue items.
+The capability exposes Confluence connector as one integrated, versioned, project-scoped behavior through its declared application/public boundary, with safe failure and evidence for downstream work.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Implement Confluence connector is available as one integrated, reviewable result
 
 ## Scope
 
-- Implement or specify exactly: Implement Confluence connector.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Implement only Confluence connector, including its domain invariants, application use case, declared public/schema boundary, required adapter behavior, persistence/migration delta, safe errors, audit/observability, and focused documentation.
+- Preserve existing capability boundaries and use only approved contracts/ADRs; no adjacent catalogue item is included.
+- Add the positive, negative, boundary, compatibility, architecture, and security tests owned by this workorder.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Implement Confluence connector is available as one integrated, reviewable result
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,36 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. The connector passes the canonical capability, provenance, retry, deletion, and safe-error contract.
-2. Own-project access succeeds; foreign-project, anonymous, revoked, and under-scoped access fails without disclosure.
-3. Egress, redirects, DNS changes, credentials, rate limits, and partial failures satisfy the active security policy.
-4. Repeated full or incremental execution converges without duplicate active records.
+1. The connector incrementally imports authorised spaces and page revisions with attachment and deletion handling.
+2. Restricted spaces, ancestor permission loss, deleted pages, or stale cursors cannot remain retrievable.
+3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
+4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The connector incrementally imports authorised spaces and page revisions with attachment and deletion handling.
+- **Negative oracle:** Restricted spaces, ancestor permission loss, deleted pages, or stale cursors cannot remain retrievable.
+- **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-023, process PRC-02, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The connector incrementally imports authorised spaces and page revisions with attachment and deletion handling.
+- Counterexample: Restricted spaces, ancestor permission loss, deleted pages, or stale cursors cannot remain retrievable.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-10-06 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-10-06: focused unit/component tests for the named invariants, state transitions, boundary values, and safe error taxonomy.
+- BDD-CAP-10-06: automated Given/When/Then journey for the positive and negative externally observable behavior when applicable.
+- Contract and compatibility fixtures for each changed public/persisted schema, including unknown-version rejection.
+- Architecture and security tests for the listed ARCH/SEC rules, including own-project success and foreign/anonymous/revoked denial where access exists.
+- Capability regression selected by recorded change impact; WO-CAP-10-08 still owns the final complete unchanged-candidate matrix.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+WO-CAP-10-07 must define and publish BDD-CAP-10-06 before this workorder becomes READY when the behavior is externally observable. Manual case MT-CAP-10-06 is required only when this result has a user/process observation that cannot be fully established by the capability package; its execution owner is WO-CAP-10-08 unless explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +138,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+This workorder produces candidate-bound evidence but does not accept the capability. WO-CAP-10-08 owns deployment of the exact complete candidate, full staging matrix, recovery, manual execution, and human acceptance.
 
 ## Documentation and evidence
 
@@ -137,11 +149,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- The four acceptance criteria and TST-WO-CAP-10-06 pass against the identified implementation snapshot
+- Any assigned BDD-CAP-10-06 execution and workorder-owned manual/security evidence are complete
+- Applicable ARCH/SEC checks, migrations, documentation, result reporting, and EXTENDED implementation review are complete
+- Remaining capability-level execution stays explicitly owned by WO-CAP-10-08
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +164,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-03 and CAP-04. Downstream: the next numbered CAP-10 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-03 and CAP-04
+- Required workorders: WO-CAP-10-01, WO-CAP-10-07, WO-CAP-10-05
+- Downstream acceptance owner: WO-CAP-10-08
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

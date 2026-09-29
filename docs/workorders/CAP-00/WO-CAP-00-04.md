@@ -1,6 +1,6 @@
 # WO-CAP-00-04 — Establish isolated local staging and recovery
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: IMPLEMENTED AND HOSTED VERIFIED
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md
 - CI test group: TST-WO-CAP-00-04
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: implementation
+- Owned verification group: TST-WO-CAP-00-04
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects delivery_control and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-Repository evidence is described in the CAP-00 planning and test-matrix documents; the exact current status above is authoritative for this workorder.
+CAP-00 implementation and hosted evidence exist against the 0.4 workorder revision. This 0.5 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
 
 ## Target result
 
-Establish isolated local staging and recovery is available as one integrated, reviewable result consumed by the remaining CAP-00 workorders. It must not silently implement adjacent catalogue items.
+The capability exposes isolated local staging and recovery as one integrated, versioned, project-scoped behavior through its declared application/public boundary, with safe failure and evidence for downstream work.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Establish isolated local staging and recovery is available as one integrated, re
 
 ## Scope
 
-- Implement or specify exactly: Establish isolated local staging and recovery.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Implement only isolated local staging and recovery, including its domain invariants, application use case, declared public/schema boundary, required adapter behavior, persistence/migration delta, safe errors, audit/observability, and focused documentation.
+- Preserve existing capability boundaries and use only approved contracts/ADRs; no adjacent catalogue item is included.
+- Add the positive, negative, boundary, compatibility, architecture, and security tests owned by this workorder.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Establish isolated local staging and recovery is available as one integrated, re
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+Observed path scope for this completed bootstrap slice: deploy/compose/, tools/staging/, and docs/operations/. Any change outside these paths requires an explicit scope/impact update before work continues.
 
 ## Stop conditions
 
@@ -92,29 +97,36 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## Acceptance criteria
 
-1. The named result is exposed only through the declared application/public contract and remains within the capability boundary.
-2. Happy path, negative path, boundary conditions, project isolation, safe errors, and retry behavior have objective tests.
-3. Relevant state, audit, metrics, and diagnostics identify project, resource, operation, attempt, and result without secrets.
-4. A clean migration/compatibility path exists or the workorder proves that no persisted/public contract changes occur.
+1. The exact candidate digests start in an isolated local stack, publish health and deployment markers, survive the controlled failure scenario, and recover without image substitution.
+2. An automatic deployment, shared-state collision, changed digest, failed recovery, or missing marker leaves staging verification failed.
+3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
+4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The exact candidate digests start in an isolated local stack, publish health and deployment markers, survive the controlled failure scenario, and recover without image substitution.
+- **Negative oracle:** An automatic deployment, shared-state collision, changed digest, failed recovery, or missing marker leaves staging verification failed.
+- **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-019, REQ-020, process PRC-07, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The exact candidate digests start in an isolated local stack, publish health and deployment markers, survive the controlled failure scenario, and recover without image substitution.
+- Counterexample: An automatic deployment, shared-state collision, changed digest, failed recovery, or missing marker leaves staging verification failed.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-00-04 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-00-04: focused unit/component tests for the named invariants, state transitions, boundary values, and safe error taxonomy.
+- BDD-CAP-00-04: automated Given/When/Then journey for the positive and negative externally observable behavior when applicable.
+- Contract and compatibility fixtures for each changed public/persisted schema, including unknown-version rejection.
+- Architecture and security tests for the listed ARCH/SEC rules, including own-project success and foreign/anonymous/revoked denial where access exists.
+- Capability regression selected by recorded change impact; WO-CAP-00-07 still owns the final complete unchanged-candidate matrix.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+WO-CAP-00-05 must define and publish BDD-CAP-00-04 before this workorder becomes READY when the behavior is externally observable. Manual case MT-CAP-00-04 is required only when this result has a user/process observation that cannot be fully established by the capability package; its execution owner is WO-CAP-00-07 unless explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +138,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+This workorder produces candidate-bound evidence but does not accept the capability. WO-CAP-00-07 owns deployment of the exact complete candidate, full staging matrix, recovery, manual execution, and human acceptance.
 
 ## Documentation and evidence
 
@@ -137,11 +149,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- The four acceptance criteria and TST-WO-CAP-00-04 pass against the identified implementation snapshot
+- Any assigned BDD-CAP-00-04 execution and workorder-owned manual/security evidence are complete
+- Applicable ARCH/SEC checks, migrations, documentation, result reporting, and EXTENDED implementation review are complete
+- Remaining capability-level execution stays explicitly owned by WO-CAP-00-07
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +164,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: None. Downstream: the next numbered CAP-00 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: None
+- Required workorders: WO-CAP-00-01, WO-CAP-00-02, WO-CAP-00-03
+- Downstream acceptance owner: WO-CAP-00-07
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

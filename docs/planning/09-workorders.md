@@ -1,12 +1,12 @@
 # Workorder Catalogue
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT
 
 ## Control summary
 
-**Result:** Every planned Apistra workorder has one canonical, AI-executable contract file under `docs/workorders/<CAP-ID>/`.
-**Change:** This document is now an index and readiness policy; detailed scope and status no longer live in a monolithic duplicate catalogue.
+**Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
+**Change:** Version 0.5 replaces generic implementation/test boilerplate with delivery-class-specific outcomes, examples, counterexamples, oracles, owned verification groups, evidence bindings, and explicit workorder dependencies.
 **Current position:** 140 workorder contracts exist. CAP-00 implementation evidence is retained in its files; all business workorders remain DRAFT until prerequisite gates and expectation reviews pass.
 **Main blocker:** GATE-CAP00-DONE, authenticated Softwaretest.it publishing readiness, architecture/security/design decisions, and independent expectation review as assigned.
 **Next step:** Close CAP-00, select CAP-01, complete its expectation review, then mark only an independently executable first workorder READY.
@@ -41,6 +41,6 @@ Stop and report when the observed repository contradicts the workorder; a produc
 
 ## Readiness rule
 
-A workorder can move from DRAFT/BLOCKED to READY only when its exact paths and current behavior are observed, prerequisite gates pass, critical expectations are human-confirmed, the independent expectation review is recorded, applicable ADRs/ARCH/SEC rules are approved, test IDs and Softwaretest.it mapping exist, and design references are approved where UI is involved.
+A workorder can move from DRAFT/BLOCKED to READY only when its exact paths and current behavior are observed, its generic path placeholder is replaced through reviewed specification revision, prerequisite gates pass, critical expectations are human-confirmed, the independent expectation review is recorded, applicable ADRs/ARCH/SEC rules are approved, test IDs and Softwaretest.it mapping exist, and design references are approved where UI is involved.
 
-Catalogue entries are planning contracts, not permission to implement. The final workorder in every capability owns the unchanged-candidate staging gate and human capability acceptance.
+Catalogue entries are planning contracts, not permission to implement. Workorder numbers are identifiers rather than execution order; `Required workorders` controls readiness. Each capability owns exactly one test-definition/publication workorder and one final unchanged-candidate staging/human-acceptance workorder.

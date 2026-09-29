@@ -24,7 +24,12 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 ### Changed
 
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
-- Repository contract validation now checks the complete planning catalogue, required sections, IDs, membership, and local links.
+- All 140 workorders now use the version 0.5 execution contract with delivery classes, explicit outcomes, examples and counterexamples, test oracles, owned verification groups, dependency graphs, and evidence invalidation rules.
+- Repository contract validation now checks the complete planning catalogue, required sections, delivery classes, owned test IDs, expectation/oracle fields, dependencies, IDs, membership, local links, and obsolete generic boilerplate.
+
+### Fixed
+
+- Applied Ruff-compatible formatting to the repository contract validator.
 
 ### Security
 

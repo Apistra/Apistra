@@ -1,6 +1,6 @@
 # WO-CAP-05-03 — Review, refine, and approve visual design references
 
-Version: 0.4-draft
+Version: 0.5-draft
 Status: DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
 Capability: [CAP-05](../../capabilities/CAP-05-workflow-authoring-and-publication.md)
 Assurance: EXTENDED
@@ -12,10 +12,15 @@ Assurance: EXTENDED
 - Capability contract: ../../capabilities/CAP-05-workflow-authoring-and-publication.md
 - CI test group: TST-WO-CAP-05-03
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: design-decision
+- Owned verification group: TST-WO-CAP-05-03
+- Specification revision: 0.5-draft; any 0.4 evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
-EXTENDED applies because the product plan crosses architecture boundaries and may affect authorization, tenant isolation, secrets, delivery control, or durable state. Stop and reassess if implementation reveals a new data migration, external permission, architecture boundary, irreversible effect, or material scope increase.
+EXTENDED applies because this workorder affects tenant_isolation and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
 
 ## Baselines and contract delta
 
@@ -28,11 +33,11 @@ EXTENDED applies because the product plan crosses architecture boundaries and ma
 
 ## Context and current behavior
 
-The capability result is not implemented. Existing CAP-00 health behavior is not evidence of this workorder.
+Current evidence does not establish this 0.5 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
 
 ## Target result
 
-Review, refine, and approve visual design references is available as one integrated, reviewable result consumed by the remaining CAP-05 workorders. It must not silently implement adjacent catalogue items.
+Product-owner-approved maintainable and rendered references define the workflow-authoring interaction before UI implementation starts.
 
 ## Prerequisites
 
@@ -43,9 +48,9 @@ Review, refine, and approve visual design references is available as one integra
 
 ## Scope
 
-- Implement or specify exactly: Review, refine, and approve visual design references.
-- Add or update its public/schema contract, focused tests, safe diagnostics, audit/observability behavior, and required documentation.
-- Preserve project isolation, offline-capable operation, and the feature → test → staging → main promotion contract.
+- Review and refine workflow editor information architecture, desktop/responsive layouts, components, interaction states, keyboard/focus behavior, reduced motion, and accessibility annotations.
+- Preserve source and rendered assets for every approved reference and viewport.
+- Record product-owner approval or specific rejected/open items; do not implement the UI.
 
 ## Non-goals and prohibited side effects
 
@@ -56,7 +61,7 @@ Review, refine, and approve visual design references is available as one integra
 
 ## Allowed changes
 
-Resolve exact paths during readiness review from the observed repository. Changes are limited to the owning backend module, its public contract, required API/worker/web adapter, language-neutral contracts, focused tests, fixtures, and directly affected documentation. Cross-module table access and private imports are forbidden.
+No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
 
 ## Stop conditions
 
@@ -92,29 +97,34 @@ This UI workorder additionally requires an approved design reference, named view
 
 ## Acceptance criteria
 
-1. Maintainable sources and rendered references cover required desktop and responsive viewports.
-2. Loading, empty, success, error, conflict, permission, disabled, keyboard, focus, and reduced-motion states are specified.
-3. Accessibility and interaction checks are mapped to independent manual UI/UX tests.
-4. The product owner approves the exact design revision; the agent does not self-approve it.
+1. Workflow editor references cover normal, loading, empty, success, validation error, save error, conflict, permission, disabled, and recovery states.
+2. Desktop and responsive behavior, keyboard order, focus restoration, labels, contrast intent, zoom, and reduced motion are explicitly specified.
+3. Manual UI/UX cases map every required state and approved viewport to an observable result.
+4. The product owner approves the exact source/rendered revision; agent self-approval is invalid.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The approved source and rendered workflow-editor references cover every named state and viewport with traceable accessibility annotations.
+- **Negative oracle:** A missing error/conflict/permission state, inaccessible interaction, source/render mismatch, or absent product-owner approval blocks UI implementation READY.
+- **Boundary oracle:** The narrowest and widest approved viewports, 200% text zoom, keyboard-only use, reduced motion, and longest supported labels remain operable.
+- **Evidence binding:** every executed result identifies specification revision 0.5, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-008, REQ-009, REQ-018, process PRC-03, and cited architecture/security/design contracts.
-- Example: the named result succeeds for an authorised actor using valid project-owned, versioned input.
-- Counterexample: equivalent foreign-project, stale, malformed, revoked, duplicated, or policy-forbidden input does not succeed and leaks no protected data.
+- Positive expectation: The approved source and rendered workflow-editor references cover every named state and viewport with traceable accessibility annotations.
+- Counterexample: A missing error/conflict/permission state, inaccessible interaction, source/render mismatch, or absent product-owner approval blocks UI implementation READY.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
 
 ## Required tests
 
-- TST-WO-CAP-05-03 unit/component tests for rules, boundaries, state, and error taxonomy
-- Contract tests for every changed public/schema boundary and unknown-version behavior
-- Architecture tests for the applicable ARCH rules, including retained forbidden fixtures
-- Security tests for applicable SEC rules and actual identities/configuration
-- Regression tests selected by documented change-impact analysis; the final capability gate runs the full scope matrix
+- TST-WO-CAP-05-03: design-reference inventory, source/render parity, link, and required-state validation.
+- Independent accessibility/design review against DSN references and WCAG 2.2 AA requirements.
+- Manual UI/UX definitions are prepared under WO-CAP-05-08; no implementation test is invented here.
 
 ## BDD and manual tests
 
-BDD and manual case IDs are assigned by the capability test-definition workorder before implementation READY. Manual process/UI cases are independent from BDD, start at sign-in, use verified synthetic users/data, and contain atomic role-prefixed steps. This workorder cannot be DONE if its own assigned test execution remains outstanding.
+No automated BDD execution is owned. MT-CAP-05-03 is the planned design-review case; WO-CAP-05-08 must publish its atomic steps before dependent UI work becomes READY.
 
 ## Softwaretest.it and CI reporting
 
@@ -126,7 +136,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder supplies candidate-bound evidence to the final capability acceptance workorder; it does not itself approve deployment or production.
+No application candidate is deployed. Approval evidence binds the exact design-source and rendered-reference hashes consumed later by UI workorders.
 
 ## Documentation and evidence
 
@@ -137,11 +147,10 @@ This workorder supplies candidate-bound evidence to the final capability accepta
 
 ## Definition of Done
 
-- Acceptance criteria and this workorder’s assigned tests pass
-- Applicable ARCH/SEC rules are evidenced with no unapproved blocking finding
-- Documentation and contracts are current; evidence is candidate-bound and reported
-- EXTENDED independent implementation review is accepted
-- Remaining capability-level tests are still explicitly owned by the final acceptance workorder
+- Maintainable sources and rendered references cover required states and viewports
+- Accessibility and manual UI/UX mappings are independently reviewed
+- Product-owner approval binds the exact revision
+- No UI implementation or capability acceptance is claimed
 
 ## Workorder completion versus capability acceptance
 
@@ -153,5 +162,8 @@ Record available intake, READY, start, wait/resume, review, acceptance, reopen, 
 
 ## Dependencies and follow-up
 
-Upstream: CAP-01 through CAP-04 and GATE-DES-01. Downstream: the next numbered CAP-05 workorder and ultimately the final staging-acceptance workorder. No downstream item may infer completion from this file alone.
-
+- Upstream capabilities/gates: CAP-01 through CAP-04 and GATE-DES-01
+- Required workorders: WO-CAP-05-01
+- Downstream acceptance owner: WO-CAP-05-09
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

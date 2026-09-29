@@ -52,18 +52,45 @@ WORKORDER_REQUIRED_SECTIONS = {
     "## Status and traceability",
     "## Risk profile and escalation",
     "## Baselines and contract delta",
+    "## Context and current behavior",
     "## Target result",
     "## Prerequisites",
     "## Scope",
     "## Non-goals and prohibited side effects",
+    "## Allowed changes",
     "## Stop conditions",
+    "## Technical guardrails",
     "## ARCH rules and pattern limits",
     "## SEC rules and safe test conditions",
     "## Acceptance criteria",
+    "## Acceptance examples and test oracles",
+    "## Expectation sources and independent review",
     "## Required tests",
+    "## BDD and manual tests",
     "## Softwaretest.it and CI reporting",
+    "## CI retry and evidence reuse",
     "## Deployment and staging evidence",
+    "## Documentation and evidence",
     "## Definition of Done",
+    "## Workorder completion versus capability acceptance",
+    "## Events, rework, and cost",
+    "## Dependencies and follow-up",
+}
+WORKORDER_DELIVERY_CLASSES = {
+    "architecture-decision",
+    "capability-acceptance",
+    "contract-definition",
+    "design-decision",
+    "implementation",
+    "legal-governance",
+    "operational-governance",
+    "repository-governance",
+    "test-definition-and-publication",
+}
+WORKORDER_FORBIDDEN_BOILERPLATE = {
+    "Implement or specify exactly:",
+    "The named result is exposed only through the declared application/public contract",
+    "unit/component tests for rules, boundaries, state, and error taxonomy",
 }
 TEST_CONCEPT_REQUIRED_SECTIONS = {
     "## 1. Control summary",
@@ -116,12 +143,12 @@ def validate_workflows(root: Path) -> list[str]:
     return errors
 
 
-def validate_version_values(version: str, backend_version: str, web_version: str) -> list[str]:
+def validate_version_values(
+    version: str, backend_version: str, web_version: str
+) -> list[str]:
     errors: list[str] = []
     if not RELEASE_VERSION_PATTERN.fullmatch(version):
-        errors.append(
-            "VERSION must contain supported SemVer without build metadata"
-        )
+        errors.append("VERSION must contain supported SemVer without build metadata")
     if backend_version != version:
         errors.append("backend/pyproject.toml version must match VERSION")
     if web_version != version:
@@ -138,7 +165,9 @@ def validate_version_policy(root: Path) -> list[str]:
     if backend_match is None:
         errors.append("backend/pyproject.toml must declare a project version")
 
-    web_package = json.loads((root / "apps/web/package.json").read_text(encoding="utf-8"))
+    web_package = json.loads(
+        (root / "apps/web/package.json").read_text(encoding="utf-8")
+    )
     errors.extend(
         validate_version_values(
             version,
@@ -166,6 +195,37 @@ def validate_test_concept(root: Path) -> list[str]:
 
 def _missing_sections(text: str, required: set[str]) -> list[str]:
     return sorted(section for section in required if section not in text)
+
+
+def _workorder_delivery_class(text: str) -> str | None:
+    match = re.search(r"^- Delivery class: ([a-z-]+)$", text, re.MULTILINE)
+    return match.group(1) if match else None
+
+
+def validate_workorder_contract(
+    path: Path, workorder_id: str, text: str
+) -> tuple[list[str], str | None]:
+    errors: list[str] = []
+    if "Version: 0.5-draft" not in text:
+        errors.append(f"{path}: workorder contract must use Version: 0.5-draft")
+
+    delivery_class = _workorder_delivery_class(text)
+    if delivery_class not in WORKORDER_DELIVERY_CLASSES:
+        errors.append(f"{path}: missing or unsupported delivery class")
+    if f"- Owned verification group: TST-{workorder_id}" not in text:
+        errors.append(f"{path}: owned verification group must be TST-{workorder_id}")
+    if "- Specification revision: 0.5-draft" not in text:
+        errors.append(f"{path}: missing 0.5 specification revision binding")
+    if "- **Positive oracle:**" not in text or "- **Negative oracle:**" not in text:
+        errors.append(f"{path}: positive and negative test oracles are mandatory")
+    if "- Positive expectation:" not in text or "- Counterexample:" not in text:
+        errors.append(f"{path}: independent expectation inputs are mandatory")
+    if "- Required workorders:" not in text:
+        errors.append(f"{path}: explicit workorder dependencies are mandatory")
+    for phrase in sorted(WORKORDER_FORBIDDEN_BOILERPLATE):
+        if phrase in text:
+            errors.append(f"{path}: forbidden generic boilerplate remains: {phrase}")
+    return errors, delivery_class
 
 
 def validate_planning_catalogues(root: Path) -> list[str]:
@@ -210,6 +270,7 @@ def validate_planning_catalogues(root: Path) -> list[str]:
             errors.append(
                 f"{directory}: expected {expected_names!r}, observed {observed_names!r}"
             )
+        delivery_classes: list[str] = []
         for name in expected_names:
             workorder_path = directory / name
             if not workorder_path.is_file():
@@ -225,10 +286,25 @@ def validate_planning_catalogues(root: Path) -> list[str]:
                 errors.append(
                     f"{workorder_path}: missing sections: {', '.join(missing)}"
                 )
+            workorder_errors, delivery_class = validate_workorder_contract(
+                workorder_path, workorder_id, workorder_text
+            )
+            errors.extend(workorder_errors)
+            if delivery_class is not None:
+                delivery_classes.append(delivery_class)
             if f"{capability_id}/{name}" not in workorder_index:
                 errors.append(f"{workorder_path}: missing from workorder index")
             if f"../workorders/{capability_id}/{name}" not in text:
                 errors.append(f"{workorder_path}: missing from {path}")
+
+        if delivery_classes.count("test-definition-and-publication") != 1:
+            errors.append(
+                f"{directory}: capability must own exactly one test-definition-and-publication workorder"
+            )
+        if delivery_classes.count("capability-acceptance") != 1:
+            errors.append(
+                f"{directory}: capability must own exactly one capability-acceptance workorder"
+            )
 
     return errors
 
