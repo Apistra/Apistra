@@ -73,7 +73,7 @@ jobs:
           corepack prepare pnpm@${PNPM_VERSION} --activate
           pnpm install --frozen-lockfile
       - name: CI-TS-03 Python architecture and negative fixture
-        run: uv run --project backend pytest backend/tests/architecture
+        run: uv run --project backend pytest --no-cov backend/tests/architecture
       - name: CI-TS-03 Import Linter contracts
         env:
           PYTHONPATH: backend/src
