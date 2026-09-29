@@ -192,8 +192,8 @@ Every executed test or gate must bind:
 - ADR-019 repository layout is approved and implemented; the remaining pattern ADRs still require qualified architecture review
 - Public Softwaretest.it OpenAPI contract is verified; authorised project/cycle binding and write/read round-trip are pending
 - Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
-- Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; independent implementation review and accepted hosted-run evidence remain pending
-- Local development images passed staging health and controlled recovery, but a clean committed immutable candidate must refresh the evidence
+- Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; GitHub Actions run 36618729112 accepted the committed candidate, while independent implementation review remains pending
+- GitHub Actions run 36618729112 built the clean committed immutable candidate and passed staging health, controlled failure, and unchanged-image recovery
 - The manual case is defined but has not received an independent human ACCEPTED decision
 - Branch protection is specified but the live `test`, `staging`, and protected-branch settings are not configured
 - The official AGPLv3 text is present; commercial terms, rights-holder details, and legal review remain pending before commercial release

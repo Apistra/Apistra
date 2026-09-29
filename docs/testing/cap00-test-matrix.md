@@ -1,6 +1,6 @@
 # CAP-00 test matrix
 
-Status: IMPLEMENTED locally; hosted and external acceptance pending
+Status: IMPLEMENTED AND HOSTED VERIFIED; external acceptance pending
 
 - CI-TS-01: repository governance contract plus retained passing and failing fixtures.
 - CI-TS-02: Ruff lint/format, TypeScript strict typecheck, and Next.js production build.
@@ -21,4 +21,4 @@ Status: IMPLEMENTED locally; hosted and external acceptance pending
 
 Stable definitions: `tests/bdd/features/cap00-bootstrap.feature` and `tests/manual/CAP00-MAN-001.md`.
 
-Local evidence observed on 2026-09-29: 34 Python tests passed at 96% coverage; two web tests passed at 100% line/function coverage; the web production build, architecture suites, public Softwaretest.it preflight, secret proof fixture, pip-audit, pnpm audit, three image builds, isolated service health, matching web/API markers, absent business route, and recovery to a healthy worker succeeded. A clean committed candidate and hosted CI run must refresh this evidence.
+Evidence observed on 2026-09-29: 34 Python tests passed at 96% coverage; two web tests passed at 100% line/function coverage; the web production build, architecture suites, public Softwaretest.it preflight, secret proof fixture, pip-audit, pnpm audit, three image builds, isolated service health, matching web/API markers, absent business route, and recovery to a healthy worker succeeded locally. GitHub Actions run 36618729112 then repeated the five required jobs against committed revision `4f0e67725643afb879baf8033310c4deeff24247` and passed, including candidate packaging, isolated staging, controlled failure, and recovery. Independent review, the authenticated Softwaretest.it round-trip, and human acceptance remain external gates.

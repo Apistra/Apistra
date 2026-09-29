@@ -48,7 +48,7 @@ Tests: CI-TS-01, CI-TS-02, CI-TS-10.
 
 ### WO-CAP-00-02 — Create the monorepo walking skeleton
 
-Status: IMPLEMENTED — clean committed candidate, hosted CI evidence, and independent review remain acceptance evidence
+Status: IMPLEMENTED AND HOSTED VERIFIED — independent review remains acceptance evidence
 
 Result:
 
@@ -71,13 +71,13 @@ Acceptance:
 - architecture tests prove ARCH-001, ARCH-010, ARCH-011, and ARCH-013;
 - forbidden dependency fixture fails.
 
-Implementation note: ADR-019 resolves the repository-layout decision. Web, API, and worker health processes, the complete local test matrix, and packaging path are implemented. This workorder is not DONE until the clean committed candidate, hosted CI run, and independent review are accepted.
+Implementation note: ADR-019 resolves the repository-layout decision. Web, API, and worker health processes, the complete local test matrix, and packaging path are implemented. GitHub Actions run 36618729112 verified the committed walking skeleton. This workorder is not DONE until the independent review is accepted.
 
 Tests: CI-TS-02 through CI-TS-07, CI-TS-15.
 
 ### WO-CAP-00-03 — Package immutable container candidates
 
-Status: IMPLEMENTED — clean committed candidate evidence pending
+Status: IMPLEMENTED AND HOSTED VERIFIED — GitHub Actions run 36618729112 built the committed candidate, archives, manifest, checksums, and SPDX SBOM
 
 Result:
 
@@ -94,7 +94,7 @@ Tests: CI-TS-10, CI-TS-15.
 
 ### WO-CAP-00-04 — Establish isolated local staging and recovery
 
-Status: IMPLEMENTED AND LOCALLY VERIFIED — unchanged committed candidate acceptance pending
+Status: IMPLEMENTED AND HOSTED VERIFIED — GitHub Actions run 36618729112 verified isolated staging, failure detection, and recovery with unchanged image IDs
 
 Result:
 
@@ -149,7 +149,7 @@ Tests: CI-TS-07, CI-TS-09, fixture self-tests.
 
 ### WO-CAP-00-07 — Complete bootstrap candidate gate
 
-Status: BLOCKED — branch protection, clean hosted candidate evidence, authorised Softwaretest.it round-trip, independent review, and human acceptance remain
+Status: BLOCKED — branch protection, authorised Softwaretest.it round-trip, independent review, and human acceptance remain
 
 Result:
 
