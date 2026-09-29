@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-02" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-02" name="Connect and index knowledge" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-02">
+      <bpmn:lane id="Lane_PRC-02_1" name="Administrator or scheduler">
+        <bpmn:flowNodeRef>PRC-02_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_done</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-02_2" name="Connector and pipeline">
+        <bpmn:flowNodeRef>PRC-02_enumerate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_extract</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_embed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_removed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_retry</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-02_3" name="PostgreSQL and Qdrant">
+        <bpmn:flowNodeRef>PRC-02_index</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_delete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-02_reconcile</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-02_01" sourceRef="PRC-02_start" targetRef="PRC-02_enumerate" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_02" sourceRef="PRC-02_enumerate" targetRef="PRC-02_extract" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_03" sourceRef="PRC-02_extract" targetRef="PRC-02_embed" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_04" sourceRef="PRC-02_embed" targetRef="PRC-02_removed" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_05" sourceRef="PRC-02_removed" targetRef="PRC-02_index" name="no" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_06" sourceRef="PRC-02_removed" targetRef="PRC-02_delete" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_07" sourceRef="PRC-02_index" targetRef="PRC-02_reconcile" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_08" sourceRef="PRC-02_delete" targetRef="PRC-02_reconcile" />
+    <bpmn:sequenceFlow id="Flow_PRC-02_09" sourceRef="PRC-02_reconcile" targetRef="PRC-02_done" />
+    <bpmn:startEvent id="PRC-02_start" name="Start sync">
+      <bpmn:outgoing>Flow_PRC-02_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-02_enumerate" name="Enumerate changes">
+      <bpmn:incoming>Flow_PRC-02_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-02_extract" name="Extract and normalise">
+      <bpmn:incoming>Flow_PRC-02_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_03</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-02_embed" name="Chunk and embed">
+      <bpmn:incoming>Flow_PRC-02_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_04</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-02_removed" name="Removed content?">
+      <bpmn:incoming>Flow_PRC-02_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_05</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-02_06</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-02_index" name="Upsert vectors and provenance">
+      <bpmn:incoming>Flow_PRC-02_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_07</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-02_delete" name="Deactivate derived data">
+      <bpmn:incoming>Flow_PRC-02_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_08</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-02_reconcile" name="Reconcile source version">
+      <bpmn:incoming>Flow_PRC-02_07</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-02_08</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-02_09</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="PRC-02_done" name="Sync complete">
+      <bpmn:incoming>Flow_PRC-02_09</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-02_retry" name="Retryable failure retained" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-02">
+    <bpmndi:BPMNPlane id="Plane_PRC-02" bpmnElement="PRC-02">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-02_1" bpmnElement="Lane_PRC-02_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-02_2" bpmnElement="Lane_PRC-02_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-02_3" bpmnElement="Lane_PRC-02_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_start" bpmnElement="PRC-02_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_enumerate" bpmnElement="PRC-02_enumerate">
+        <dc:Bounds x="212.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_extract" bpmnElement="PRC-02_extract">
+        <dc:Bounds x="362.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_embed" bpmnElement="PRC-02_embed">
+        <dc:Bounds x="512.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_removed" bpmnElement="PRC-02_removed">
+        <dc:Bounds x="690.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_index" bpmnElement="PRC-02_index">
+        <dc:Bounds x="812.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_delete" bpmnElement="PRC-02_delete">
+        <dc:Bounds x="962.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_reconcile" bpmnElement="PRC-02_reconcile">
+        <dc:Bounds x="1112.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_done" bpmnElement="PRC-02_done">
+        <dc:Bounds x="1290.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-02_retry" bpmnElement="PRC-02_retry">
+        <dc:Bounds x="1440.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_01" bpmnElement="Flow_PRC-02_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_02" bpmnElement="Flow_PRC-02_02">
+        <di:waypoint x="315" y="320.0" />
+        <di:waypoint x="375" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_03" bpmnElement="Flow_PRC-02_03">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="525" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_04" bpmnElement="Flow_PRC-02_04">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="675" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_05" bpmnElement="Flow_PRC-02_05">
+        <di:waypoint x="765" y="320.0" />
+        <di:waypoint x="825" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_06" bpmnElement="Flow_PRC-02_06">
+        <di:waypoint x="765" y="320.0" />
+        <di:waypoint x="975" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_07" bpmnElement="Flow_PRC-02_07">
+        <di:waypoint x="915" y="470.0" />
+        <di:waypoint x="1125" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_08" bpmnElement="Flow_PRC-02_08">
+        <di:waypoint x="1065" y="470.0" />
+        <di:waypoint x="1125" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-02_09" bpmnElement="Flow_PRC-02_09">
+        <di:waypoint x="1215" y="470.0" />
+        <di:waypoint x="1275" y="170.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

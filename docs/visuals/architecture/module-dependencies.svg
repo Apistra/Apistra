@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="700" viewBox="0 0 1340 700" role="img" aria-labelledby="title desc">
+<title id="title">module-dependencies</title>
+<desc id="desc">Apistra architecture planning diagram. No implementation evidence.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1340" height="700" fill="#071414"/>
+<text x="45" y="42" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">ARC-MOD-01 · Planned modules and allowed dependency direction</text>
+<rect x="110" y="100" width="1120" height="100" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="110" y="100" width="5" height="100" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="128" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">apps/web · services/api · services/worker</text>
+<text x="128" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Composition roots and transport</text>
+<rect x="170" y="235" width="1000" height="100" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="170" y="235" width="5" height="100" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="188" y="263" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">packages/adapters · engineering/softwaretest</text>
+<text x="188" y="286" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Persistence, providers and engineering adapters</text>
+<rect x="230" y="370" width="880" height="100" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="230" y="370" width="5" height="100" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="248" y="398" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">packages/application · packages/contracts · connector-sdk</text>
+<text x="248" y="421" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Use cases, ports and public contracts</text>
+<rect x="290" y="505" width="760" height="100" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="290" y="505" width="5" height="100" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="308" y="533" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">packages/domain</text>
+<text x="308" y="556" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Provider-neutral rules, values and state models</text>
+<line x1="430" y1="235" x2="430" y2="200" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="430" y1="370" x2="430" y2="335" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="430" y1="505" x2="430" y2="470" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="670" y1="235" x2="670" y2="200" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="670" y1="370" x2="670" y2="335" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="670" y1="505" x2="670" y2="470" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="910" y1="235" x2="910" y2="200" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="910" y1="370" x2="910" y2="335" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="910" y1="505" x2="910" y2="470" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="670" y="650" fill="#ed7070" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Forbidden: domain → framework/provider · module → another module&#x27;s tables · runtime → Softwaretest.it</text>
+</svg>

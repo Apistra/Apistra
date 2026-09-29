@@ -1,6 +1,6 @@
 # Apistra Architecture
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT
 Architecture profile: EXTENDED
 
@@ -81,6 +81,14 @@ Trust boundaries:
 
 Softwaretest.it is never required for normal product runtime.
 
+### 3.1 Context and trust-boundary diagram
+
+Maintainable source and rendered reference:
+
+![Apistra system context and trust boundaries](../visuals/architecture/system-context.svg)
+
+The diagram source is generated from docs/visuals/generate_visuals.py. It is a target architecture view, not implementation evidence.
+
 ## 4. Solution strategy
 
 System style:
@@ -143,6 +151,18 @@ Domain and application modules define behaviour and ports. Framework, database, 
 
 No module may read another module's tables directly. Cross-module access uses an application contract, a documented query interface, or a versioned event.
 
+### 5.4 Container and module diagrams
+
+![Apistra runtime containers](../visuals/architecture/containers.svg)
+
+![Apistra module dependency direction](../visuals/architecture/module-dependencies.svg)
+
+### 5.5 Core domain model
+
+![Apistra core domain model](../visuals/architecture/domain-model.svg)
+
+The domain model deliberately shows only architecturally significant aggregates and versioned entities. It is not a generated inventory of implementation classes.
+
 ## 6. Runtime view
 
 ### 6.1 Publish workflow
@@ -189,6 +209,14 @@ No module may read another module's tables directly. Cross-module access uses an
 
 After interruption, the durable engine resumes from a committed checkpoint. Completed non-repeatable side effects are protected by idempotency records or explicit compensation. All attempts remain visible.
 
+### 6.6 Runtime sequence diagrams
+
+![Start and execute a durable run](../visuals/architecture/sequence-run.svg)
+
+![Human approval and controlled write](../visuals/architecture/sequence-approval.svg)
+
+![Knowledge synchronisation and deletion](../visuals/architecture/sequence-knowledge-sync.svg)
+
 ## 7. Deployment view
 
 Local development:
@@ -226,6 +254,10 @@ Runtime nodes:
 - PostgreSQL
 - Qdrant
 - Optional local model and connector targets
+
+### 7.1 Deployment diagram
+
+![Delivery and isolated local staging](../visuals/architecture/deployment.svg)
 
 ## 8. Cross-cutting concepts
 
@@ -272,15 +304,32 @@ Internationalisation:
 
 ## 9. Architecture decisions
 
-Confirmed ADRs:
+The proposed decision and pattern catalogue is maintained in
+[Architecture Decisions and Pattern Catalogue](11-architecture-decisions-and-patterns.md).
+It becomes binding only after the stated architecture review and planning approval.
 
-- Greenfield implementation
-- Provider-neutral ports at external boundaries
-- PostgreSQL platform state
-- Qdrant behind a replaceable vector-store port
-- Separate web, API, and worker processes
-- Docker Compose first
-- No automatic deployment
+Proposed concrete patterns:
+
+- modular monolith for backend domain ownership, deployed as separate API and worker processes;
+- Ports and Adapters only at provider, persistence, durable-engine, identity, licence, tool, connector, and engineering boundaries;
+- explicit application use cases for every externally triggered operation;
+- aggregate repositories plus Unit of Work, with no generic repository per table;
+- persisted state machines for run, attempt, human task, synchronisation, callback, and publication lifecycles;
+- durable Saga or Process Manager for workflow runs;
+- Transactional Outbox and Idempotent Consumer at atomicity and redelivery boundaries;
+- Strategy plus Adapter and provider Anti-Corruption Layer for external variants;
+- versioned Policy Objects for approval, egress, citation, limits, retention, and evaluation;
+- Handler Registry and Factory for approved versioned node types;
+- schema-first contracts, optimistic concurrency, and explicit composition roots.
+
+Explicit non-decisions:
+
+- no microservice split for 0.x;
+- no generic repository for every table;
+- no global CQRS infrastructure;
+- no Event Sourcing as platform persistence;
+- no distributed two-phase commit;
+- no service locator or arbitrary runtime plugin loading.
 
 Pending ADRs:
 

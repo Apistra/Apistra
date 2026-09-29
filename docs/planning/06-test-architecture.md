@@ -1,6 +1,6 @@
 # System-Centred Test Architecture
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT
 
 ## 1. Test purpose and scope
@@ -52,58 +52,51 @@ Component tests cover:
 
 Class-level models are created with implementation and are restricted to architecturally significant classes such as WorkflowDefinition, PublishedWorkflow, AgentVersion, KnowledgeSource, Run, NodeAttempt, HumanTask, PolicyVersion, LimitSet, ConnectorCursor, ProvenanceRecord, and LicenceGrant.
 
+Static architecture references:
+
+- [System context](../visuals/architecture/system-context.svg)
+- [Runtime containers](../visuals/architecture/containers.svg)
+- [Module dependency direction](../visuals/architecture/module-dependencies.svg)
+- [Core domain model](../visuals/architecture/domain-model.svg)
+
 ## 4. Critical process models
 
-### PRC-03 — Author and publish
+The canonical models are versioned BPMN 2.0 files. The SVG and PNG files are generated review views from the same process definitions.
 
-P03-S01 Start draft
-P03-S02 Edit graph or canonical text
-P03-S03 Validate schema and references
-P03-G01 Valid?
-P03-S04 Execute draft test
-P03-G02 Test acceptable?
-P03-S05 Publish immutable version
-P03-E01 Published
-P03-E02 Validation or test rejected
+### PRC-01 — Configure installation and project
 
-### PRC-04 — Execute Process API
+- [BPMN 2.0 source](../visuals/processes/prc-01.bpmn)
+- [Readable process view](../visuals/processes/prc-01.svg)
 
-P04-S01 Authenticate project API key
-P04-S02 Validate workflow version, input, idempotency, and limits
-P04-G01 Existing idempotent run?
-P04-S03 Create durable run
-P04-S04 Execute nodes and checkpoints
-P04-G02 Human task required?
-P04-S05 Wait and resume
-P04-G03 Completed, failed, or cancelled?
-P04-S06 Validate result
-P04-S07 Deliver optional callback
-P04-E01 Result available
-P04-E02 Failed or cancelled with safe evidence
+### PRC-02 — Connect and index knowledge
 
-### PRC-05 — Human approval
+- [BPMN 2.0 source](../visuals/processes/prc-02.bpmn)
+- [Readable process view](../visuals/processes/prc-02.svg)
 
-P05-S01 Create pending task
-P05-S02 Present input, planned action, scope, and context
-P05-G01 Approve, reject, or timeout?
-P05-S03 Record approval and resume
-P05-S04 Record rejection reason and terminate configured path
-P05-S05 Apply non-executing timeout path
-P05-E01 Resumed
-P05-E02 Rejected
-P05-E03 Timed out without action
+### PRC-03 — Author and publish a workflow
 
-### PRC-02 — Knowledge synchronisation
+- [BPMN 2.0 source](../visuals/processes/prc-03.bpmn)
+- [Readable process view](../visuals/processes/prc-03.svg)
 
-P02-S01 Start manual or scheduled sync
-P02-S02 Enumerate changes
-P02-S03 Extract and normalise
-P02-S04 Chunk and embed
-P02-S05 Upsert index and provenance
-P02-G01 Removed content?
-P02-S06 Delete or deactivate derived records
-P02-E01 Consistent source version
-P02-E02 Retryable failure with cursor retained
+### PRC-04 — Execute a published process through the API
+
+- [BPMN 2.0 source](../visuals/processes/prc-04.bpmn)
+- [Readable process view](../visuals/processes/prc-04.svg)
+
+### PRC-05 — Complete a human approval
+
+- [BPMN 2.0 source](../visuals/processes/prc-05.bpmn)
+- [Readable process view](../visuals/processes/prc-05.svg)
+
+### PRC-06 — Evaluate workflow quality
+
+- [BPMN 2.0 source](../visuals/processes/prc-06.bpmn)
+- [Readable process view](../visuals/processes/prc-06.svg)
+
+### PRC-07 — Operate and recover Apistra
+
+- [BPMN 2.0 source](../visuals/processes/prc-07.bpmn)
+- [Readable process view](../visuals/processes/prc-07.svg)
 
 Every process receives a complete manual process test package even when automated E2E coverage exists.
 

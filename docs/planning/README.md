@@ -1,6 +1,6 @@
 # Apistra BuildBySpec Planning Baseline
 
-Version: 0.1-draft
+Version: 0.2-draft
 Date: 2026-09-29
 Language: English
 Assurance profile: EXTENDED
@@ -15,14 +15,15 @@ No document in this baseline is implementation evidence. No capability is implem
 - 00-control-overview.md — human control view, current status, blockers, and next responsible step
 - 01-product-scope.md — product intent, users, scope, non-goals, and product rules
 - 02-decision-register.md — confirmed and deferred decisions
-- 03-architecture.md — complete arc42 architecture and binding ARCH rules
+- 03-architecture.md — arc42 architecture, binding ARCH rules, and architecture diagrams
 - 04-security-concept.md — system-wide security concept and SEC rules
 - 05-delivery-ci-contract.md — branch, build, evidence, staging, recovery, and promotion contract
-- 06-test-architecture.md — system-centred test model and Softwaretest.it contract
-- 07-design-contract.md — brand, interaction, accessibility, and visual design contract
+- 06-test-architecture.md — system-centred test model, BPMN process references, and Softwaretest.it contract
+- 07-design-contract.md — brand, interaction, accessibility, and rendered visual design references
 - 08-capabilities-and-roadmap.md — gate-based release slices and capability outcomes
-- 09-workorders.md — implementation-ready workorder catalogue and execution order
+- 09-workorders.md — gate-controlled workorder catalogue and execution order
 - 10-traceability-and-gates.md — requirement-to-evidence mappings and release gates
+- 11-architecture-decisions-and-patterns.md — concrete ADRs, pattern scope, prohibitions, and verification
 
 ## Governing rules
 

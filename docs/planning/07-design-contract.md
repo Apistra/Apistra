@@ -1,6 +1,6 @@
 # Apistra UX and UI Design Contract
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: IN_REVIEW
 
 ## 1. Scope and responsibility
@@ -97,6 +97,12 @@ Initial page inventory:
 - DSN-020 Audit log
 - DSN-021 Licence status
 
+### 4.1 Information-architecture reference
+
+Maintainable SVG source and generated PNG preview:
+
+![Apistra application information architecture](../visuals/design/information-architecture.png)
+
 ## 5. Workflow editor contract
 
 Large viewport:
@@ -118,6 +124,26 @@ Canonical editor:
 - Shows the same model as the visual canvas.
 - Validation errors identify schema path and corresponding visual node.
 - Switching representation cannot silently discard information.
+
+### 5.1 DSN-010 workflow-editor reference
+
+![Apistra workflow editor desktop reference](../visuals/design/workflow-editor-desktop.png)
+
+This view defines information hierarchy and interaction placement. It does not assert implemented behaviour or final pixel identity.
+
+### 5.2 DSN-016 run-trace reference
+
+![Apistra run trace desktop reference](../visuals/design/run-trace-desktop.png)
+
+### 5.3 DSN-018 human-approval references
+
+Desktop:
+
+![Apistra human approval desktop reference](../visuals/design/human-approval-desktop.png)
+
+Mobile full-page view:
+
+![Apistra human approval mobile reference](../visuals/design/human-approval-mobile.png)
 
 ## 6. Design tokens
 
@@ -151,6 +177,10 @@ Required scales:
 - motion duration and easing
 
 No product state may be communicated by cyan, purple, green, amber, or red alone.
+
+### 6.1 Design-system reference
+
+![Apistra dark technical design-system reference](../visuals/design/design-system.png)
 
 ## 7. Component contracts
 
@@ -261,16 +291,23 @@ The editor additionally defines:
 
 The dark direction is selected, but the design gate is not yet passed.
 
-Before the first UI workorder is READY, produce:
+Now present:
 
-- maintainable repo-native visual source;
-- rendered large and small viewport references for the same representative content;
-- workflow editor, run trace, and human approval reference views;
-- token specification;
-- critical component states;
-- light-surface or print treatment where needed;
-- accessibility review;
-- product-owner approval.
+- maintainable repo-native generator and SVG sources;
+- generated PNG review previews;
+- workflow-editor, run-trace, and human-approval references;
+- desktop and mobile approval views;
+- information architecture;
+- initial token roles and component-state reference.
+
+Still required before the first UI workorder is READY:
+
+- product-owner review and explicit selection of reference version 0.2;
+- logo rights, vector master, reversed wordmark, monochrome and icon variants;
+- measured contrast, keyboard, focus, reflow, reduced-motion, and screen-reader evidence;
+- detailed references for validation, error, conflict, permission, disabled, loading, empty, and offline states;
+- final light-surface or print treatment where applicable;
+- manual UI and UX test definitions published through the verified Softwaretest.it API.
 
 The research screenshot is inspiration, not implementation evidence.
 
@@ -279,8 +316,8 @@ The research screenshot is inspiration, not implementation evidence.
 - Brand direction: DECIDED
 - Existing logo input: DECIDED
 - Logo rights and production variants: BLOCKING for public brand release
-- Information architecture: DRAFT
-- Tokens and component details: DRAFT
-- Rendered reference sources: BLOCKING
+- Information architecture: IN_REVIEW
+- Tokens and component details: IN_REVIEW
+- Rendered reference sources: PRESENT, approval pending
 - Accessibility test oracles: DRAFT
 - Human design approval: PENDING

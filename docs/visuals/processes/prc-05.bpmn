@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-05" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-05" name="Complete a human approval" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-05">
+      <bpmn:lane id="Lane_PRC-05_1" name="Durable runtime">
+        <bpmn:flowNodeRef>PRC-05_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_timedout</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-05_2" name="Human task service">
+        <bpmn:flowNodeRef>PRC-05_create</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_approve</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_reject</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_timeout</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-05_3" name="Administrator">
+        <bpmn:flowNodeRef>PRC-05_present</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-05_decision</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-05_01" sourceRef="PRC-05_start" targetRef="PRC-05_create" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_02" sourceRef="PRC-05_create" targetRef="PRC-05_present" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_03" sourceRef="PRC-05_present" targetRef="PRC-05_decision" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_04" sourceRef="PRC-05_decision" targetRef="PRC-05_approve" name="approve" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_05" sourceRef="PRC-05_decision" targetRef="PRC-05_reject" name="reject" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_06" sourceRef="PRC-05_decision" targetRef="PRC-05_timeout" name="timeout" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_07" sourceRef="PRC-05_approve" targetRef="PRC-05_approved" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_08" sourceRef="PRC-05_reject" targetRef="PRC-05_rejected" />
+    <bpmn:sequenceFlow id="Flow_PRC-05_09" sourceRef="PRC-05_timeout" targetRef="PRC-05_timedout" />
+    <bpmn:startEvent id="PRC-05_start" name="Write requires approval">
+      <bpmn:outgoing>Flow_PRC-05_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-05_create" name="Create pending task">
+      <bpmn:incoming>Flow_PRC-05_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-05_present" name="Present action, scope and context">
+      <bpmn:incoming>Flow_PRC-05_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_03</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-05_decision" name="Decision?">
+      <bpmn:incoming>Flow_PRC-05_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_04</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-05_05</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-05_06</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-05_approve" name="Record approval and resume">
+      <bpmn:incoming>Flow_PRC-05_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_07</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-05_reject" name="Record rejection reason">
+      <bpmn:incoming>Flow_PRC-05_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_08</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="PRC-05_timeout" name="Timeout without execution">
+      <bpmn:incoming>Flow_PRC-05_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-05_09</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_PRC-05_timeout">
+        <bpmn:timeDuration>PT0S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="PRC-05_approved" name="Run resumed">
+      <bpmn:incoming>Flow_PRC-05_07</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-05_rejected" name="Path rejected">
+      <bpmn:incoming>Flow_PRC-05_08</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-05_timedout" name="Timed out safely">
+      <bpmn:incoming>Flow_PRC-05_09</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-05">
+    <bpmndi:BPMNPlane id="Plane_PRC-05" bpmnElement="PRC-05">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-05_1" bpmnElement="Lane_PRC-05_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-05_2" bpmnElement="Lane_PRC-05_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-05_3" bpmnElement="Lane_PRC-05_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1690" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_start" bpmnElement="PRC-05_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_create" bpmnElement="PRC-05_create">
+        <dc:Bounds x="212.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_present" bpmnElement="PRC-05_present">
+        <dc:Bounds x="362.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_decision" bpmnElement="PRC-05_decision">
+        <dc:Bounds x="540.0" y="440.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_approve" bpmnElement="PRC-05_approve">
+        <dc:Bounds x="662.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_reject" bpmnElement="PRC-05_reject">
+        <dc:Bounds x="812.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_timeout" bpmnElement="PRC-05_timeout">
+        <dc:Bounds x="990.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_approved" bpmnElement="PRC-05_approved">
+        <dc:Bounds x="1140.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_rejected" bpmnElement="PRC-05_rejected">
+        <dc:Bounds x="1290.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-05_timedout" bpmnElement="PRC-05_timedout">
+        <dc:Bounds x="1440.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_01" bpmnElement="Flow_PRC-05_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_02" bpmnElement="Flow_PRC-05_02">
+        <di:waypoint x="315" y="320.0" />
+        <di:waypoint x="375" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_03" bpmnElement="Flow_PRC-05_03">
+        <di:waypoint x="465" y="470.0" />
+        <di:waypoint x="525" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_04" bpmnElement="Flow_PRC-05_04">
+        <di:waypoint x="615" y="470.0" />
+        <di:waypoint x="675" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_05" bpmnElement="Flow_PRC-05_05">
+        <di:waypoint x="615" y="470.0" />
+        <di:waypoint x="825" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_06" bpmnElement="Flow_PRC-05_06">
+        <di:waypoint x="615" y="470.0" />
+        <di:waypoint x="975" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_07" bpmnElement="Flow_PRC-05_07">
+        <di:waypoint x="765" y="320.0" />
+        <di:waypoint x="1125" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_08" bpmnElement="Flow_PRC-05_08">
+        <di:waypoint x="915" y="320.0" />
+        <di:waypoint x="1275" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-05_09" bpmnElement="Flow_PRC-05_09">
+        <di:waypoint x="1065" y="320.0" />
+        <di:waypoint x="1425" y="170.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

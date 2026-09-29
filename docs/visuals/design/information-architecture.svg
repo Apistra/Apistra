@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="830" viewBox="0 0 1380 830" role="img" aria-labelledby="title desc">
+<title id="title">Information Architecture</title>
+<desc id="desc">Apistra design reference. Planning artefact, not implemented UI.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1380" height="830" fill="#071414"/>
+<text x="40" y="42" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">DSN-IA-01 · Application information architecture</text>
+<rect x="510" y="78" width="360" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="510" y="78" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="528" y="106" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Application shell</text>
+<text x="528" y="129" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Installation status · project switcher ·</text>
+<text x="528" y="145" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">navigation · Administrator</text>
+<rect x="40" y="250" width="280" height="370" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="40" y="250" width="5" height="370" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="58" y="278" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Build</text>
+<text x="58" y="301" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Project-scoped</text>
+<rect x="62" y="331" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="82" y="359" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Workflows</text>
+<rect x="62" y="385" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="82" y="413" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Agents</text>
+<rect x="62" y="439" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="82" y="467" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Knowledge</text>
+<rect x="62" y="493" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="82" y="521" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Connectors</text>
+<rect x="62" y="547" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="82" y="575" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Tools</text>
+<line x1="690" y1="166" x2="180" y2="250" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="360" y="250" width="280" height="370" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="360" y="250" width="5" height="370" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="378" y="278" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Operate</text>
+<text x="378" y="301" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Project-scoped</text>
+<rect x="382" y="331" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="402" y="359" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Runs</text>
+<rect x="382" y="385" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="402" y="413" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Human Tasks</text>
+<rect x="382" y="439" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="402" y="467" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Audit</text>
+<line x1="690" y1="166" x2="500" y2="250" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="680" y="250" width="280" height="370" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="680" y="250" width="5" height="370" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="698" y="278" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Evaluate</text>
+<text x="698" y="301" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Project-scoped</text>
+<rect x="702" y="331" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="722" y="359" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Datasets</text>
+<rect x="702" y="385" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="722" y="413" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Evaluations</text>
+<rect x="702" y="439" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="722" y="467" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Comparisons</text>
+<line x1="690" y1="166" x2="820" y2="250" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1000" y="250" width="280" height="370" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="1000" y="250" width="5" height="370" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="1018" y="278" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Administer</text>
+<text x="1018" y="301" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Project-scoped</text>
+<rect x="1022" y="331" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="1042" y="359" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Endpoints</text>
+<rect x="1022" y="385" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="1042" y="413" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">API Access</text>
+<rect x="1022" y="439" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="1042" y="467" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Limits and policies</text>
+<rect x="1022" y="493" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="1042" y="521" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Licence</text>
+<rect x="1022" y="547" width="236" height="44" rx="7" fill="#142c2b" stroke="#294643" stroke-width="1"/>
+<text x="1042" y="575" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="start">Settings</text>
+<line x1="690" y1="166" x2="1140" y2="250" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="690" y="690" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="middle">Global context remains visible: installation · environment · project · role · version</text>
+<text x="690" y="728" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Mobile priority: review, run status, human tasks and essential administration</text>
+</svg>

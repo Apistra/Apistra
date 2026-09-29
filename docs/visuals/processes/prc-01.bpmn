@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-01" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-01" name="Configure installation and project" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-01">
+      <bpmn:lane id="Lane_PRC-01_1" name="Administrator">
+        <bpmn:flowNodeRef>PRC-01_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-01_auth</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-01_project</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-01_ready</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-01_2" name="Web and API">
+        <bpmn:flowNodeRef>PRC-01_validate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-01_reject</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-01_3" name="Platform services">
+        <bpmn:flowNodeRef>PRC-01_persist</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-01_01" sourceRef="PRC-01_start" targetRef="PRC-01_auth" />
+    <bpmn:sequenceFlow id="Flow_PRC-01_02" sourceRef="PRC-01_auth" targetRef="PRC-01_project" />
+    <bpmn:sequenceFlow id="Flow_PRC-01_03" sourceRef="PRC-01_project" targetRef="PRC-01_validate" />
+    <bpmn:sequenceFlow id="Flow_PRC-01_04" sourceRef="PRC-01_validate" targetRef="PRC-01_persist" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-01_05" sourceRef="PRC-01_persist" targetRef="PRC-01_ready" />
+    <bpmn:sequenceFlow id="Flow_PRC-01_06" sourceRef="PRC-01_validate" targetRef="PRC-01_reject" name="no" />
+    <bpmn:startEvent id="PRC-01_start" name="Open bootstrap">
+      <bpmn:outgoing>Flow_PRC-01_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-01_auth" name="Create or sign in as Administrator">
+      <bpmn:incoming>Flow_PRC-01_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-01_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-01_project" name="Create isolated project">
+      <bpmn:incoming>Flow_PRC-01_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-01_03</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-01_validate" name="Configuration valid?">
+      <bpmn:incoming>Flow_PRC-01_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-01_04</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-01_06</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-01_persist" name="Persist project, limits and audit">
+      <bpmn:incoming>Flow_PRC-01_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-01_05</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="PRC-01_ready" name="Project ready">
+      <bpmn:incoming>Flow_PRC-01_05</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-01_reject" name="Validation rejected">
+      <bpmn:incoming>Flow_PRC-01_06</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-01">
+    <bpmndi:BPMNPlane id="Plane_PRC-01" bpmnElement="PRC-01">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-01_1" bpmnElement="Lane_PRC-01_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1270" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-01_2" bpmnElement="Lane_PRC-01_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1270" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-01_3" bpmnElement="Lane_PRC-01_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1270" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_start" bpmnElement="PRC-01_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_auth" bpmnElement="PRC-01_auth">
+        <dc:Bounds x="212.0" y="134.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_project" bpmnElement="PRC-01_project">
+        <dc:Bounds x="362.0" y="134.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_validate" bpmnElement="PRC-01_validate">
+        <dc:Bounds x="540.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_persist" bpmnElement="PRC-01_persist">
+        <dc:Bounds x="662.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_ready" bpmnElement="PRC-01_ready">
+        <dc:Bounds x="840.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-01_reject" bpmnElement="PRC-01_reject">
+        <dc:Bounds x="990.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_01" bpmnElement="Flow_PRC-01_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_02" bpmnElement="Flow_PRC-01_02">
+        <di:waypoint x="315" y="170.0" />
+        <di:waypoint x="375" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_03" bpmnElement="Flow_PRC-01_03">
+        <di:waypoint x="465" y="170.0" />
+        <di:waypoint x="525" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_04" bpmnElement="Flow_PRC-01_04">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="675" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_05" bpmnElement="Flow_PRC-01_05">
+        <di:waypoint x="765" y="470.0" />
+        <di:waypoint x="825" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-01_06" bpmnElement="Flow_PRC-01_06">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="975" y="320.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

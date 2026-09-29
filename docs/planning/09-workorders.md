@@ -1,6 +1,6 @@
 # Workorder Catalogue
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT
 
 All workorders use EXTENDED assurance unless a later reviewed delta justifies a lower profile. Every workorder requires approved expectations, implementation evidence, and the specified gate. No workorder is currently READY.
@@ -225,7 +225,7 @@ Key acceptance:
 
 - WO-CAP-05-01 — Define canonical versioned workflow schema
 - WO-CAP-05-02 — Implement graph and node validation
-- WO-CAP-05-03 — Produce and approve visual design references
+- WO-CAP-05-03 — Review, refine, and approve the produced visual design references
 - WO-CAP-05-04 — Implement visual workflow editor
 - WO-CAP-05-05 — Implement YAML and JSON editor with semantic round-trip
 - WO-CAP-05-06 — Implement draft lifecycle and conflict handling
@@ -343,6 +343,7 @@ Before READY, each catalogue item must be expanded with:
 
 - exact source and approved expectation review;
 - affected requirements, ARCH and SEC rules;
+- applicable ADRs and patterns from `11-architecture-decisions-and-patterns.md`, including their defined scope and prohibited uses;
 - observed repository paths;
 - explicit scope and prohibited side effects;
 - objective positive, negative, boundary, security, and compatibility criteria;
@@ -352,3 +353,5 @@ Before READY, each catalogue item must be expanded with:
 - evidence and later capability-gate assignment.
 
 Catalogue entries are planning slices, not permission to implement.
+
+The maintainable sources and rendered previews required by WO-CAP-05-03 now exist under `docs/visuals/design`. The workorder remains DRAFT because product-owner approval, logo production variants and rights evidence, accessibility measurement, detailed interaction-state references, and Softwaretest.it manual UI/UX tests are still pending.

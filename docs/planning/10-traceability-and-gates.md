@@ -1,6 +1,6 @@
 # Traceability and Gates
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT
 
 ## 1. Stable requirement catalogue
@@ -53,6 +53,8 @@ REQ-020 — Softwaretest.it test management and complete result reporting
 - Offline operation: ARCH-010 and ARCH-014; SEC-013; CAP-00 and CAP-06
 - Supply chain: SEC-011 and SEC-012; CAP-00
 - Licensing: SEC-014; CAP-01 and commercial release
+
+Concrete implementation patterns and their boundaries are defined in `11-architecture-decisions-and-patterns.md`. Each implementation workorder must cite the applicable ADRs rather than treating a pattern as a repository-wide default. The ADR catalogue is present but remains DRAFT until qualified architecture review and product-owner acceptance.
 
 ## 4. Process and test mapping
 
@@ -187,8 +189,9 @@ Every executed test or gate must bind:
 - No independent expectation review
 - No approved ADR for durable execution
 - No authentication implementation ADR
+- Architecture and pattern ADR catalogue is present but not yet approved
 - No verified Softwaretest.it API contract or authorised project
-- No UI reference source or rendered design gate evidence
+- Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
 - No architecture test tooling
 - No security control evidence
 - No CI workflow

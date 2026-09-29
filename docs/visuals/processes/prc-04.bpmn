@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-04" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-04" name="Execute a published process through the API" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-04">
+      <bpmn:lane id="Lane_PRC-04_1" name="API client">
+        <bpmn:flowNodeRef>PRC-04_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_done</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-04_2" name="Process API and durable engine">
+        <bpmn:flowNodeRef>PRC-04_authenticate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_duplicate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_return</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_create</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_human</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_wait</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_failed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-04_3" name="Worker and adapters">
+        <bpmn:flowNodeRef>PRC-04_execute</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-04_result</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-04_01" sourceRef="PRC-04_start" targetRef="PRC-04_authenticate" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_02" sourceRef="PRC-04_authenticate" targetRef="PRC-04_duplicate" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_03" sourceRef="PRC-04_duplicate" targetRef="PRC-04_return" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_04" sourceRef="PRC-04_return" targetRef="PRC-04_done" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_05" sourceRef="PRC-04_duplicate" targetRef="PRC-04_create" name="no" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_06" sourceRef="PRC-04_create" targetRef="PRC-04_execute" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_07" sourceRef="PRC-04_execute" targetRef="PRC-04_human" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_08" sourceRef="PRC-04_human" targetRef="PRC-04_wait" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_09" sourceRef="PRC-04_wait" targetRef="PRC-04_execute" name="resume" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_10" sourceRef="PRC-04_human" targetRef="PRC-04_result" name="no" />
+    <bpmn:sequenceFlow id="Flow_PRC-04_11" sourceRef="PRC-04_result" targetRef="PRC-04_done" />
+    <bpmn:startEvent id="PRC-04_start" name="POST run">
+      <bpmn:outgoing>Flow_PRC-04_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-04_authenticate" name="Authenticate and validate input">
+      <bpmn:incoming>Flow_PRC-04_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-04_duplicate" name="Existing idempotent run?">
+      <bpmn:incoming>Flow_PRC-04_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_03</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-04_05</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-04_return" name="Return existing run ID">
+      <bpmn:incoming>Flow_PRC-04_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_04</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-04_create" name="Create durable run">
+      <bpmn:incoming>Flow_PRC-04_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_06</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-04_execute" name="Execute nodes and checkpoints">
+      <bpmn:incoming>Flow_PRC-04_06</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-04_09</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_07</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-04_human" name="Human task required?">
+      <bpmn:incoming>Flow_PRC-04_07</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_08</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-04_10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-04_wait" name="Pause and resume">
+      <bpmn:incoming>Flow_PRC-04_08</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_09</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-04_result" name="Validate output and callback">
+      <bpmn:incoming>Flow_PRC-04_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-04_11</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="PRC-04_done" name="Result available">
+      <bpmn:incoming>Flow_PRC-04_04</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-04_11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-04_failed" name="Failed or cancelled safely" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-04">
+    <bpmndi:BPMNPlane id="Plane_PRC-04" bpmnElement="PRC-04">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-04_1" bpmnElement="Lane_PRC-04_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1840" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-04_2" bpmnElement="Lane_PRC-04_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1840" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-04_3" bpmnElement="Lane_PRC-04_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1840" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_start" bpmnElement="PRC-04_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_authenticate" bpmnElement="PRC-04_authenticate">
+        <dc:Bounds x="212.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_duplicate" bpmnElement="PRC-04_duplicate">
+        <dc:Bounds x="390.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_return" bpmnElement="PRC-04_return">
+        <dc:Bounds x="512.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_create" bpmnElement="PRC-04_create">
+        <dc:Bounds x="662.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_execute" bpmnElement="PRC-04_execute">
+        <dc:Bounds x="812.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_human" bpmnElement="PRC-04_human">
+        <dc:Bounds x="990.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_wait" bpmnElement="PRC-04_wait">
+        <dc:Bounds x="1112.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_result" bpmnElement="PRC-04_result">
+        <dc:Bounds x="1262.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_done" bpmnElement="PRC-04_done">
+        <dc:Bounds x="1440.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-04_failed" bpmnElement="PRC-04_failed">
+        <dc:Bounds x="1590.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_01" bpmnElement="Flow_PRC-04_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_02" bpmnElement="Flow_PRC-04_02">
+        <di:waypoint x="315" y="320.0" />
+        <di:waypoint x="375" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_03" bpmnElement="Flow_PRC-04_03">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="525" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_04" bpmnElement="Flow_PRC-04_04">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="1425" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_05" bpmnElement="Flow_PRC-04_05">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="675" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_06" bpmnElement="Flow_PRC-04_06">
+        <di:waypoint x="765" y="320.0" />
+        <di:waypoint x="825" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_07" bpmnElement="Flow_PRC-04_07">
+        <di:waypoint x="915" y="470.0" />
+        <di:waypoint x="975" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_08" bpmnElement="Flow_PRC-04_08">
+        <di:waypoint x="1065" y="320.0" />
+        <di:waypoint x="1125" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_09" bpmnElement="Flow_PRC-04_09">
+        <di:waypoint x="1215" y="320.0" />
+        <di:waypoint x="825" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_10" bpmnElement="Flow_PRC-04_10">
+        <di:waypoint x="1065" y="320.0" />
+        <di:waypoint x="1275" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-04_11" bpmnElement="Flow_PRC-04_11">
+        <di:waypoint x="1365" y="470.0" />
+        <di:waypoint x="1425" y="170.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

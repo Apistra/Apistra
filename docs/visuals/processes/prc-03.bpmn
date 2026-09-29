@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-03" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-03" name="Author and publish a workflow" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-03">
+      <bpmn:lane id="Lane_PRC-03_1" name="Administrator">
+        <bpmn:flowNodeRef>PRC-03_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_edit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_acceptable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_done</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-03_2" name="Authoring API">
+        <bpmn:flowNodeRef>PRC-03_validate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_valid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_rejected</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-03_3" name="Validation and versioning">
+        <bpmn:flowNodeRef>PRC-03_test</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-03_publish</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-03_01" sourceRef="PRC-03_start" targetRef="PRC-03_edit" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_02" sourceRef="PRC-03_edit" targetRef="PRC-03_validate" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_03" sourceRef="PRC-03_validate" targetRef="PRC-03_valid" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_04" sourceRef="PRC-03_valid" targetRef="PRC-03_test" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_05" sourceRef="PRC-03_valid" targetRef="PRC-03_rejected" name="no" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_06" sourceRef="PRC-03_test" targetRef="PRC-03_acceptable" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_07" sourceRef="PRC-03_acceptable" targetRef="PRC-03_publish" name="yes" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_08" sourceRef="PRC-03_acceptable" targetRef="PRC-03_edit" name="no" />
+    <bpmn:sequenceFlow id="Flow_PRC-03_09" sourceRef="PRC-03_publish" targetRef="PRC-03_done" />
+    <bpmn:startEvent id="PRC-03_start" name="Create draft">
+      <bpmn:outgoing>Flow_PRC-03_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-03_edit" name="Edit visual or canonical form">
+      <bpmn:incoming>Flow_PRC-03_01</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-03_08</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-03_validate" name="Validate graph and references">
+      <bpmn:incoming>Flow_PRC-03_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_03</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-03_valid" name="Valid?">
+      <bpmn:incoming>Flow_PRC-03_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_04</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-03_05</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-03_test" name="Execute draft snapshot test">
+      <bpmn:incoming>Flow_PRC-03_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_06</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-03_acceptable" name="Acceptable?">
+      <bpmn:incoming>Flow_PRC-03_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_07</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-03_08</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-03_publish" name="Publish immutable version">
+      <bpmn:incoming>Flow_PRC-03_07</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-03_09</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="PRC-03_done" name="Version published">
+      <bpmn:incoming>Flow_PRC-03_09</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="PRC-03_rejected" name="Return actionable findings">
+      <bpmn:incoming>Flow_PRC-03_05</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-03">
+    <bpmndi:BPMNPlane id="Plane_PRC-03" bpmnElement="PRC-03">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-03_1" bpmnElement="Lane_PRC-03_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-03_2" bpmnElement="Lane_PRC-03_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-03_3" bpmnElement="Lane_PRC-03_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_start" bpmnElement="PRC-03_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_edit" bpmnElement="PRC-03_edit">
+        <dc:Bounds x="212.0" y="134.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_validate" bpmnElement="PRC-03_validate">
+        <dc:Bounds x="362.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_valid" bpmnElement="PRC-03_valid">
+        <dc:Bounds x="540.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_test" bpmnElement="PRC-03_test">
+        <dc:Bounds x="662.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_acceptable" bpmnElement="PRC-03_acceptable">
+        <dc:Bounds x="840.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_publish" bpmnElement="PRC-03_publish">
+        <dc:Bounds x="962.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_done" bpmnElement="PRC-03_done">
+        <dc:Bounds x="1140.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-03_rejected" bpmnElement="PRC-03_rejected">
+        <dc:Bounds x="1290.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_01" bpmnElement="Flow_PRC-03_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_02" bpmnElement="Flow_PRC-03_02">
+        <di:waypoint x="315" y="170.0" />
+        <di:waypoint x="375" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_03" bpmnElement="Flow_PRC-03_03">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="525" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_04" bpmnElement="Flow_PRC-03_04">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="675" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_05" bpmnElement="Flow_PRC-03_05">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="1275" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_06" bpmnElement="Flow_PRC-03_06">
+        <di:waypoint x="765" y="470.0" />
+        <di:waypoint x="825" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_07" bpmnElement="Flow_PRC-03_07">
+        <di:waypoint x="915" y="170.0" />
+        <di:waypoint x="975" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_08" bpmnElement="Flow_PRC-03_08">
+        <di:waypoint x="915" y="170.0" />
+        <di:waypoint x="225" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-03_09" bpmnElement="Flow_PRC-03_09">
+        <di:waypoint x="1065" y="470.0" />
+        <di:waypoint x="1125" y="170.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

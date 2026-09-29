@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1890" height="620" viewBox="0 0 1890 620" role="img" aria-labelledby="title desc">
+<title id="title">PRC-04 Execute a published process through the API</title>
+<desc id="desc">Readable process preview. The adjacent BPMN file is canonical.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1890" height="620" fill="#071414"/>
+<text x="35" y="42" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">PRC-04 · Execute a published process through the API</text>
+<rect x="25" y="95" width="1840" height="150" rx="0" fill="#0a1818" stroke="#294643" stroke-width="1"/>
+<text x="42" y="120" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="start">API client</text>
+<rect x="25" y="245" width="1840" height="150" rx="0" fill="#071414" stroke="#294643" stroke-width="1"/>
+<text x="42" y="270" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="start">Process API and durable engine</text>
+<rect x="25" y="395" width="1840" height="150" rx="0" fill="#0a1818" stroke="#294643" stroke-width="1"/>
+<text x="42" y="420" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="start">Worker and adapters</text>
+<line x1="165" y1="170.0" x2="225" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="315" y1="320.0" x2="375" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="465" y1="320.0" x2="525" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="495.0" y="311.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">yes</text>
+<line x1="615" y1="320.0" x2="1425" y2="170.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="465" y1="320.0" x2="675" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="570.0" y="311.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">no</text>
+<line x1="765" y1="320.0" x2="825" y2="470.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="915" y1="470.0" x2="975" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="1065" y1="320.0" x2="1125" y2="320.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1095.0" y="311.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">yes</text>
+<line x1="1215" y1="320.0" x2="825" y2="470.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1020.0" y="386.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">resume</text>
+<line x1="1065" y1="320.0" x2="1275" y2="470.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1170.0" y="386.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">no</text>
+<line x1="1365" y1="470.0" x2="1425" y2="170.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<circle cx="120" cy="170.0" r="30" fill="#102323" stroke="#55c98c" stroke-width="3"/>
+<text x="120" y="222.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">POST run</text>
+<rect x="212" y="284.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="270" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Authenticate and</text>
+<text x="270" y="386.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">validate input</text>
+<rect x="388" y="288.0" width="64" height="64" rx="2" fill="#142c2b" stroke="#e4b454" stroke-width="2"/>
+<text x="420" y="325.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="middle">×</text>
+<text x="420" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Existing</text>
+<text x="420" y="386.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">idempotent run?</text>
+<rect x="512" y="284.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="570" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Return existing</text>
+<text x="570" y="386.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">run ID</text>
+<rect x="662" y="284.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="720" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Create durable run</text>
+<rect x="812" y="434.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="870" y="522.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Execute nodes and</text>
+<text x="870" y="536.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">checkpoints</text>
+<rect x="988" y="288.0" width="64" height="64" rx="2" fill="#142c2b" stroke="#e4b454" stroke-width="2"/>
+<text x="1020" y="325.0" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="middle">×</text>
+<text x="1020" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Human task</text>
+<text x="1020" y="386.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">required?</text>
+<rect x="1112" y="284.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="1170" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Pause and resume</text>
+<rect x="1262" y="434.0" width="116" height="72" rx="10" fill="#102323" stroke="#2bd4cf" stroke-width="2"/>
+<text x="1320" y="522.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Validate output</text>
+<text x="1320" y="536.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">and callback</text>
+<circle cx="1470" cy="170.0" r="30" fill="#102323" stroke="#ed7070" stroke-width="3"/>
+<text x="1470" y="222.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Result available</text>
+<circle cx="1620" cy="320.0" r="30" fill="#102323" stroke="#ed7070" stroke-width="3"/>
+<text x="1620" y="372.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">Failed or</text>
+<text x="1620" y="386.0" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle">cancelled safely</text>
+<text x="1860" y="602" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="end">Readable preview · canonical process definition is the adjacent BPMN 2.0 file</text>
+</svg>

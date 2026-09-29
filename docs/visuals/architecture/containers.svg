@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="620" viewBox="0 0 1340 620" role="img" aria-labelledby="title desc">
+<title id="title">containers</title>
+<desc id="desc">Apistra architecture planning diagram. No implementation evidence.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1340" height="620" fill="#071414"/>
+<text x="45" y="43" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">ARC-CNT-01 · Runtime containers and responsibilities</text>
+<rect x="80" y="110" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="80" y="110" width="5" height="145" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="98" y="138" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Web</text>
+<text x="98" y="161" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Next.js · authoring,</text>
+<text x="98" y="177" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">administration, run and</text>
+<text x="98" y="193" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">approval UI</text>
+<rect x="390" y="110" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="390" y="110" width="5" height="145" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="408" y="138" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">API</text>
+<text x="408" y="161" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">FastAPI · management API,</text>
+<text x="408" y="177" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Process API, policy enforcement</text>
+<rect x="700" y="110" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="700" y="110" width="5" height="145" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="718" y="138" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Worker</text>
+<text x="718" y="161" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Durable activities ·</text>
+<text x="718" y="177" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">connectors, retrieval, tools</text>
+<text x="718" y="193" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">and models</text>
+<rect x="1010" y="110" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="1010" y="110" width="5" height="145" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="1028" y="138" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Durable engine</text>
+<text x="1028" y="161" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Run state, timers, retries,</text>
+<text x="1028" y="177" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">pause and resume</text>
+<rect x="235" y="360" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="235" y="360" width="5" height="145" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="253" y="388" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">PostgreSQL</text>
+<text x="253" y="411" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Platform state, versions, audit</text>
+<text x="253" y="427" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">and idempotency</text>
+<rect x="555" y="360" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="555" y="360" width="5" height="145" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="573" y="388" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Qdrant</text>
+<text x="573" y="411" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Embeddings with source</text>
+<text x="573" y="427" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">provenance</text>
+<rect x="875" y="360" width="250" height="145" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="875" y="360" width="5" height="145" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="893" y="388" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">External adapters</text>
+<text x="893" y="411" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Endpoints, connectors,</text>
+<text x="893" y="427" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">callbacks and tools</text>
+<line x1="330" y1="182" x2="390" y2="182" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="640" y1="182" x2="700" y2="182" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="950" y1="182" x2="1010" y2="182" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="515" y1="255" x2="360" y2="360" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="825" y1="255" x2="360" y2="360" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="825" y1="255" x2="680" y2="360" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="825" y1="255" x2="1000" y2="360" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="1135" y1="255" x2="825" y2="255" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="660" y="570" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="middle">Static source dependencies follow inward-facing ports; runtime calls follow explicit contracts.</text>
+</svg>

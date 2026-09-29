@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="672" viewBox="0 0 1380 672" role="img" aria-labelledby="title desc">
+<title id="title">sequence-run</title>
+<desc id="desc">Apistra architecture planning diagram. No implementation evidence.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1380" height="672" fill="#071414"/>
+<text x="45" y="42" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">ARC-SEQ-01 · Start and execute a durable run</text>
+<rect x="-5.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="70.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">API client</text>
+<line x1="70.0" y1="117" x2="70.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<rect x="243.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="318.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Process API</text>
+<line x1="318.0" y1="117" x2="318.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<rect x="491.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="566.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">PostgreSQL</text>
+<line x1="566.0" y1="117" x2="566.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<rect x="739.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="814.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Durable engine</text>
+<line x1="814.0" y1="117" x2="814.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<rect x="987.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="1062.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Worker</text>
+<line x1="1062.0" y1="117" x2="1062.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<rect x="1235.0" y="72" width="150" height="45" rx="8" fill="#102323" stroke="#294643" stroke-width="1"/>
+<text x="1310.0" y="100" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Endpoint</text>
+<line x1="1310.0" y1="117" x2="1310.0" y2="637" stroke="#294643" stroke-width="1" stroke-dasharray="5 5"/>
+<line x1="70.0" y1="155" x2="318.0" y2="155" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="194.0" y="146" fill="#294643" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">start + idempotency key</text>
+<line x1="318.0" y1="213" x2="566.0" y2="213" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="442.0" y="204" fill="#294643" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">verify project, version and key</text>
+<line x1="318.0" y1="271" x2="814.0" y2="271" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="566.0" y="262" fill="#294643" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">create durable run</text>
+<line x1="814.0" y1="329" x2="1062.0" y2="329" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="938.0" y="320" fill="#294643" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">schedule node attempt</text>
+<line x1="1062.0" y1="387" x2="1310.0" y2="387" stroke="#e4b454" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1186.0" y="378" fill="#e4b454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">governed model or tool call</text>
+<line x1="1062.0" y1="445" x2="566.0" y2="445" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="814.0" y="436" fill="#294643" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">checkpoint attempt and usage</text>
+<line x1="1062.0" y1="503" x2="814.0" y2="503" stroke="#55c98c" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="938.0" y="494" fill="#55c98c" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">complete node</text>
+<line x1="814.0" y1="561" x2="318.0" y2="561" stroke="#55c98c" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="566.0" y="552" fill="#55c98c" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">complete run</text>
+<line x1="318.0" y1="619" x2="70.0" y2="619" stroke="#55c98c" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="194.0" y="610" fill="#55c98c" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="middle">schema-valid result</text>
+</svg>

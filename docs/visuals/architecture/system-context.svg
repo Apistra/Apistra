@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="690" viewBox="0 0 1320 690" role="img" aria-labelledby="title desc">
+<title id="title">system-context</title>
+<desc id="desc">Apistra architecture planning diagram. No implementation evidence.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1320" height="690" fill="#071414"/>
+<text x="50" y="45" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">ARC-CTX-01 · System context and trust boundaries</text>
+<rect x="470" y="190" width="360" height="210" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="470" y="190" width="5" height="210" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="488" y="218" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Apistra</text>
+<text x="488" y="241" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Design, publish and operate governed AI-</text>
+<text x="488" y="257" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">assisted business processes.</text>
+<rect x="45" y="120" width="250" height="110" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="45" y="120" width="5" height="110" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="63" y="148" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Administrator</text>
+<text x="63" y="171" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Configures and approves</text>
+<line x1="295" y1="175" x2="470" y2="255.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="45" y="300" width="250" height="110" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="45" y="300" width="5" height="110" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="63" y="328" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">API client</text>
+<text x="63" y="351" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Starts and observes runs</text>
+<line x1="295" y1="355" x2="470" y2="300.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="45" y="480" width="250" height="110" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="45" y="480" width="5" height="110" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="63" y="508" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Maintainer</text>
+<text x="63" y="531" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Builds, stages and recovers</text>
+<line x1="295" y1="535" x2="470" y2="345.0" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="965" y="70" width="300" height="105" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="965" y="70" width="5" height="105" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="983" y="98" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Model and embedding endpoints</text>
+<text x="983" y="121" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Cloud or on-premise</text>
+<line x1="830" y1="240" x2="965" y2="122" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="965" y="225" width="300" height="105" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="965" y="225" width="5" height="105" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="983" y="253" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Connector targets</text>
+<text x="983" y="276" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Files, REST, Git and later systems</text>
+<line x1="830" y1="290" x2="965" y2="277" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="965" y="380" width="300" height="105" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="965" y="380" width="5" height="105" rx="3" fill="#e4b454" stroke="#e4b454" stroke-width="1"/>
+<text x="983" y="408" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Callback receivers</text>
+<text x="983" y="431" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Signed idempotent delivery</text>
+<line x1="830" y1="340" x2="965" y2="432" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="965" y="535" width="300" height="105" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="965" y="535" width="5" height="105" rx="3" fill="#8fa9a5" stroke="#8fa9a5" stroke-width="1"/>
+<text x="983" y="563" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Softwaretest.it</text>
+<text x="983" y="586" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">Engineering only; never runtime</text>
+<line x1="830" y1="380" x2="965" y2="587" stroke="#294643" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<rect x="430" y="150" width="440" height="290" rx="16" fill="none" stroke="#8b6cf6" stroke-width="2"/>
+<text x="650" y="465" fill="#8b6cf6" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Installation trust boundary · one organisation, isolated projects</text>
+</svg>

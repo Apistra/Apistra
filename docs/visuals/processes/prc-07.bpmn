@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PRC-07" targetNamespace="https://apistra.dev/bpmn" exporter="Apistra BuildBySpec visual generator" exporterVersion="0.1">
+  <bpmn:process id="PRC-07" name="Operate and recover Apistra" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_PRC-07">
+      <bpmn:lane id="Lane_PRC-07_1" name="Maintainer">
+        <bpmn:flowNodeRef>PRC-07_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_inspect</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_done</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-07_2" name="Delivery controls">
+        <bpmn:flowNodeRef>PRC-07_choice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_rollback</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_rollforward</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_evidence</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PRC-07_3" name="Local staging services">
+        <bpmn:flowNodeRef>PRC-07_restore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PRC-07_verify</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_PRC-07_01" sourceRef="PRC-07_start" targetRef="PRC-07_inspect" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_02" sourceRef="PRC-07_inspect" targetRef="PRC-07_choice" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_03" sourceRef="PRC-07_choice" targetRef="PRC-07_rollback" name="rollback" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_04" sourceRef="PRC-07_choice" targetRef="PRC-07_rollforward" name="roll-forward" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_05" sourceRef="PRC-07_choice" targetRef="PRC-07_restore" name="restore" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_06" sourceRef="PRC-07_rollback" targetRef="PRC-07_verify" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_07" sourceRef="PRC-07_rollforward" targetRef="PRC-07_verify" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_08" sourceRef="PRC-07_restore" targetRef="PRC-07_verify" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_09" sourceRef="PRC-07_verify" targetRef="PRC-07_evidence" />
+    <bpmn:sequenceFlow id="Flow_PRC-07_10" sourceRef="PRC-07_evidence" targetRef="PRC-07_done" />
+    <bpmn:startEvent id="PRC-07_start" name="Detect failed candidate or service">
+      <bpmn:outgoing>Flow_PRC-07_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="PRC-07_inspect" name="Inspect health and correlation">
+      <bpmn:incoming>Flow_PRC-07_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_02</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="PRC-07_choice" name="Recovery path?">
+      <bpmn:incoming>Flow_PRC-07_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_03</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-07_04</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PRC-07_05</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PRC-07_rollback" name="Rollback compatible candidate">
+      <bpmn:incoming>Flow_PRC-07_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_06</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-07_rollforward" name="Deploy corrected candidate">
+      <bpmn:incoming>Flow_PRC-07_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_07</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-07_restore" name="Restore verified backup">
+      <bpmn:incoming>Flow_PRC-07_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_08</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-07_verify" name="Run health and smoke checks">
+      <bpmn:incoming>Flow_PRC-07_06</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-07_07</bpmn:incoming>
+      <bpmn:incoming>Flow_PRC-07_08</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_09</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PRC-07_evidence" name="Record recovery evidence">
+      <bpmn:incoming>Flow_PRC-07_09</bpmn:incoming>
+      <bpmn:outgoing>Flow_PRC-07_10</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="PRC-07_done" name="Known healthy state">
+      <bpmn:incoming>Flow_PRC-07_10</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_PRC-07">
+    <bpmndi:BPMNPlane id="Plane_PRC-07" bpmnElement="PRC-07">
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-07_1" bpmnElement="Lane_PRC-07_1" isHorizontal="true">
+        <dc:Bounds x="25" y="95" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-07_2" bpmnElement="Lane_PRC-07_2" isHorizontal="true">
+        <dc:Bounds x="25" y="245" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_PRC-07_3" bpmnElement="Lane_PRC-07_3" isHorizontal="true">
+        <dc:Bounds x="25" y="395" width="1540" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_start" bpmnElement="PRC-07_start">
+        <dc:Bounds x="90.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_inspect" bpmnElement="PRC-07_inspect">
+        <dc:Bounds x="212.0" y="134.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_choice" bpmnElement="PRC-07_choice">
+        <dc:Bounds x="390.0" y="290.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_rollback" bpmnElement="PRC-07_rollback">
+        <dc:Bounds x="512.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_rollforward" bpmnElement="PRC-07_rollforward">
+        <dc:Bounds x="662.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_restore" bpmnElement="PRC-07_restore">
+        <dc:Bounds x="812.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_verify" bpmnElement="PRC-07_verify">
+        <dc:Bounds x="962.0" y="434.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_evidence" bpmnElement="PRC-07_evidence">
+        <dc:Bounds x="1112.0" y="284.0" width="116" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PRC-07_done" bpmnElement="PRC-07_done">
+        <dc:Bounds x="1290.0" y="140.0" width="60" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_01" bpmnElement="Flow_PRC-07_01">
+        <di:waypoint x="165" y="170.0" />
+        <di:waypoint x="225" y="170.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_02" bpmnElement="Flow_PRC-07_02">
+        <di:waypoint x="315" y="170.0" />
+        <di:waypoint x="375" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_03" bpmnElement="Flow_PRC-07_03">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="525" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_04" bpmnElement="Flow_PRC-07_04">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="675" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_05" bpmnElement="Flow_PRC-07_05">
+        <di:waypoint x="465" y="320.0" />
+        <di:waypoint x="825" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_06" bpmnElement="Flow_PRC-07_06">
+        <di:waypoint x="615" y="320.0" />
+        <di:waypoint x="975" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_07" bpmnElement="Flow_PRC-07_07">
+        <di:waypoint x="765" y="320.0" />
+        <di:waypoint x="975" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_08" bpmnElement="Flow_PRC-07_08">
+        <di:waypoint x="915" y="470.0" />
+        <di:waypoint x="975" y="470.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_09" bpmnElement="Flow_PRC-07_09">
+        <di:waypoint x="1065" y="470.0" />
+        <di:waypoint x="1125" y="320.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_PRC-07_10" bpmnElement="Flow_PRC-07_10">
+        <di:waypoint x="1215" y="320.0" />
+        <di:waypoint x="1275" y="170.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

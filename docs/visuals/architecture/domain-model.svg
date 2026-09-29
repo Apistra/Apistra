@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="670" viewBox="0 0 1280 670" role="img" aria-labelledby="title desc">
+<title id="title">domain-model</title>
+<desc id="desc">Apistra architecture planning diagram. No implementation evidence.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#294643"/></marker>
+</defs>
+<rect width="1280" height="670" fill="#071414"/>
+<text x="45" y="42" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">ARC-DOM-01 · Core domain model</text>
+<rect x="45" y="100" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="45" y="100" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="63" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Organisation</text>
+<text x="63" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">1 installation</text>
+<rect x="280" y="100" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="280" y="100" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="298" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Project</text>
+<text x="298" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">isolation boundary</text>
+<rect x="515" y="100" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="515" y="100" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="533" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">WorkflowDraft</text>
+<text x="533" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">mutable</text>
+<rect x="750" y="100" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="750" y="100" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="768" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">PublishedWorkflow</text>
+<text x="768" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">immutable snapshot</text>
+<rect x="985" y="100" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="985" y="100" width="5" height="88" rx="3" fill="#2bd4cf" stroke="#2bd4cf" stroke-width="1"/>
+<text x="1003" y="128" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Run</text>
+<text x="1003" y="151" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">durable execution</text>
+<rect x="1100" y="315" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="1100" y="315" width="5" height="88" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="1118" y="343" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">NodeAttempt</text>
+<text x="1118" y="366" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">retry history</text>
+<rect x="815" y="315" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="815" y="315" width="5" height="88" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="833" y="343" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">HumanTask</text>
+<text x="833" y="366" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">approval state</text>
+<rect x="530" y="315" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="530" y="315" width="5" height="88" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="548" y="343" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">AgentVersion</text>
+<text x="548" y="366" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">endpoint + prompt +</text>
+<text x="548" y="382" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">tools</text>
+<rect x="245" y="315" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="245" y="315" width="5" height="88" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="263" y="343" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">KnowledgeSource</text>
+<text x="263" y="366" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">sync + provenance</text>
+<rect x="45" y="315" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="45" y="315" width="5" height="88" rx="3" fill="#8b6cf6" stroke="#8b6cf6" stroke-width="1"/>
+<text x="63" y="343" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">SecretReference</text>
+<text x="63" y="366" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">encrypted value</text>
+<rect x="245" y="525" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="245" y="525" width="5" height="88" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="263" y="553" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">ProvenanceRecord</text>
+<text x="263" y="576" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">source + version +</text>
+<text x="263" y="592" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">location</text>
+<rect x="530" y="525" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="530" y="525" width="5" height="88" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="548" y="553" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">PolicyVersion</text>
+<text x="548" y="576" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">write and citation rules</text>
+<rect x="815" y="525" width="195" height="88" rx="10" fill="#102323" stroke="#294643" stroke-width="1"/>
+<rect x="815" y="525" width="5" height="88" rx="3" fill="#55c98c" stroke="#55c98c" stroke-width="1"/>
+<text x="833" y="553" fill="#e7f1ef" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">LimitSet</text>
+<text x="833" y="576" fill="#8fa9a5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start">time + calls + cost</text>
+<line x1="240" y1="144" x2="280" y2="144" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="475" y1="144" x2="515" y2="144" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="710" y1="144" x2="750" y2="144" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="945" y1="144" x2="985" y2="144" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="1080" y1="190" x2="1170" y2="315" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="985" y1="190" x2="910" y2="315" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="750" y1="190" x2="625" y2="315" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="515" y1="190" x2="340" y2="315" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="280" y1="190" x2="140" y2="315" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="340" y1="403" x2="340" y2="525" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="625" y1="403" x2="625" y2="525" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="910" y1="403" x2="910" y2="525" stroke="#294643" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
