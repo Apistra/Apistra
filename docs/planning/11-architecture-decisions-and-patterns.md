@@ -1,6 +1,6 @@
 # Architecture Decisions and Pattern Catalogue
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 Assurance profile: EXTENDED
 
@@ -388,7 +388,7 @@ Status: PROPOSED
 
 Visual editing, YAML or JSON, APIs, events, callbacks, connector SDKs, and snapshots need one meaning across TypeScript and Python.
 
-Define versioned schemas in packages/contracts. Generate or validate boundary types for both languages. Translate DTOs to domain commands and values at adapters.
+Define versioned schemas in `contracts`. Generate or validate boundary types for both languages. Translate DTOs to domain commands and values at adapters.
 
 The workflow schema is the only semantic source for both editors. Published snapshots store schema version and content digest.
 
@@ -468,10 +468,10 @@ Status: PROPOSED
 
 Each deployable has one explicit composition root:
 
-- services/api/bootstrap
-- services/worker/bootstrap
-- apps/web application bootstrap
-- engineering/softwaretest bootstrap
+- `backend/src/apistra/entrypoints/api/composition.py`
+- `backend/src/apistra/entrypoints/worker/composition.py`
+- `apps/web/src/app/bootstrap.ts`
+- `engineering/softwaretest` bootstrap when that adapter is implemented
 
 Constructor injection is the default. Framework DI is allowed only at the outer composition boundary.
 
@@ -519,6 +519,43 @@ Verification:
 
 Error-mapping, safe-message, retry-classification, and redaction tests.
 
+## ADR-019 — Monorepo layout and executable dependency boundaries
+
+Status: DECIDED
+
+Decision date: 2026-09-29
+
+### Context and decision
+
+Apistra needs independently understandable web, backend, public-contract, connector-SDK, deployment, and engineering boundaries without introducing multiple Python distribution graphs or a monorepo orchestrator before measured need.
+
+Use one public monorepo with:
+
+- `apps/web` for the TypeScript web application;
+- `backend` for one installable Python package used by separate API and worker entrypoints;
+- `contracts/{openapi,workflow,events,connectors}` for language-neutral canonical contracts;
+- `connector-sdk/python` for the public Python connector boundary;
+- `deploy/compose` for local, test, and isolated staging packaging;
+- `engineering/softwaretest` for test-management integration outside the product runtime;
+- `tests/architecture-fixtures` for retained positive and negative dependency graphs;
+- `tools` for repository automation.
+
+Backend business ownership is module-first. A module contains `domain`, `application`, `ports`, and `adapters`, and exposes cross-module use only through `modules.<name>.public`. Dependencies point inward: domain; application and ports; adapters; entrypoint composition roots. The API and worker share the backend package but have separate explicit composition roots.
+
+Use uv for the Python project and pnpm workspaces for TypeScript. Do not add Nx, Turborepo, or multiple Python workspace packages until measured build or ownership pressure justifies a new ADR.
+
+### Consequences
+
+- Module ownership is enforceable without premature network-service boundaries.
+- API and worker code cannot drift into separate domain models.
+- Language-neutral contracts and the connector SDK have visible ownership.
+- A single Python lock and a single pnpm lock keep clean-clone execution reproducible.
+- Adding a module requires a public contract and the standard internal layer direction.
+
+### Verification
+
+CI-TS-03 runs Import Linter, pytest plus AST rules, Dependency Cruiser, and pnpm workspace-cycle protection. Source discovery fails closed on an empty scope. Retained allowed fixtures must pass and retained forbidden fixtures must fail. No initial exceptions exist; a future exception requires rule ID, reason, owner, expiry, removal workorder, and approval.
+
 ## Pattern-to-module summary
 
 Cross-cutting backend:
@@ -561,4 +598,4 @@ Deliberately not selected globally:
 
 ## Decision gate
 
-These decisions remain DRAFT until product-owner and qualified architecture review. ADR-PENDING-001 for the durable engine and ADR-PENDING-004 for authentication implementation still block their dependent workorders.
+ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-001 through ADR-018 remain PROPOSED until qualified architecture review. ADR-PENDING-001 for the durable engine and ADR-PENDING-004 for authentication implementation still block their dependent workorders.

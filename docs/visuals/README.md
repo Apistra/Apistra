@@ -25,7 +25,7 @@ SVG and BPMN generation uses the Python standard library. PNG previews for archi
 
 - ARC-CTX-01 — system context and trust boundaries
 - ARC-CNT-01 — runtime containers
-- ARC-MOD-01 — planned module dependencies
+- ARC-MOD-01 — approved module-first dependency direction
 - ARC-DEP-01 — delivery and local staging deployment
 - ARC-DOM-01 — core domain model
 - ARC-SEQ-01 — durable run sequence

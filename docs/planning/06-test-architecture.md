@@ -59,6 +59,18 @@ Static architecture references:
 - [Module dependency direction](../visuals/architecture/module-dependencies.svg)
 - [Core domain model](../visuals/architecture/domain-model.svg)
 
+### 3.1 Executable architecture test model
+
+- AT-ARCH-001 checks domain independence with Import Linter and the Python AST rule set.
+- AT-ARCH-010 keeps engineering-only Softwaretest.it integration outside the runtime graph.
+- AT-ARCH-011 verifies explicit API and worker composition roots and adapter containment.
+- AT-ARCH-012 verifies public feature and module contracts.
+- AT-ARCH-013 detects dependency cycles in the TypeScript graph and rejects forbidden Python layer direction.
+- AT-ARCH-SCOPE rejects an empty source scope.
+- AT-ARCH-FIXTURE requires retained allowed graphs to pass and retained forbidden graphs to fail.
+
+The authoritative commands, tool versions, paths, and exception policy are maintained in `docs/architecture/testing.md`. These tests are structural evidence only and cannot substitute for behavioural, integration, security, deployment, or recovery tests.
+
 ## 4. Critical process models
 
 The canonical models are versioned BPMN 2.0 files. The SVG and PNG files are generated review views from the same process definitions.

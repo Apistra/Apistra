@@ -1,6 +1,6 @@
 # Apistra Architecture
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 Architecture profile: EXTENDED
 
@@ -113,21 +113,22 @@ Strategy by quality goal:
 
 ## 5. Building-block view
 
-### 5.1 Planned deployable units
+### 5.1 Approved repository and deployable boundaries
 
-- apps/web — Next.js user interface and localisation
-- services/api — FastAPI management and Process API
-- services/worker — workflow execution activities
-- packages/contracts — canonical OpenAPI, JSON Schema, events, and workflow schema
-- packages/domain — provider-neutral domain rules and state models
-- packages/application — use cases and ports
-- packages/adapters — persistence and external integrations
-- packages/connector-sdk — public connector contract and test kit
-- packages/test-support — synthetic fixtures and service virtualisation
-- deploy/compose — local, test, and staging profiles
-- engineering/softwaretest — publishing and result-reporting adapter
+- `apps/web` — Next.js user interface, feature-public contracts, and localisation
+- `backend` — one installable Python package shared by the API and worker entrypoints
+- `backend/src/apistra/modules/<module>` — module-first business ownership with `domain`, `application`, `ports`, `adapters`, and `public.py`
+- `backend/src/apistra/entrypoints/api` — API composition root
+- `backend/src/apistra/entrypoints/worker` — worker composition root
+- `backend/src/apistra/platform` — shared database, observability, and security infrastructure without business ownership
+- `contracts/{openapi,workflow,events,connectors}` — canonical language-neutral contracts
+- `connector-sdk/python` — public connector contract and compatibility kit
+- `deploy/compose` — local, test, and isolated staging profiles
+- `engineering/softwaretest` — publishing and result-reporting adapter outside the product runtime graph
+- `tests/architecture-fixtures` — retained allowed and forbidden dependency graphs
+- `tools/architecture` — repository architecture checks
 
-These are planned paths, not observed implementation.
+The boundaries and the representative `projects` module skeleton are implemented. Empty product modules are not pre-created; every new module must satisfy the same enforced internal structure when its capability workorder introduces it. No API, worker, or business behaviour is implied by this foundation.
 
 ### 5.2 Domain modules
 
@@ -149,7 +150,7 @@ These are planned paths, not observed implementation.
 
 Domain and application modules define behaviour and ports. Framework, database, provider, transport, and vendor types remain in adapters. Deployable services compose implementations at their outer boundary.
 
-No module may read another module's tables directly. Cross-module access uses an application contract, a documented query interface, or a versioned event.
+No module may read another module's tables directly. Python cross-module imports use only `modules.<name>.public`; semantic interaction uses a documented application contract, query interface, or versioned event. Dependencies point inward: domain; then application and ports; then adapters; then the API or worker composition root.
 
 ### 5.4 Container and module diagrams
 
@@ -334,13 +335,14 @@ Explicit non-decisions:
 Pending ADRs:
 
 - Durable execution engine
-- Monorepo build tooling
 - Authentication library and session architecture
 - Local event transport
 - Callback signing format
 - Migration tooling
 
 Each pending ADR blocks only the workorders that depend on it.
+
+The approved repository-layout decision is ADR-019. Its executable checks are described in the [Architecture test system](../architecture/testing.md) and run as CI-TS-03.
 
 ## 10. Quality requirements
 

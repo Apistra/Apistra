@@ -257,12 +257,12 @@ def architecture_containers():
 
 
 def architecture_modules():
-    ops = [text(45, 42, "ARC-MOD-01 · Planned modules and allowed dependency direction", 22, TEXT, "600")]
+    ops = [text(45, 42, "ARC-MOD-01 · Approved module-first dependency direction", 22, TEXT, "600")]
     layers = [
-        (110, 100, 1120, 100, "apps/web · services/api · services/worker", "Composition roots and transport", PURPLE),
-        (170, 235, 1000, 100, "packages/adapters · engineering/softwaretest", "Persistence, providers and engineering adapters", AMBER),
-        (230, 370, 880, 100, "packages/application · packages/contracts · connector-sdk", "Use cases, ports and public contracts", CYAN),
-        (290, 505, 760, 100, "packages/domain", "Provider-neutral rules, values and state models", GREEN),
+        (110, 100, 1120, 100, "apps/web/app · backend/entrypoints/{api,worker}", "Explicit composition roots and transport", PURPLE),
+        (170, 235, 1000, 100, "backend/modules/*/adapters · backend/platform", "Persistence, providers and shared technical infrastructure", AMBER),
+        (230, 370, 880, 100, "backend/modules/*/{application,ports} · contracts · connector-sdk", "Use cases, inward ports and public contracts", CYAN),
+        (290, 505, 760, 100, "backend/modules/*/domain", "Provider-neutral rules, values and state models", GREEN),
     ]
     for x, y, w, h, title_value, detail, accent in layers:
         labelled_box(ops, x, y, w, h, title_value, detail, accent)
@@ -270,7 +270,7 @@ def architecture_modules():
         ops.append(line(x, 235, x, 200, BORDER, 2, True))
         ops.append(line(x, 370, x, 335, BORDER, 2, True))
         ops.append(line(x, 505, x, 470, BORDER, 2, True))
-    ops.append(text(670, 650, "Forbidden: domain → framework/provider · module → another module's tables · runtime → Softwaretest.it", 14, RED, "600", "middle"))
+    ops.append(text(670, 650, "Cross-module imports use public.py · Softwaretest.it remains outside the runtime graph", 14, RED, "600", "middle"))
     return 1340, 700, ops
 
 

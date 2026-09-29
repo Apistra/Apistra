@@ -150,11 +150,11 @@ Status: BLOCKING for runtime implementation
 
 Select a proven component after a focused evaluation of durability, local and offline deployment, PostgreSQL compatibility, worker model, pause and resume, cancellation, retry semantics, licensing, operability, and recovery. Do not build a bespoke distributed job engine.
 
-### ADR-PENDING-002 — Repository and package layout
+### ADR-019 — Repository and package layout
 
-Status: DEFAULTED
+Status: DECIDED
 
-Default recommendation: a monorepo with independently buildable web, API, worker, contracts, connector SDK, and deployment packages. Confirm in CAP-00 after build-tool evaluation.
+Use one monorepo with `apps/web`, one installable Python package under `backend`, language-neutral contracts under `contracts`, a separately versioned `connector-sdk/python` boundary, Compose packaging under `deploy/compose`, engineering-only integrations under `engineering`, retained architecture fixtures under `tests/architecture-fixtures`, and repository automation under `tools`. Backend business ownership is module-first with internal layers. Cross-module imports use only `modules.<name>.public`. The complete rationale and dependency rules are recorded in `11-architecture-decisions-and-patterns.md`.
 
 ### ADR-PENDING-003 — Local event transport
 

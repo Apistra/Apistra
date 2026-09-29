@@ -48,7 +48,7 @@ Tests: CI-TS-01, CI-TS-02, CI-TS-10.
 
 ### WO-CAP-00-02 — Create the monorepo walking skeleton
 
-Status: BLOCKED by ADR-PENDING-002 review
+Status: DRAFT — repository layout and architecture-test foundation implemented; service health behaviour, complete clean-clone build evidence, and independent implementation review remain
 
 Result:
 
@@ -60,6 +60,9 @@ In scope:
 - pinned runtime and package-manager versions
 - minimal health interfaces
 - no business entities or workflow behaviour
+- one installable Python backend package with module-first internal layers
+- public-only cross-module contracts
+- retained positive and negative architecture fixtures
 
 Acceptance:
 
@@ -67,6 +70,8 @@ Acceptance:
 - services start without external SaaS;
 - architecture tests prove ARCH-001, ARCH-010, ARCH-011, and ARCH-013;
 - forbidden dependency fixture fails.
+
+Implementation note: ADR-019 resolves the repository-layout decision. The structural tests and CI-TS-03 integration are present, but this workorder is not DONE because the API and worker health processes, complete bootstrap matrix, hosted CI evidence, and independent review are separate remaining evidence.
 
 Tests: CI-TS-02 through CI-TS-07, CI-TS-15.
 

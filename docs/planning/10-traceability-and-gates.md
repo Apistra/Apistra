@@ -189,12 +189,11 @@ Every executed test or gate must bind:
 - No independent expectation review
 - No approved ADR for durable execution
 - No authentication implementation ADR
-- Architecture and pattern ADR catalogue is present but not yet approved
+- ADR-019 repository layout is approved and implemented; the remaining pattern ADRs still require qualified architecture review
 - No verified Softwaretest.it API contract or authorised project
 - Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
-- No architecture test tooling
+- Architecture test tooling and CI definitions exist; independent implementation review and accepted hosted-run evidence remain pending
 - No security control evidence
-- No CI workflow
 - No immutable candidate
 - No local staging deployment
 - No fixture generator

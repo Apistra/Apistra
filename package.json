@@ -1,0 +1,19 @@
+{
+  "name": "apistra",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": "24.19.0",
+    "pnpm": "12.8.1"
+  },
+  "scripts": {
+    "architecture": "node tools/architecture/verify-typescript-architecture.mjs && node tools/architecture/verify-typescript-fixtures.mjs",
+    "architecture:typescript": "node tools/architecture/verify-typescript-architecture.mjs",
+    "architecture:typescript-fixtures": "node tools/architecture/verify-typescript-fixtures.mjs"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "18.4.0",
+    "typescript": "6.0.3"
+  }
+}
