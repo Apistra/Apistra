@@ -1,0 +1,252 @@
+# Delivery and CI Contract
+
+Version: 0.1-draft
+Status: DRAFT
+
+## 1. Delivery principles
+
+- Build once, identify by digest, and promote the unchanged candidate.
+- No branch automatically deploys to any environment.
+- Every promotion is a pull request with required evidence and human approval.
+- Local staging is a real isolated Docker Compose profile, not a development server.
+- Product code cannot begin before CAP-00 proves the delivery path and Softwaretest.it publishing readiness.
+- Every capability ends with a local staging acceptance workorder.
+- A production environment is not yet defined.
+
+## 2. Branch model
+
+Feature branches:
+- Created from the intended integration base.
+- Contain one bounded workorder outcome.
+- Submit a pull request into test.
+
+test:
+- Integration branch for completed workorders.
+- Requires scope, quality, architecture, security, and test checks.
+- Never deploys automatically.
+
+staging:
+- Candidate branch.
+- Accepts promotion from test only.
+- Produces or selects the immutable release candidate.
+- An operator manually deploys the candidate digest to local staging.
+- Capability or release acceptance evidence is bound to this digest.
+
+main:
+- Accepted public baseline.
+- Accepts promotion from staging only.
+- No automatic deployment follows.
+- A main merge is not production approval.
+
+Direct pushes to test, staging, and main are prohibited.
+
+## 3. Environments
+
+Local development:
+- Fast feedback and component services
+- May use mocks and developer data
+- Not acceptance evidence
+
+CI:
+- Reproducible checks and immutable result artefacts
+- No interactive secrets
+- Untrusted pull requests isolated from protected credentials
+
+Local staging:
+- Separate Compose project, networks, volumes, ports, credentials, and synthetic fixtures
+- Starts from clean or explicitly versioned state
+- Receives exact candidate digest
+- Supports health, smoke, manual, recovery, and evidence collection
+
+Production:
+- DEFERRED
+- Requires a separate environment, operator, backup, TLS, DNS, access, monitoring, RPO, RTO, rollout, and rollback contract
+
+## 4. Artefact model
+
+Each candidate contains:
+
+- Immutable web, API, and worker container image digests
+- Versioned database migration set
+- Canonical API and workflow schemas
+- Dependency lockfiles
+- SBOM
+- Build provenance or equivalent signed build metadata where implemented
+- Test-definition version
+- Architecture and security rule-set versions
+- Evidence bundle references
+
+Tags are convenience labels and are never the acceptance identity.
+
+## 5. CI stage catalogue
+
+CI-TS-01 — Contract consistency
+- Trigger: every pull request
+- Scope: planning and workorder indexes, schemas, stable IDs, references
+- Oracle: no schema, reference, or transition violation; empty scope fails
+
+CI-TS-02 — Formatting and static analysis
+- Trigger: affected language or configuration
+- Scope: TypeScript, Python, YAML, JSON, Markdown, Docker and infrastructure files
+- Oracle: no blocking configured violation
+
+CI-TS-03 — Architecture rules
+- Trigger: source, package, build, or ARCH-rule changes
+- Scope: dependency directions, cycles, module APIs, type leaks, composition roots
+- Oracle: zero unauthorised dependencies; allowed fixture passes and forbidden fixture fails
+
+CI-TS-04 — Unit tests
+- Trigger: affected modules
+- Scope: domain, application, parsers, validation, policies, state machines
+- Oracle: all required tests pass; no mandatory suite has zero discovered tests
+
+CI-TS-05 — Component tests
+- Trigger: affected service or adapter
+- Scope: API, worker, web components, persistence adapters, provider adapters
+- Oracle: declared component contracts pass against controlled dependencies
+
+CI-TS-06 — Schema and consumer contracts
+- Trigger: API, workflow, event, connector, callback, or persistence contract changes
+- Scope: OpenAPI, JSON Schema, compatibility, round-trip
+- Oracle: compatible changes or explicit approved version break
+
+CI-TS-07 — Integration tests
+- Trigger: data, adapter, execution, or infrastructure changes
+- Scope: PostgreSQL, Qdrant, durable engine, model and connector simulators
+- Oracle: state, idempotency, transactions, and error paths match the contract
+
+CI-TS-08 — Automated BDD end-to-end
+- Trigger: business behaviour and final candidate gate
+- Scope: published workflow journeys with stable BDD IDs
+- Oracle: externally observable behaviour matches the approved specification
+
+CI-TS-09 — Security tests
+- Trigger: every candidate; deeper authenticated tests for affected attack surfaces
+- Scope: authorisation, project isolation, SSRF, injection, secrets, sessions, keys, policy, egress
+- Oracle: required positive controls succeed and negative controls fail without data or side effects
+
+CI-TS-10 — Supply-chain checks
+- Trigger: every candidate and dependency change
+- Scope: secrets, dependencies, licences, container, SBOM, workflow and deployment configuration
+- Oracle: no unhandled blocking finding; missing or empty report fails
+
+CI-TS-11 — Migration tests
+- Trigger: database, schema, persistence, or version changes
+- Scope: upgrade from supported previous state, failed migration recovery, forward compatibility
+- Oracle: deterministic success or safe documented recovery
+
+CI-TS-12 — Performance and resource limits
+- Trigger: runtime, query, ingestion, retrieval, and release candidates
+- Scope: agreed synthetic profiles and configured limits
+- Oracle: limits enforce safely; release thresholds are defined before execution
+
+CI-TS-13 — Resilience and recovery
+- Trigger: durable runtime, data, deployment, and final candidate
+- Scope: process restart, worker loss, endpoint timeout, uncertain response, restore, rollback or roll-forward
+- Oracle: no duplicate unsafe side effect and no unaudited state loss
+
+CI-TS-14 — UI accessibility and visual checks
+- Trigger: UI or design-token changes
+- Scope: approved pages, states, viewports, keyboard, focus, automated accessibility
+- Oracle: no blocking deviation from approved reference or WCAG contract
+
+CI-TS-15 — Packaging and Compose smoke
+- Trigger: every candidate
+- Scope: clean build, configuration, migration, startup, readiness, liveness, offline profile
+- Oracle: exact image digest starts and passes smoke checks
+
+CI-TS-16 — Softwaretest.it reporting
+- Trigger: after all other stages, and independently for retry
+- Scope: all actual results including passed, failed, skipped, error, and cancelled
+- Oracle: idempotent upload and round-trip receipt count and status match the immutable result bundle
+
+## 6. Stage execution and retries
+
+For the same candidate:
+
+- Retry only failed, cancelled, or technically invalid stages.
+- Reuse successful independent stages when suite, inputs, configuration, and relevant candidate parts have matching fingerprints.
+- Record every attempt.
+- A Softwaretest.it-only failure retries CI-TS-16 without rerunning tests.
+
+After a repair commit:
+
+- Rerun the failed stage.
+- Rerun stages invalidated by the changed code, contracts, dependencies, configuration, migrations, test definitions, policies, or environment.
+- When impact is unclear, widen the stage set and record the reason.
+
+Before a staging acceptance:
+
+- Run the complete scope-required matrix once against the exact unchanged candidate.
+
+## 7. CAP-00 bootstrap gate
+
+CAP-00 contains no business behaviour. It must prove:
+
+- protected branch and review flow
+- reproducible monorepo build
+- minimal web, API, and worker skeleton
+- immutable images and candidate manifest
+- Docker Compose local staging profile
+- externalised configuration and protected secrets
+- real or no-op migration mechanism
+- readiness, liveness, and smoke checks
+- structured logging, basic metrics, correlation, and deployment marker
+- SBOM and baseline supply-chain checks
+- automated result artefacts
+- Softwaretest.it preflight, publishing manifest, example result upload, round-trip, or an explicit blocking finding without invented endpoints
+- manual deployment of the exact digest to local staging
+- tested rollback or roll-forward recovery
+- retained evidence with commit, digest, stage attempts, environment, and recovery result
+
+No business workorder becomes READY until CAP-00 and publishing readiness pass.
+
+## 8. Softwaretest.it delivery contract
+
+Before a write:
+
+1. Retrieve the authoritative OpenAPI document from the intended instance.
+2. Verify base URL, version, authentication, scopes, rate limits, resources, statuses, steps, evidence, and idempotency.
+3. Run a read-only preflight.
+4. Validate synthetic example requests locally.
+5. Use minimum project-scoped credentials.
+
+Required logical resources:
+
+- Apistra project
+- Versioned release or capability test plan
+- Capabilities and processes
+- Automated and manual test definitions
+- Ordered manual steps
+- Test runs, attempts, statuses, evidence, and defects
+
+If the API lacks a required capability, publishing remains BLOCKED and a lossless local manifest is retained. No approximate endpoint or flattened manual test is allowed.
+
+## 9. Capability staging gate
+
+A capability is accepted only when:
+
+- all workorders are DONE;
+- the complete required matrix passed on the unchanged candidate;
+- all CI results are confirmed in Softwaretest.it;
+- the operator deployed the exact digest to isolated local staging;
+- migrations and configuration completed;
+- capability smoke, acceptance, security, and UI tests passed;
+- synthetic users and fixtures were verified;
+- required manual tests were executed from Softwaretest.it;
+- logs, metrics, traces, and audit show expected behaviour;
+- recovery is understood and, for elevated risk, demonstrated;
+- a human accepted the capability.
+
+## 10. Recovery
+
+CAP-00 selects and proves either:
+
+- rollback to the previous compatible image and schema state; or
+- roll-forward to a corrected candidate when database compatibility prevents rollback.
+
+Backups and restore are distinct evidence. A backup without a successful restore test is not recovery proof.
+
+## 11. Production boundary
+
+No production environment, deployment identity, or automatic release exists. Promotion to main records an accepted source and candidate baseline only. Any future production work requires explicit authorisation and a separate approved contract.
