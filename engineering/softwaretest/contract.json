@@ -1,0 +1,43 @@
+{
+  "observed_at": "2026-09-30",
+  "base_url": "https://softwaretest.it",
+  "openapi_path": "/api/v1/openapi.json",
+  "openapi_version": "3.0.3",
+  "api_title": "softwaretest.it REST API",
+  "api_version": "1.0.0",
+  "integration_guide": {
+    "path": "/api/v1/integration-guides/ci.json",
+    "contract": "softwaretest.it-ci-integration",
+    "version": "1.0.0",
+    "revision_header": "If-Match",
+    "idempotency_header": "Idempotency-Key",
+    "cycle_operations": ["cycle_create", "cycle_item_create", "cycle_start", "run_start"],
+    "failure_codes": [
+      "CYCLE_START_PRECONDITION_FAILED",
+      "REVISION_CONFLICT",
+      "IDEMPOTENCY_CONFLICT"
+    ]
+  },
+  "authentication": {"scheme": "ProjectBearer", "type": "http", "scheme_name": "bearer", "required_scopes": ["read", "execution:write", "testcase:write", "ci:write"]},
+  "operations": {
+    "integration_guide": ["GET", "/api/v1/integration-guides/ci.json"],
+    "project_read": ["GET", "/api/v1/projects/{project_id}"],
+    "definition_register": ["POST", "/api/v1/projects/{project_id}/automated-definitions"],
+    "execution_create": ["POST", "/api/v1/projects/{project_id}/automated-executions"],
+    "results_batch": ["POST", "/api/v1/projects/{project_id}/automated-executions/{execution_id}/results:batch"],
+    "ci_report_create": ["POST", "/api/v1/projects/{project_id}/ci-reports"],
+    "ci_report_entries": ["POST", "/api/v1/projects/{project_id}/ci-reports/{report_id}/entries"],
+    "ci_report_finalize": ["POST", "/api/v1/projects/{project_id}/ci-reports/{report_id}/finalize"],
+    "ci_report_readback": ["GET", "/api/v1/projects/{project_id}/ci-reports/{report_id}"],
+    "reporting_receipt_readback": ["GET", "/api/v1/projects/{project_id}/reporting-receipts/{receipt_id}"],
+    "cycle_list": ["GET", "/api/v1/projects/{project_id}/cycles"],
+    "cycle_create": ["POST", "/api/v1/projects/{project_id}/cycles"],
+    "cycle_item_create": ["POST", "/api/v1/projects/{project_id}/cycles/{cycle_id}/items"],
+    "cycle_start": ["POST", "/api/v1/projects/{project_id}/cycles/{cycle_id}:start"],
+    "run_list": ["GET", "/api/v1/projects/{project_id}/runs"],
+    "run_start": ["POST", "/api/v1/projects/{project_id}/runs/{run_id}:start"]
+  },
+  "result_statuses": ["PASSED", "FAILED", "SKIPPED", "ERROR", "CANCELLED"],
+  "final_statuses": ["COMPLETE", "INCOMPLETE", "REJECTED"],
+  "idempotency": "Every write requires Idempotency-Key; a 409 is a conflict and must not be silently treated as success."
+}

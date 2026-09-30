@@ -1,0 +1,12 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apistra Bootstrap API",
+    "version": "0.0.0-dev",
+    "description": "Health-only API shell for CAP-00. No business operations are exposed."
+  },
+  "paths": {
+    "/health/live": { "get": { "tags": ["health"], "operationId": "live_health_live_get", "responses": { "200": { "description": "Successful Response", "content": { "application/json": { "schema": { "additionalProperties": true, "type": "object", "title": "Response Live Health Live Get" } } } } } } },
+    "/health/ready": { "get": { "tags": ["health"], "operationId": "ready_health_ready_get", "responses": { "200": { "description": "Successful Response" } } } }
+  }
+}

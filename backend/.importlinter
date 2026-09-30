@@ -1,0 +1,50 @@
+[importlinter]
+root_package = apistra
+include_external_packages = True
+
+[importlinter:contract:domain-independence]
+name = ARCH-001 domain independence
+type = forbidden
+source_modules =
+    apistra.modules.projects.domain
+forbidden_modules =
+    apistra.modules.projects.application
+    apistra.modules.projects.ports
+    apistra.modules.projects.adapters
+    apistra.entrypoints
+    fastapi
+    openai
+    pydantic
+    qdrant_client
+    sqlalchemy
+
+[importlinter:contract:application-boundary]
+name = ARCH-002 application controls use cases
+type = forbidden
+source_modules =
+    apistra.modules.projects.application
+forbidden_modules =
+    apistra.modules.projects.adapters
+    apistra.entrypoints
+
+[importlinter:contract:ports-boundary]
+name = ARCH-003 ports remain provider neutral
+type = forbidden
+source_modules =
+    apistra.modules.projects.ports
+forbidden_modules =
+    apistra.modules.projects.application
+    apistra.modules.projects.adapters
+    apistra.entrypoints
+    fastapi
+    openai
+    qdrant_client
+    sqlalchemy
+
+[importlinter:contract:adapter-containment]
+name = ARCH-011 adapters do not own composition
+type = forbidden
+source_modules =
+    apistra.modules.projects.adapters
+forbidden_modules =
+    apistra.entrypoints

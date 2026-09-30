@@ -94,6 +94,9 @@ CI-TS-03 — Architecture rules
 - Trigger: source, package, build, or ARCH-rule changes
 - Scope: dependency directions, cycles, module APIs, type leaks, composition roots
 - Oracle: zero unauthorised dependencies; allowed fixture passes and forbidden fixture fails
+- Implemented commands: locked Python architecture pytest suite, Import Linter contracts, and the pnpm TypeScript architecture suite
+- Fail-closed controls: source discovery must be non-empty; retained positive fixtures pass; retained negative fixtures fail for the intended rule
+- Current CI jobs: `Architecture / Python` and `Architecture / TypeScript`, each with a ten-minute timeout and read-only repository permission
 
 CI-TS-04 — Unit tests
 - Trigger: affected modules
@@ -112,7 +115,7 @@ CI-TS-06 — Schema and consumer contracts
 
 CI-TS-07 — Integration tests
 - Trigger: data, adapter, execution, or infrastructure changes
-- Scope: PostgreSQL, Qdrant, durable engine, model and connector simulators
+- Scope: PostgreSQL, Qdrant, Apistra runtime persistence and dispatch, model and connector simulators
 - Oracle: state, idempotency, transactions, and error paths match the contract
 
 CI-TS-08 — Automated BDD end-to-end

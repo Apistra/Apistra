@@ -1,12 +1,12 @@
 # Apistra BuildBySpec Planning Baseline
 
-Version: 0.2-draft
-Date: 2026-09-29
+Version: 0.6-draft
+Date: 2026-09-30
 Language: English
 Assurance profile: EXTENDED
 Status: DRAFT
 
-This directory is the canonical planning baseline for Apistra. It describes the intended product and the gates that must be satisfied before implementation, capability acceptance, or any production release.
+This directory contains the cross-cutting planning baseline for Apistra. Canonical per-item contracts live under `docs/capabilities/` and `docs/workorders/`; the roadmap and catalogue documents here are indexes and gate views.
 
 No document in this baseline is implementation evidence. No capability is implemented, tested, accepted, deployed, or approved merely because it is described here.
 
@@ -18,12 +18,17 @@ No document in this baseline is implementation evidence. No capability is implem
 - 03-architecture.md — arc42 architecture, binding ARCH rules, and architecture diagrams
 - 04-security-concept.md — system-wide security concept and SEC rules
 - 05-delivery-ci-contract.md — branch, build, evidence, staging, recovery, and promotion contract
-- 06-test-architecture.md — system-centred test model, BPMN process references, and Softwaretest.it contract
+- 06-test-architecture.md — system-centred test model, BPMN process references, and technical evidence paths
+- ../testing/test-concept.md — test governance, levels, entry and exit criteria, defect handling, execution, evidence, and acceptance rules
+- ../testing/test-id-catalog.md — canonical behavioural scenario IDs, manual package namespaces, and allocation rules
 - 07-design-contract.md — brand, interaction, accessibility, and rendered visual design references
-- 08-capabilities-and-roadmap.md — gate-based release slices and capability outcomes
-- 09-workorders.md — gate-controlled workorder catalogue and execution order
+- 08-capabilities-and-roadmap.md — gate-based release index; detailed contracts are in `../capabilities/`
+- 09-workorders.md — readiness/index view; one execution contract per file is in `../workorders/`
 - 10-traceability-and-gates.md — requirement-to-evidence mappings and release gates
 - 11-architecture-decisions-and-patterns.md — concrete ADRs, pattern scope, prohibitions, and verification
+- 12-repository-path-contract.md — observed repository roots, planned capability package mapping, workorder path boundaries, and unresolved new-root decisions
+- ../../VERSIONING.md — product version authority, compatibility meaning, and release procedure
+- ../../CHANGELOG.md — curated history of user-visible, contract, security, and operational changes
 
 ## Governing rules
 
@@ -43,7 +48,10 @@ No document in this baseline is implementation evidence. No capability is implem
 - Security baseline: DRAFT
 - Delivery contract: DRAFT
 - Test architecture: DRAFT
+- Test concept: DRAFT
+- Versioning and changelog policy: DEFINED; no product release exists
 - Design direction: DECIDED, design evidence still PENDING
 - Independent expectation review: PENDING
-- CAP-00 implementation: BLOCKED until its workorders pass readiness review
+- CAP-00 implementation: IMPLEMENTED; version 0.5 is hosted verified, version 0.6 still needs current candidate evidence, and product-owner review/human acceptance are recorded; the authenticated Softwaretest.it receipt remains open
 - Business implementation: BLOCKED until CAP-00 and Softwaretest.it publishing readiness pass
+- Business workorder path contracts: COMPLETE AS PROPOSAL for all 133 workorders; qualified architecture review remains PENDING, with CAP-16 and CAP-17 new-root decisions BLOCKING

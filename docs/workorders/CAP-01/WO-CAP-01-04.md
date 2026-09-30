@@ -1,0 +1,209 @@
+# WO-CAP-01-04 — Publish and verify PRC-01 test definitions
+
+Version: 0.6-draft
+Status: DRAFT
+Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
+Implementation state: LOCAL DEFINITIONS, BDD, AND FIXTURE DESCRIPTORS COMPLETE; PUBLICATION PENDING
+Evidence state: LOCAL VALIDATION PASSED; NOT PUBLISHED OR EXECUTED
+Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
+Assurance: EXTENDED
+
+## Status and traceability
+
+- Requirements: REQ-001, REQ-002, REQ-016, REQ-017
+- Process: PRC-01
+- Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
+- CI test group: TST-WO-CAP-01-04
+- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: test-definition-and-publication
+- Owned verification group: TST-WO-CAP-01-04
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+
+## Risk profile and escalation
+
+EXTENDED applies because this workorder affects authorization, tenant_isolation, and secrets. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
+
+## Baselines and contract delta
+
+- Product: ../../planning/01-product-scope.md
+- Decisions: ../../planning/02-decision-register.md
+- Architecture/patterns: ../../planning/03-architecture.md and ../../planning/11-architecture-decisions-and-patterns.md
+- Security: ../../planning/04-security-concept.md
+- Delivery, tests, design: ../../planning/05-delivery-ci-contract.md through ../../planning/07-design-contract.md
+- Delta: deliver only “Publish and verify PRC-01 test definitions”; all other baseline behavior remains unchanged.
+
+## Context and current behavior
+
+Six reviewed `MTP-PRC-01` definitions, BDD-AUTH-001, BDD-PROJ-001, and deterministic CAP-01 fixture descriptors exist locally. Design revision 0.3 and the CAP-01 expectation, architecture, security, and path review are approved. No definition has been published or executed; the authenticated Softwaretest.it write/read receipt remains the only workorder blocker.
+
+## Target result
+
+The complete PRC-01 capability test package is versioned locally, idempotently published to Softwaretest.it, and verified by field- and step-level read-back before behavioral implementation becomes READY.
+
+## Prerequisites
+
+- Dependencies: CAP-00
+- GATE-CAP00-DONE and Softwaretest.it publishing readiness for business implementation
+- Approved expectation review for this specification revision
+- Approved ADRs, security decisions, and design references actually used by this workorder
+
+## Scope
+
+- Derive automated BDD scenarios, independent manual process/UI/security cases, atomic steps, fixtures, roles, data, requirement/risk links, and CI-stage mappings from the approved capability contracts.
+- Publish or update definitions idempotently through the verified API and read back identifiers, fields, ordering, and links.
+- Preserve a lossless local manifest/outbox when authorised publication is unavailable; do not execute the tests in this workorder.
+
+## Non-goals and prohibited side effects
+
+- No unrelated refactor, dependency, connector, node type, role, production target, or automatic deployment
+- No secret values in definitions, logs, exports, fixtures, screenshots, or evidence
+- No weakening of architecture tests, required CI stages, security rules, or prior accepted behavior
+- No new repository path or module boundary before it is reconciled with the observed ADR-019 layout
+
+## Allowed changes
+
+Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
+
+Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+
+Observed existing paths within the bounded change area:
+
+- EXISTING: `docs/workorders/CAP-01/WO-CAP-01-04.md`
+- EXISTING: `docs/capabilities/CAP-01-installation-and-isolated-project-administration.md`
+- EXISTING: `CHANGELOG.md`
+- EXISTING: `docs/testing/test-id-catalog.md`
+- EXISTING: `engineering/softwaretest/`
+- EXISTING: `tools/fixtures/`
+- EXISTING: `tests/bdd/`
+
+Planned additions to the bounded change area after READY:
+
+- PLANNED: `docs/testing/manual/PRC-01/`
+- PLANNED: `tests/bdd/features/cap_01/`
+- PLANNED: `tools/fixtures/cap_01/`
+
+Workorder-class boundary: Test definition and publication only; no product runtime implementation is authorised. Changes stay within local definitions, fixtures, the engineering adapter, and directly affected documentation.
+
+Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
+
+Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
+
+## Stop conditions
+
+- CAP-00 or another prerequisite is not accepted
+- A required ADR, schema, identity, project boundary, design state, authorised test target, or Softwaretest.it resource is missing
+- The observed repository contradicts this workorder
+- Acceptance would require an unlisted external mutation, destructive test, or production deployment
+- A blocking architecture/security finding or ambiguous expected behavior appears
+
+## Technical guardrails
+
+- Application Service/use-case entrypoints coordinate behavior; domain code remains framework-independent.
+- Ports and Adapters apply only at volatile or security-relevant boundaries.
+- Persisted lifecycles use explicit state machines; external redelivery uses outbox/inbox/idempotency where applicable.
+- Schema-first boundary mappers prevent vendor or transport models from entering domain code.
+- Mutable administration uses optimistic concurrency; no global CQRS or Event Sourcing is introduced.
+
+No new UI is authorised unless the capability design contract explicitly assigns one.
+
+## ARCH rules and pattern limits
+
+- Rules: ARCH-010, ARCH-012
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
+- ADRs/patterns: ADR-002, ADR-010, ADR-013, ADR-017, ADR-018, ADR-019
+- Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
+- Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
+
+## SEC rules and safe test conditions
+
+- Rules: SEC-002, SEC-011, SEC-012, SEC-015
+- Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
+- Tests use only authorised local/staging targets and synthetic project-scoped data.
+- Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
+- Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
+
+## Acceptance criteria
+
+1. Every externally observable capability acceptance criterion has a stable BDD ID or an explicit not-applicable rationale.
+2. Every business process has a complete manual package starting at logged-out sign-in, with atomic role-prefixed action/observation steps, concrete synthetic data, and one matching expected result per step.
+3. Publication is idempotent and field-/order-level read-back matches the local version and checksums.
+4. Definition, publication, fixture readiness, execution, result reporting, and capability acceptance remain distinct statuses.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
+- **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
+- **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+
+## Expectation sources and independent review
+
+- Sources: confirmed product decisions, the linked capability, requirements REQ-001, REQ-002, REQ-016, REQ-017, process PRC-01, and cited architecture/security/design contracts.
+- Positive expectation: The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
+- Counterexample: A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
+- The independent derivation, comparison, discrepancy resolution, and human confirmation are recorded in ../../planning/13-cap01-readiness-review.md; a material source change invalidates that review.
+
+## Required tests
+
+- TST-WO-CAP-01-04: definition schema, ID uniqueness, traceability, atomic-step structure, and local manifest validation in CI-TS-01/CI-TS-06.
+- Softwaretest.it adapter contract and idempotency tests in CI-TS-06 and CI-TS-16.
+- Authorised live round-trip proving project/plan/case fields and manual-step order.
+- No behavioral test result is created by publishing a definition.
+
+## BDD and manual tests
+
+This workorder owns definition and publication of the catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) and manual package `MTP-PRC-01`. The following IDs and local definitions are reserved:
+
+- `MT-PRC-01-001` — single bootstrap Administrator creation
+- `MT-PRC-01-002` — completed-bootstrap UI and route lockout
+- `MT-PRC-01-003` — invalid sign-in without account disclosure
+- `MT-PRC-01-004` — session revocation and reuse denial
+- `MT-PRC-01-005` — isolated project creation and attributable audit
+- `MT-PRC-01-006` — foreign-project denial without disclosure
+
+The package manifest is `../../testing/manual/PRC-01/README.md`; each case has one file in the same directory. The reviewed definitions remain `DRAFT`, `NOT PUBLISHED`, and `NOT EXECUTED`. Local design, review, BDD, and fixture-descriptor gates are complete. Publication now waits only for the authenticated Softwaretest.it write/read path. Actual fixture application and execution remain with WO-CAP-01-05 against the unchanged staging candidate.
+
+## Softwaretest.it and CI reporting
+
+Definitions must be idempotently published and field-level round-tripped before execution. All CI stage and individual results are reported with candidate identity and all statuses. A reporting-only failure retries the reporting stage and never reruns successful tests.
+
+## CI retry and evidence reuse
+
+Retry only a failed/aborted/invalid stage for an unchanged candidate. After a repair commit, rerun that stage plus stages invalidated by recorded change impact. Before capability acceptance, run the complete required matrix once against the exact unchanged candidate.
+
+## Deployment and staging evidence
+
+No product candidate is accepted. Only the engineering test-management target is changed, using minimum authorised project-scoped credentials and a lossless local outbox on failure.
+
+## Documentation and evidence
+
+- Updated contracts/ADRs only where their approved delta requires it
+- Test definitions/results, architecture/security evidence, and redacted diagnostics
+- Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
+- No invented pass, approval, cost, duration, or external receipt
+
+## Definition of Done
+
+- Complete local test package and traceability manifest pass structural review
+- Authorised Softwaretest.it publication and field-/step-level read-back are confirmed, or the workorder remains BLOCKED
+- Consumer workorders reference stable IDs and execution ownership
+- No unexecuted definition is reported as a passed test
+
+## Workorder completion versus capability acceptance
+
+DONE proves only this integrated result. CAP-01 remains unaccepted until every workorder is DONE, the unchanged candidate passes the full scope matrix on staging, required manual tests and Softwaretest.it reporting are confirmed, and an authorised human accepts the capability.
+
+## Events, rework, and cost
+
+Record available intake, READY, start, wait/resume, review, acceptance, reopen, rework, intervention, escaped-defect, and cost evidence. Unknown time or cost remains unknown; no new dashboard is a prerequisite.
+
+## Dependencies and follow-up
+
+- Upstream capabilities/gates: CAP-00
+- Required workorders: none within this capability
+- Downstream acceptance owner: WO-CAP-01-05
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.
