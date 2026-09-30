@@ -21,7 +21,7 @@ The repository is public and developed in public. External contributions are not
 
 Status: DECIDED
 
-The public distribution uses AGPL plus a commercial licence alternative. Legal wording and commercial terms require legal approval.
+Apistra is developed in public as source-available software. PolyForm Noncommercial 1.0.0 covers its permitted noncommercial purposes; PolyForm Free Trial 1.0.0 permits company evaluation for fewer than 32 consecutive calendar days; productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, or managed-service operation requires a separately signed Apistra Commercial License. This is not represented as OSI-approved Open Source. Jens Bekersch is the licensor and copyright holder. Previously published AGPL versions retain their granted rights. `LICENSE-TRANSITION.md` records the exact boundary, notice, and contact details.
 
 ### DEC-004 — Architecture stack
 
@@ -31,7 +31,7 @@ Status: DECIDED
 - API and AI components: Python and FastAPI
 - Platform database: PostgreSQL
 - Initial vector store: Qdrant behind a replaceable port
-- Execution: separate workers and a proven durable-execution component selected through an ADR
+- Execution: separate workers and an Apistra-owned durable-execution runtime; no external orchestration product or control plane is a runtime prerequisite
 - Packaging: container images and Docker Compose
 
 ### DEC-005 — Deployment topology
@@ -134,7 +134,7 @@ All repository documentation, code identifiers, APIs, workorders, test definitio
 
 Status: DECIDED
 
-Commercial entitlements are verified locally from a cryptographically signed offline licence file. The AGPL distribution does not require a licence file. Mandatory phone-home verification is prohibited.
+The noncommercial and evaluation distributions do not require online activation. Where a commercial agreement grants machine-verifiable entitlements, they are verified locally from a cryptographically signed offline licence file. Mandatory phone-home verification is prohibited. Contractual licence rights and technical entitlements remain distinct.
 
 ### DEC-022 — Visual direction and logo
 
@@ -144,11 +144,11 @@ The existing dark technical workflow-editor direction is the starting visual ref
 
 ## Decisions delegated to controlled ADRs
 
-### ADR-PENDING-001 — Durable execution engine
+### ADR-020 — Apistra-owned durable execution runtime
 
-Status: BLOCKING for runtime implementation
+Status: DECIDED
 
-Select a proven component after a focused evaluation of durability, local and offline deployment, PostgreSQL compatibility, worker model, pause and resume, cancellation, retry semantics, licensing, operability, and recovery. Do not build a bespoke distributed job engine.
+Apistra owns and implements its durable orchestration runtime. No external workflow engine, orchestration server, hosted control plane, licence service, or paid management product is required for execution, recovery, diagnosis, or offline operation. PostgreSQL is the durable system of record. The runtime is delivered incrementally through persisted state machines, an append-only execution journal, transactional outbox and inbox, lease-based dispatch, idempotency records, durable timers, cancellation, human signals, explicit compensation, versioning, and recovery. Libraries are allowed only when they work offline, are licence-compatible, pinned, inventoried, replaceable behind owned boundaries, and practically forkable or maintainable.
 
 ### ADR-019 — Repository and package layout
 
@@ -160,19 +160,19 @@ Use one monorepo with `apps/web`, one installable Python package under `backend`
 
 Status: DEFERRED
 
-Prefer the simplest transport supported by the durable engine and local deployment requirements. Do not introduce Kafka or an equivalent platform without a measured requirement.
+Prefer PostgreSQL-backed dispatch within the owned Apistra runtime until measured throughput or isolation requirements justify another locally controlled transport. Do not introduce Kafka or an equivalent platform without a measured requirement and a separate ADR.
 
-### ADR-PENDING-004 — Authentication implementation
+### ADR-021 — Local authentication implementation
 
-Status: BLOCKING for identity implementation
+Status: DECIDED
 
-Select established password hashing, session, CSRF, recovery, and bootstrap mechanisms. Do not implement custom cryptography or token protocols.
+Release 0.1 uses local Administrator authentication with Argon2id password hashing and opaque server-side sessions stored in PostgreSQL. Browser sessions use secure, HTTP-only, same-site cookies and server-side CSRF protection. The first Administrator is created through a single-use local CLI bootstrap; privileged local recovery replaces any email or online dependency. Sessions are revocable and rotated at security-sensitive transitions. Apistra does not invent cryptography, browser token protocols, or OAuth/OIDC; enterprise identity remains deferred to CAP-15.
 
-### ADR-PENDING-005 — Commercial feature boundary
+### ADR-022 — Source-available and commercial licensing boundary
 
-Status: BLOCKING before commercial release
+Status: DECIDED; IMPLEMENTED
 
-Define which rights or services are governed by the commercial licence without degrading the usable AGPL product or creating a mandatory online dependency.
+Apistra releases from the transition commit use PolyForm Noncommercial 1.0.0 for its permitted noncommercial purposes and PolyForm Free Trial 1.0.0 for company evaluation for fewer than 32 consecutive calendar days. Productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, and managed-service operation require a separate licence signed by the licensee and Jens Bekersch. The repository remains public and build-in-public but is described as source available, not OSI Open Source. Existing AGPL grants remain valid for versions already published. `LICENSE`, `NOTICE`, `COMMERCIAL-LICENSE.md`, and `LICENSE-TRANSITION.md` implement the decision without mandatory online activation.
 
 ## Explicitly deferred decisions
 

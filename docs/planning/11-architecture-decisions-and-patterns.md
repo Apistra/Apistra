@@ -58,7 +58,7 @@ Status: PROPOSED
 
 ### Context and decision
 
-Model providers, embedding providers, vector stores, connectors, durable engines, identity systems, licences, clocks, identifiers, and external tools can vary or introduce vendor-specific semantics.
+Model providers, embedding providers, vector stores, connectors, identity systems, licences, clocks, identifiers, and external tools can vary or introduce vendor-specific semantics. Durable orchestration is an owned Apistra capability and is not delegated to a third-party product.
 
 Use Ports and Adapters for:
 
@@ -179,26 +179,29 @@ Verification:
 
 Transition-table tests, invalid-transition property tests, optimistic-concurrency tests, restart tests, and timeout tests.
 
-## ADR-006 — Durable Saga and Process Manager for workflow runs
+## ADR-006 — Apistra-owned durable Saga and Process Manager
 
-Status: PROPOSED at pattern level; engine selection remains BLOCKING
+Status: PROPOSED at pattern level; product ownership is decided by ADR-020
 
 ### Context and decision
 
 Workflow runs span model calls, connectors, tools, approvals, timers, retries, callbacks, and process restarts. A database transaction cannot cover them.
 
-Model each run as a durable process manager implemented through the selected durable execution engine. It owns orchestration, checkpoints, timers, retry decisions, cancellation, and explicit compensation commands.
+Model each run as a durable process manager implemented by the Apistra runtime. It owns orchestration, checkpoints, timers, retry decisions, cancellation, and explicit compensation commands. PostgreSQL is the durable system of record; API and worker processes remain replaceable execution hosts.
 
 The workflow graph is execution data interpreted by a versioned runtime. Side effects remain in activities or adapters and are protected by idempotency or compensation.
+
+The owned runtime is split into persisted state machines, an append-only execution journal, transactional outbox and inbox records, lease-based dispatch, idempotency records, durable timers, human-signal intake, and explicit recovery operations. Current state remains directly queryable; the journal does not introduce global Event Sourcing.
 
 Prohibited:
 
 - In-memory orchestration in an API process.
 - Distributed two-phase commit across external systems.
 - Automatic compensation without an explicitly defined safe inverse.
-- Building a bespoke durable engine.
+- A runtime dependency on an external workflow engine, hosted control plane, online licence service, or paid management product.
+- Embedding orchestration semantics in a replaceable library or adapter.
 
-ADR-PENDING-001 must select the engine based on offline deployment, PostgreSQL support, licensing, worker model, pause and resume, cancellation, visibility, recovery, and operations.
+Runtime delivery is incremental: durable sequential execution; graph decisions and fan-out/fan-in; human waits and signals; operational pause, resume, cancellation, and diagnosis; compensation and uncertain-response recovery; then measured scale, priority, and fairness. Each slice must pass crash, duplicate-delivery, stale-lease, version-compatibility, and recovery tests before later slices rely on it.
 
 Verification:
 
@@ -556,6 +559,46 @@ Use uv for the Python project and pnpm workspaces for TypeScript. Do not add Nx,
 
 CI-TS-03 runs Import Linter, pytest plus AST rules, Dependency Cruiser, and pnpm workspace-cycle protection. Source discovery fails closed on an empty scope. Retained allowed fixtures must pass and retained forbidden fixtures must fail. No initial exceptions exist; a future exception requires rule ID, reason, owner, expiry, removal workorder, and approval.
 
+## ADR-020 — Apistra-owned durable execution runtime
+
+Status: DECIDED
+
+Decision date: 2026-09-30
+
+### Context and decision
+
+Durable orchestration is part of Apistra's differentiating product capability. Depending on an external workflow product or its control plane would make offline operation, commercial continuity, and core behaviour subject to another provider's pricing, roadmap, availability, and licence decisions.
+
+Apistra therefore owns the execution state model, scheduler and dispatcher semantics, worker protocol, timer and signal handling, idempotency and recovery rules, operational inspection model, and compatibility contract. PostgreSQL provides durable storage and concurrency primitives but does not own product semantics.
+
+Third-party libraries may implement generic technical mechanisms only when they are offline-capable, licence-compatible, pinned, inventoried, isolated behind an owned boundary, and practically replaceable or forkable. No external orchestration server, SaaS, control plane, licence service, or paid feature is required to start, execute, recover, inspect, or administer a run.
+
+### Consequences and verification
+
+- CAP-06 owns the first vertically usable durable runtime rather than integrating an external engine.
+- CAP-07 adds durable human interaction; CAP-08 adds advanced graph control without replacing the runtime core.
+- ARCH-008 and ARCH-009 remain mandatory; a new dependency rule rejects imports or deployment dependencies on third-party orchestration products.
+- Worker-loss, restart, duplicate delivery, lease expiry, stale result, cancellation, approval resume, timer recovery, version evolution, backup/restore, and uncertain external response are mandatory test classes.
+- Runtime scope grows only through accepted capability slices; a general-purpose BPM platform is not implied.
+
+## ADR-021 — Local Administrator authentication
+
+Status: DECIDED
+
+Decision date: 2026-09-30
+
+Release 0.1 uses local Administrator authentication suitable for offline installation. Passwords use Argon2id through an established library. Browser authentication uses opaque, revocable server-side sessions stored in PostgreSQL and secure, HTTP-only, same-site cookies with server-side CSRF protection. Bootstrap and recovery are local privileged CLI operations with no default credential, email, hosted identity, or phone-home dependency. Session rotation, timeout, revocation, and security events are explicit and testable. OIDC and enterprise identity remain CAP-15 concerns.
+
+## ADR-022 — Source-available and commercial licensing boundary
+
+Status: DECIDED; IMPLEMENTED
+
+Decision date: 2026-09-30
+
+Releases from the transition commit are source available under PolyForm Noncommercial 1.0.0 for its permitted purposes, with PolyForm Free Trial 1.0.0 as the company-evaluation path for fewer than 32 consecutive calendar days. Productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, and managed-service operation require a separate licence signed by the licensee and Jens Bekersch.
+
+Apistra must not be described as OSI Open Source under this model. Existing AGPL grants remain valid for versions already published. `LICENSE-TRANSITION.md` identifies the last AGPL commit and the first source-available commit; `NOTICE` supplies the Required Notice; `COMMERCIAL-LICENSE.md` contains the standard commercial terms. External contributions remain closed until an explicit compatible rights grant is introduced. No mandatory online activation is introduced.
+
 ## Pattern-to-module summary
 
 Cross-cutting backend:
@@ -576,7 +619,7 @@ Workflow runtime:
 
 External integration:
 
-- Ports and Adapters: providers, connectors, vector store, durable engine, tools, identity, licence
+- Ports and Adapters: providers, connectors, vector store, worker execution mechanisms, tools, identity, licence
 - Strategy: versioned implementation selection
 - Anti-Corruption Layer: request, result, usage, and error translation
 
@@ -598,4 +641,4 @@ Deliberately not selected globally:
 
 ## Decision gate
 
-ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-001 through ADR-018 remain PROPOSED until qualified architecture review. ADR-PENDING-001 for the durable engine and ADR-PENDING-004 for authentication implementation still block their dependent workorders.
+ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-022 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED until qualified architecture review. The former durable-engine and authentication product decisions no longer block their dependent workorders, but the detailed runtime and security workorders still require their own expectation and architecture/security reviews before READY.

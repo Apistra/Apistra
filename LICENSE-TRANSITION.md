@@ -9,9 +9,8 @@ grant to the source-available licensing paths described in [LICENSE](LICENSE).
 
 - Last commit released under GNU AGPL version 3:
   `af526acf70345f2d94ad6af2663bf9b6c07bd6f1`
-- First source-available commit: recorded after the dedicated transition commit
-  is created; the transition commit is the first commit whose tree contains
-  this record and the source-available root `LICENSE`.
+- First source-available commit:
+  `b05d895d75f77947180ff5bec2ef39d63824845f`.
 - Product version at transition: `0.0.0` (unreleased CAP-00 development
   baseline; this is a licensing transition, not a product release).
 - Decision and transition date: 2026-09-30.

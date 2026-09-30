@@ -16,12 +16,16 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Isolated manual local-staging verification with health, deployment markers, controlled failure, and unchanged-image recovery.
 - GitHub Actions gates for contracts/static checks, architecture, tests, security/supply chain, and candidate packaging.
 - Public Softwaretest.it OpenAPI preflight, result-bundle contract, dry-run publisher, lossless outbox, and adapter tests.
+- Protected GitHub `softwaretest` environment, trusted-branch reporting job, authenticated reporting preflight, cycle resolution, field-level report readback, and redacted atomic receipt support.
 - Synthetic CAP-00 engineering fixtures and secret-detection proof fixture.
 - AGPLv3 licence, commercial-licence notice, contribution policy, security policy, issue templates, pull-request template, CODEOWNERS, and expected branch-protection contract.
 - System-centred test architecture and operational test concept.
 - Repository-wide Semantic Versioning policy and central `VERSION` authority.
 - Canonical semantic behavioural test-ID and process-level manual package catalogue.
 - ARCH-015 for explicit, versioned, fail-closed policy decisions.
+- Product-owner decisions ADR-020 through ADR-022 for the Apistra-owned durable runtime, local Administrator authentication, and the implemented source-available licensing boundary.
+- Source-available licence set with PolyForm Noncommercial 1.0.0, PolyForm Free Trial 1.0.0, standard commercial terms, Required Notice, and an explicit historical AGPL boundary.
+- CAP-00 independent review and human bootstrap acceptance record; external reporting evidence remains separate.
 
 ### Changed
 
@@ -34,6 +38,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Applied Ruff-compatible formatting to the repository contract validator.
 - Removed generated `BDD-CAP-*`, `BDD-WO-*`, and `MT-CAP-*` aliases from workorders and reconciled process mappings with the canonical catalogue.
 - Reconciled the control overview with successful GitHub Actions run 36637376129 while keeping version 0.6 evidence explicitly local until hosted validation.
+- Enabled solo-maintainer-safe live branch protection on `test`, `staging`, and `main`, including strict required checks and administrator enforcement.
 
 ### Security
 
@@ -42,6 +47,6 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Known limitations
 
-- CAP-00 formal acceptance still requires live branch protection, an authenticated Softwaretest.it write/read round-trip, independent review, and human bootstrap acceptance.
+- CAP-00 formal completion still requires clarification of Softwaretest.it's undocumented automation-resource prerequisite and a successful authenticated write/read round-trip with receipts bound to the final immutable candidate. Independent review and human bootstrap acceptance were recorded on 2026-09-30. All required token scopes, authenticated reads, testcase writes, direct run planning, and cycle activation are confirmed.
 - CAP-01 through CAP-18 are planning contracts only and are not implemented or accepted.
 - No production environment or automatic deployment path exists.

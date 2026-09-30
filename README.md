@@ -25,7 +25,7 @@ The current BuildBySpec planning package starts at [docs/planning/README.md](doc
 
 Granular product slices are maintained as [one file per capability](docs/capabilities/README.md) and [one execution contract per workorder](docs/workorders/README.md).
 
-The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. The final CAP-00 gate still requires repository branch protection, an authorised Softwaretest.it round-trip, independent review, and explicit human acceptance.
+The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. Branch protection, independent review, and explicit human acceptance are recorded; the final CAP-00 gate still requires the authorised Softwaretest.it round-trip and receipt bound to the unchanged final candidate.
 
 The operational test rules are defined in the [Test Concept](docs/testing/test-concept.md); the system test structure remains in the [Test Architecture](docs/planning/06-test-architecture.md).
 
@@ -43,7 +43,7 @@ Build, staging, recovery, evidence, and cleanup commands are documented in [docs
 
 ## Licensing
 
-The repository is offered under the [GNU Affero General Public License version 3](LICENSE). A separate commercial agreement is described in [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md); no commercial licence is granted without a signed agreement.
+Apistra is source available under the paths described in [LICENSE](LICENSE): PolyForm Noncommercial 1.0.0 for its permitted purposes, PolyForm Free Trial 1.0.0 for a company evaluation of fewer than 32 consecutive calendar days, or a separately signed [Apistra Commercial License](COMMERCIAL-LICENSE.md). Apistra is not represented as OSI Open Source under this model. Earlier revisions retain their historical GNU AGPL version 3 grants; the exact boundary is recorded in [LICENSE-TRANSITION.md](LICENSE-TRANSITION.md).
 
 ## Contributions
 
