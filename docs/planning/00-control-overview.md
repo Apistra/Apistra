@@ -23,7 +23,8 @@ Implementation:
 
 Evidence:
 
-- GitHub Actions run 36637376129 passed all five required jobs for commit e57ab19 and the version 0.5 workorder baseline. The version 0.6 correction is locally verified only until it is committed, pushed, and accepted by a new hosted run.
+- GitHub Actions run 36637376129 passed all five required jobs for commit e57ab19 and the version 0.5 workorder baseline. Version 0.6 run 36645427566 passed four jobs but exposed Ruff B023 closure binding errors in the repository validator; the repair requires a new hosted run.
+- Live branch protection is enabled for `test`, `staging`, and `main`: pull requests, strict required checks, linear history, resolved conversations, administrator enforcement, and force-push/deletion prevention are active. Required approvals and CODEOWNERS reviews are deliberately disabled while the repository has only one maintainer.
 - The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, exact workflow statuses and separated state fields, canonical test IDs, delivery classes, positive/negative oracles, rule references and applicability, dependency existence and acyclicity, catalogue membership, local links, and forbidden generic boilerplate.
 - The public Softwaretest.it OpenAPI preflight and dry-run adapter tests pass; an authenticated project/test-plan round-trip remains unavailable.
 - Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
@@ -32,22 +33,18 @@ Approval:
 
 - Confirmed product decisions remain recorded in 02-decision-register.md.
 - ADR-019 is approved and implemented; ADR-001 through ADR-018 still require qualified review.
+- ADR-020 through ADR-022 are product-owner approved. ADR-022 is implemented by the source-available licence set and the exact boundary recorded in `LICENSE-TRANSITION.md`.
+- CAP-00 independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30; no production approval is inferred.
 - Design sources exist but the product-owner design gate remains pending.
 - No business capability, release, or production approval exists.
 
 ## 4. Blocking obligations
 
-1. Configure live branch protection for test, staging, and main.
-2. Complete the authorised Softwaretest.it project/test-plan write and field-level read-back.
-3. Complete independent expectation and CAP-00 implementation reviews.
-4. Record human CAP-00 bootstrap acceptance.
-5. Before each business workorder becomes READY, close its named architecture, security, design, test-management, and prerequisite decisions.
+1. Complete the authorised Softwaretest.it project/test-plan write and field-level read-back.
+2. Bind the Softwaretest.it receipt, complete required matrix, staging environment, and recorded human decision to the same immutable final candidate.
+3. Before each business workorder becomes READY, close its named architecture, security, design, test-management, and prerequisite decisions.
 
 ## 5. Next responsible steps
-
-Repository administrator:
-
-- Configure branch protection without creating an impossible solo-review policy.
 
 Authorised test-management operator:
 
@@ -55,10 +52,10 @@ Authorised test-management operator:
 
 Independent reviewer and product owner:
 
-- Review CAP-00 evidence and the version 0.6 workorder-contract delta.
-- Resolve the remaining architecture/design decisions for the next selected capability.
+- Re-review CAP-00 only if change-impact analysis identifies a material change to the accepted behaviour or boundary.
+- Complete the detailed architecture/security expectation review for the next selected capability.
 - Approve no more than one or two independent first workorders as READY.
 
 ## 6. Decision required now
 
-No business implementation should begin yet. The next human decision is how branch review will work with the current single repository owner and who performs the independent CAP-00 acceptance review.
+No business implementation should begin until GATE-CAP00-DONE and publishing readiness close. The CAP-00 review and human acceptance decisions are recorded. The next external step is the provider fix and authenticated receipt; the next internal decisions concern detailed CAP-01 security defaults and the CAP-06 runtime slices. Required PR approvals and CODEOWNERS review must be reconsidered when a second qualified maintainer joins.

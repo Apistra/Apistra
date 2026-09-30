@@ -146,9 +146,9 @@ An Administrator observes health and runs, backs up state, restores it, and diag
 
 ## 8. Commercial and licensing model
 
-The public repository uses AGPL with a commercial alternative. Research and trial use can use the public distribution. Productive proprietary use can obtain a commercial licence. The licence mechanism uses a locally verified signed licence file and does not require mandatory phone-home communication.
+The public repository is transitioning from AGPL to a source-available model for future releases. PolyForm Noncommercial 1.0.0 covers its defined noncommercial purposes. PolyForm Free Trial 1.0.0 covers a 32-day company evaluation without distribution. Productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, and managed-service operation require a separately signed Apistra Commercial License. Mandatory phone-home communication is prohibited; a signed offline licence file may carry machine-verifiable commercial entitlements but does not replace the legal agreement.
 
-The exact legal text, copyright ownership, commercial terms, and feature entitlements require qualified legal review before the first public release.
+Already published AGPL versions remain available under their existing grant. The repository `LICENSE`, copyright notice, commercial terms, rights-holder identity, and exact transition boundary implement ADR-022; `LICENSE-TRANSITION.md` is the canonical boundary record.
 
 ## 9. Success criteria
 
