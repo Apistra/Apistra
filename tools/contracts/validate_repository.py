@@ -396,23 +396,21 @@ def validate_business_path_contract(
         if not observed.exists():
             errors.append(f"{path}: observed EXISTING path does not exist: {relative}")
 
-    if workorder_id.startswith("WO-CAP-16-"):
-        if (
-            "Architecture path gate: BLOCKING" not in allowed_section
-            or "`contracts/plugins/`" not in allowed_section
-            or "`plugin-sdk/python/`" not in allowed_section
-        ):
-            errors.append(
-                f"{path}: CAP-16 must retain the plugin-root architecture blocker"
-            )
-    if workorder_id.startswith("WO-CAP-17-"):
-        if (
-            "Architecture path gate: BLOCKING" not in allowed_section
-            or "`deploy/kubernetes/`" not in allowed_section
-        ):
-            errors.append(
-                f"{path}: CAP-17 must retain the Kubernetes-root architecture blocker"
-            )
+    if workorder_id.startswith("WO-CAP-16-") and (
+        "Architecture path gate: BLOCKING" not in allowed_section
+        or "`contracts/plugins/`" not in allowed_section
+        or "`plugin-sdk/python/`" not in allowed_section
+    ):
+        errors.append(
+            f"{path}: CAP-16 must retain the plugin-root architecture blocker"
+        )
+    if workorder_id.startswith("WO-CAP-17-") and (
+        "Architecture path gate: BLOCKING" not in allowed_section
+        or "`deploy/kubernetes/`" not in allowed_section
+    ):
+        errors.append(
+            f"{path}: CAP-17 must retain the Kubernetes-root architecture blocker"
+        )
     return errors
 
 
