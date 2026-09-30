@@ -1,7 +1,7 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 0.2-draft
-Status: DRAFT; implementation blocked by prerequisite gates
+Version: 0.3-draft
+Status: DRAFT; only external Softwaretest.it publishing readiness blocks implementation READY
 Release: 0.1
 Assurance: EXTENDED
 
@@ -9,8 +9,8 @@ Assurance: EXTENDED
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
 **Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** CAP-00 completion and the independent CAP-01 expectation/security review block implementation READY; the authentication mechanism is decided by ADR-021.
-**Next step:** Complete prerequisite gates and an independent expectation review before implementation READY.
+**Main blocker:** The authenticated Softwaretest.it definition publication and field-/step-level read-back receipt remains unavailable.
+**Next step:** Complete only that external publishing gate before moving an independently executable first implementation workorder to READY.
 
 ## Goal and value
 
@@ -76,7 +76,8 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 
 - ARCH rules: ARCH-001, ARCH-002, ARCH-005, ARCH-011, ARCH-012, ARCH-014
 - SEC rules: SEC-001, SEC-008, SEC-014, SEC-015
-- Design references: DSN-001 through DSN-004
+- Design references: DSN-001 through DSN-004, revision 0.3, approved 2026-09-30
+- Readiness review: ../planning/13-cap01-readiness-review.md
 - Each workorder selects applicable ADRs and pattern boundaries; proposed ADRs are not silently treated as approved.
 
 ## Acceptance criteria
@@ -88,8 +89,9 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 
 ## Test and evidence contract
 
-- Planned automated and manual IDs are defined by the capability test-definition workorder and mapped to process PRC-01.
+- BDD-AUTH-001, BDD-PROJ-001, and MT-PRC-01-001 through MT-PRC-01-006 are defined locally and mapped to PRC-01.
 - Definition, Softwaretest.it publication, fixtures, execution, and reporting are separate evidence states.
+- Deterministic fixture descriptors are implemented locally; actual staging application and verification remain capability-execution evidence.
 - The unchanged candidate runs the complete scope matrix before manual staging acceptance.
 
 ## Workorders
@@ -106,7 +108,10 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-ADR-021 decides the local authentication mechanism. Its security details, defaults, and tests require independent review before the affected workorders become READY.
+The CAP-01 expectation, architecture, security, path, design, BDD, manual-case,
+and local fixture-definition decisions are recorded in
+`../planning/13-cap01-readiness-review.md`.
 
-No implementing agent may resolve a blocking decision implicitly.
+Only the authenticated Softwaretest.it publication/read-back receipt remains
+blocking. No implementing agent may waive or infer that receipt.
 

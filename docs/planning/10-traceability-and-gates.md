@@ -77,13 +77,13 @@ REQ-031 — Commercial operations and optional managed-service boundaries
 - Supply chain: SEC-011 and SEC-012; CAP-00
 - Licensing: SEC-014; CAP-01 and commercial release
 
-Concrete implementation patterns and their boundaries are defined in `11-architecture-decisions-and-patterns.md`. Each implementation workorder must cite the applicable ADRs rather than treating a pattern as a repository-wide default. The ADR catalogue is present but remains DRAFT until qualified architecture review and product-owner acceptance.
+Concrete implementation patterns and their boundaries are defined in `11-architecture-decisions-and-patterns.md`. Each implementation workorder must cite the applicable ADRs rather than treating a pattern as a repository-wide default. The ADR catalogue remains DRAFT globally; the exact CAP-01 slice is approved in `13-cap01-readiness-review.md`.
 
 ## 4. Process and test mapping
 
 The stable identifier definitions and intents are governed by the [Canonical Test ID Catalogue](../testing/test-id-catalog.md). A range below is descriptive; each referenced ID remains an individual catalogue entry.
 
-- PRC-01 → CAP-01 → MTP-PRC-01 → BDD-AUTH-001 and BDD-PROJ-001 → MT-PRC-01-001 through MT-PRC-01-006 (`DRAFT`; not published or executed)
+- PRC-01 → CAP-01 → MTP-PRC-01 → BDD-AUTH-001 and BDD-PROJ-001 → MT-PRC-01-001 through MT-PRC-01-006 (`REVIEWED`; not published or executed)
 - PRC-02 → CAP-03, CAP-04, and CAP-10 → MTP-PRC-02 → BDD-KNOW-001 and BDD-KNOW-002
 - PRC-03 → CAP-05 → MTP-PRC-03 → BDD-WF-001 and BDD-WF-002
 - PRC-04 → CAP-06 → MTP-PRC-04 → BDD-RUN-001 through BDD-RUN-003

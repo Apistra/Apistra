@@ -8,8 +8,8 @@ Status: DRAFT
 **Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
 **Change:** Version 0.6 adds an exact status model, separated implementation/evidence/approval states, canonical semantic test IDs, workorder-specific ARCH/SEC applicability, and a validator-enforced dependency graph to the strengthened execution contracts.
 **Current position:** 140 workorder contracts exist. CAP-00 implementation evidence is retained in its files; all business workorders remain DRAFT until prerequisite gates and expectation reviews pass.
-**Main blocker:** GATE-CAP00-DONE, authenticated Softwaretest.it publishing readiness, architecture/security/design decisions, and independent expectation review as assigned.
-**Next step:** Close CAP-00, select CAP-01, complete its expectation review, then mark only an independently executable first workorder READY.
+**Main blocker:** Authenticated Softwaretest.it publishing readiness. CAP-01 architecture, security, design, path, BDD, fixture-definition, and expectation decisions are approved.
+**Next step:** Complete the Softwaretest.it write/read receipt, then mark only an independently executable first CAP-01 workorder READY.
 
 The [canonical workorder index](../workorders/README.md) links every file and its current status.
 

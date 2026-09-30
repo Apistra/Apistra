@@ -2,10 +2,10 @@
 
 Version: 0.6-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Status reason: CAP-01 implementation and authenticated Softwaretest.it evidence do not yet exist
 Implementation state: NOT STARTED
 Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Approval state: ACCEPTANCE PLAN APPROVED; CAPABILITY NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish a CAP-01 candidate or acceptance result. The planning review is approved in ../../planning/13-cap01-readiness-review.md, but product implementation, unchanged-candidate staging evidence, authenticated Softwaretest.it receipts, manual execution, and capability acceptance do not yet exist.
 
 ## Target result
 
@@ -87,7 +87,7 @@ Planned additions to the bounded change area after READY:
 
 Workorder-class boundary: Capability acceptance only; no feature implementation is authorised. Changes stay within staging verification, acceptance definitions/evidence, and directly affected documentation.
 
-Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
+Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
 
 Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
 
@@ -113,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 - Rules: ARCH-002, ARCH-005, ARCH-008, ARCH-009, ARCH-010, ARCH-011, ARCH-012, ARCH-014, ARCH-015
 - Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
-- ADRs/patterns: ADR-001 through ADR-005, ADR-010, ADR-013, ADR-017, ADR-018, ADR-021
+- ADRs/patterns: verifies the approved CAP-01 pattern union from WO-CAP-01-01 through WO-CAP-01-04 and introduces no new implementation pattern
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
@@ -144,7 +144,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Sources: confirmed product decisions, the linked capability, requirements REQ-001, REQ-002, REQ-016, REQ-017, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - Counterexample: A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
-- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+- The planning derivation and human confirmation are recorded in ../../planning/13-cap01-readiness-review.md; candidate-bound implementation review remains mandatory before capability acceptance.
 
 ## Required tests
 

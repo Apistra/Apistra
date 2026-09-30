@@ -1,12 +1,13 @@
 # MTP-PRC-01 — Administration and Project Lifecycle
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT; NOT PUBLISHED; NOT EXECUTED
+Review state: PRODUCT OWNER APPROVED 2026-09-30
 Process: PRC-01
 Capability: [CAP-01](../../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Owning workorder: [WO-CAP-01-04](../../../workorders/CAP-01/WO-CAP-01-04.md)
 Execution owner: [WO-CAP-01-05](../../../workorders/CAP-01/WO-CAP-01-05.md)
-Design baseline: [0.3-proposed](../../../planning/07-design-contract.md)
+Design baseline: [0.3 approved for DSN-001 through DSN-004](../../../planning/07-design-contract.md)
 
 ## Package objective
 
@@ -40,10 +41,13 @@ Fixture requirements:
 - emitted fixture revision and checksum bound to the execution receipt;
 - cleanup by restoring the named snapshot, not by ad hoc destructive UI action.
 
-Fixture implementation state: `NOT AVAILABLE`. Until a reviewed generator and
-its verification evidence exist, every case remains blocked for execution.
-Fixture-generator delivery and validation belong to WO-CAP-01-04; staging
-preparation and case execution belong to WO-CAP-01-05.
+Fixture definition state: `IMPLEMENTED AND LOCALLY VERIFIED` by
+`tools/fixtures/cap_01/`. The generator creates deterministic, checksummed
+synthetic descriptors and never claims to mutate product state. Actual
+application to the unchanged staging candidate, resulting-state verification,
+and the application receipt remain `NOT EXECUTED`; those belong to
+WO-CAP-01-05. Every manual case remains blocked for execution until that
+candidate-bound preparation succeeds.
 
 ## Cases
 
@@ -56,15 +60,17 @@ preparation and case execution belong to WO-CAP-01-05.
 
 ## Review and publication gates
 
-The package may be published only after all of the following are recorded:
+Completed local gates:
 
-1. product-owner approval or correction of design revision `0.3-proposed`;
-2. independent expectation and security review of all six cases;
-3. implemented and verified fixtures matching this manifest;
-4. open CAP-00 and Softwaretest.it publication gates;
-5. schema validation and checksum generation for the unchanged definitions;
-6. idempotent Softwaretest.it write and field-/step-order read-back receipts.
+1. product-owner approval of design revision 0.3 for DSN-001 through DSN-004;
+2. expectation, architecture, and security review of all six cases;
+3. deterministic fixture-descriptor generator and local verification contract;
+4. schema/structure validation and stable IDs for unchanged definitions.
 
-Review state: `PENDING`.
+Remaining external gate: idempotent Softwaretest.it write and field-/step-order
+read-back receipts for the unchanged package. Actual staging fixture application
+and case execution are later WO-CAP-01-05 evidence, not publication evidence.
+
+Review state: `APPROVED 2026-09-30`.
 Softwaretest.it object IDs: `NOT ASSIGNED`.
 Publication receipt: `NOT AVAILABLE`.

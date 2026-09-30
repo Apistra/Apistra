@@ -2,10 +2,10 @@
 
 Version: 0.6-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
-Implementation state: LOCAL DEFINITIONS DRAFTED; FIXTURES AND PUBLICATION NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
+Implementation state: LOCAL DEFINITIONS, BDD, AND FIXTURE DESCRIPTORS COMPLETE; PUBLICATION PENDING
+Evidence state: LOCAL VALIDATION PASSED; NOT PUBLISHED OR EXECUTED
+Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Six local `MTP-PRC-01` definitions are drafted for review, but design revision `0.3-proposed` is not approved, executable fixtures do not exist, and no definition has been published or executed. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Six reviewed `MTP-PRC-01` definitions, BDD-AUTH-001, BDD-PROJ-001, and deterministic CAP-01 fixture descriptors exist locally. Design revision 0.3 and the CAP-01 expectation, architecture, security, and path review are approved. No definition has been published or executed; the authenticated Softwaretest.it write/read receipt remains the only workorder blocker.
 
 ## Target result
 
@@ -87,7 +87,7 @@ Planned additions to the bounded change area after READY:
 
 Workorder-class boundary: Test definition and publication only; no product runtime implementation is authorised. Changes stay within local definitions, fixtures, the engineering adapter, and directly affected documentation.
 
-Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
+Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
 
 Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
 
@@ -113,7 +113,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 - Rules: ARCH-010, ARCH-012
 - Applicability: engineering adapter isolation, versioned test contracts, protected credentials/evidence, and attributable publication.
-- ADRs/patterns: ADR-001 through ADR-005, ADR-010, ADR-013, ADR-017, ADR-018, ADR-021
+- ADRs/patterns: ADR-002, ADR-010, ADR-013, ADR-017, ADR-018, ADR-019
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
@@ -144,7 +144,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Sources: confirmed product decisions, the linked capability, requirements REQ-001, REQ-002, REQ-016, REQ-017, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - Counterexample: A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
-- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+- The independent derivation, comparison, discrepancy resolution, and human confirmation are recorded in ../../planning/13-cap01-readiness-review.md; a material source change invalidates that review.
 
 ## Required tests
 
@@ -164,7 +164,7 @@ This workorder owns definition and publication of the catalog-listed scenarios (
 - `MT-PRC-01-005` — isolated project creation and attributable audit
 - `MT-PRC-01-006` — foreign-project denial without disclosure
 
-The package manifest is `../../testing/manual/PRC-01/README.md`; each case has one file in the same directory. The definitions are `DRAFT`, `NOT PUBLISHED`, and `NOT EXECUTED`. Publication is prohibited until design revision `0.3-proposed` is approved or corrected, the declared fixture generator is implemented and verified, the independent expectation/security review is accepted, and the CAP-00/Softwaretest.it gates are open. Execution remains with WO-CAP-01-05 against the unchanged staging candidate.
+The package manifest is `../../testing/manual/PRC-01/README.md`; each case has one file in the same directory. The reviewed definitions remain `DRAFT`, `NOT PUBLISHED`, and `NOT EXECUTED`. Local design, review, BDD, and fixture-descriptor gates are complete. Publication now waits only for the authenticated Softwaretest.it write/read path. Actual fixture application and execution remain with WO-CAP-01-05 against the unchanged staging candidate.
 
 ## Softwaretest.it and CI reporting
 

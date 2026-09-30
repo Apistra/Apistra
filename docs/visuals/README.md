@@ -1,7 +1,7 @@
 # Apistra Visual Planning Artefacts
 
-Version: 0.2-draft
-Status: IN_REVIEW
+Version: 0.3
+Status: DSN-001 THROUGH DSN-004 APPROVED; OTHER DESIGN REFERENCES IN_REVIEW
 
 This package supplies the maintainable visual sources that complement the textual BuildBySpec planning baseline.
 
@@ -56,4 +56,7 @@ The dark technical direction reuses the product-owner-selected research referenc
 
 ## Approval state
 
-Sources and previews are present. Product-owner design approval, logo-rights documentation, accessibility measurement, manual UI/UX test publication, and implementation evidence remain pending. The Design Gate is therefore still PENDING.
+The product owner approved revision 0.3 for DSN-001 through DSN-004 on
+2026-09-30. No approval is inferred for other design references. Accessibility
+measurement, Softwaretest.it publication, implementation, and candidate-bound
+visual evidence remain separate later gates.

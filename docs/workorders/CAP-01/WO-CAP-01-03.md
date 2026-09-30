@@ -2,10 +2,10 @@
 
 Version: 0.6-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
 Implementation state: NOT STARTED
 Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md; the authenticated Softwaretest.it publication/read-back receipt remains the only READY blocker.
 
 ## Target result
 
@@ -99,7 +99,7 @@ Planned additions to the bounded change area after READY:
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
 
-Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
+Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
 
 Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
 
@@ -125,7 +125,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 - Rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-011, ARCH-012
 - Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
-- ADRs/patterns: ADR-001 through ADR-005, ADR-010, ADR-013, ADR-017, ADR-018, ADR-021
+- ADRs/patterns: ADR-001, ADR-002, ADR-003, ADR-004, ADR-013, ADR-017, ADR-018, ADR-019, ADR-021
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
@@ -156,7 +156,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Sources: confirmed product decisions, the linked capability, requirements REQ-001, REQ-002, REQ-016, REQ-017, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: Every project-owned use case receives and audits the authenticated project context before repository or adapter access.
 - Counterexample: A missing or mismatched project context fails before data access and cannot be bypassed through a direct API call.
-- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+- The independent derivation, comparison, discrepancy resolution, and human confirmation are recorded in ../../planning/13-cap01-readiness-review.md; a material source change invalidates that review.
 
 ## Required tests
 

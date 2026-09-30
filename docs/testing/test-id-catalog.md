@@ -16,6 +16,8 @@ Generated capability or workorder aliases such as `BDD-CAP-*`, `BDD-WO-*`, and `
 - `BDD-OFFLINE-001` — Start and exercise the configured local platform without a required external SaaS dependency.
 - `BDD-AUTH-001` — Bootstrap one local Administrator, authenticate, and revoke the session safely.
 - `BDD-PROJ-001` — Create an isolated project and deny access from an unrelated project context.
+
+CAP-01 definitions: `tests/bdd/features/cap_01/administration.feature`; reviewed locally, not yet published or executed.
 - `BDD-ENDPOINT-001` — Configure and validate an AI endpoint without exposing stored credentials.
 - `BDD-LIMIT-001` — Stop a run safely when its configured hard resource or cost limit is reached.
 
@@ -109,7 +111,7 @@ Allocated `MTP-PRC-01` definitions:
 - [`MT-PRC-01-005`](manual/PRC-01/MT-PRC-01-005.md) — Create an isolated project and verify its attributable audit event; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
 - [`MT-PRC-01-006`](manual/PRC-01/MT-PRC-01-006.md) — Deny direct access to a foreign project without disclosure; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
 
-These IDs are now reserved and must not be renamed or reused. Their proposed UI labels derive from design revision `0.3-proposed`; design approval, executable fixture generation, Softwaretest.it publication, field-level read-back, execution, and acceptance remain separate gates.
+These IDs are reserved and must not be renamed or reused. Their UI labels derive from design revision `0.3`, approved for DSN-001 through DSN-004. Local BDD definitions, manual definitions, and deterministic fixture descriptors are present; Softwaretest.it publication/read-back, staging fixture application, execution, and acceptance remain separate gates.
 
 Implementation workorders reference the package only. Acceptance workorders execute the exact published case IDs; they must not create IDs during execution.
 

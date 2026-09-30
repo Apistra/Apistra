@@ -8,7 +8,7 @@ One canonical capability contract lives in each file. The roadmap in ../planning
 | Capability | Release | Status |
 |---|---|---|
 | [CAP-00 — Reproducible Delivery Walking Skeleton](CAP-00-reproducible-delivery-walking-skeleton.md) | 0.0 | IMPLEMENTED; acceptance gates remain |
-| [CAP-01 — Installation And Isolated Project Administration](CAP-01-installation-and-isolated-project-administration.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |
+| [CAP-01 — Installation And Isolated Project Administration](CAP-01-installation-and-isolated-project-administration.md) | 0.1 | DRAFT; planning approved, Softwaretest.it publication/read-back pending |
 | [CAP-02 — Secrets Endpoints Agents Tools And Limits](CAP-02-secrets-endpoints-agents-tools-and-limits.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |
 | [CAP-03 — Connector Foundation And Trusted Sources](CAP-03-connector-foundation-and-trusted-sources.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |
 | [CAP-04 — Knowledge And Cited Retrieval](CAP-04-knowledge-and-cited-retrieval.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |

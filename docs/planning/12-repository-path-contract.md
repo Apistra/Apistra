@@ -1,7 +1,8 @@
 # Business Workorder Repository Path Contract
 
-Version: 0.1-proposed
-Status: IN_REVIEW
+Version: 0.2
+Status: APPROVED FOR CAP-01; IN_REVIEW FOR CAP-02 THROUGH CAP-18
+CAP-01 approval date: 2026-09-30
 Observation date: 2026-09-30
 Observed repository commit: `be7e84d`
 Scope: CAP-01 through CAP-18 business workorders
@@ -17,10 +18,11 @@ implementing agent.
 at `/home/jens/projects/apistra`. Planned paths are specifications and are not
 implementation evidence.
 
-**Approval state:** IN_REVIEW. ADR-019 already approves the top-level monorepo
-roots and module-first structure. The capability-to-package mapping below still
-requires the normal expectation and qualified architecture review before an
-affected workorder may become READY.
+**Approval state:** The CAP-01 mapping is approved by the product owner and the
+CAP-01 readiness review. ADR-019 already approves the top-level monorepo roots
+and module-first structure. CAP-02 through CAP-18 mappings still require their
+normal expectation and qualified architecture review before an affected
+workorder may become READY.
 
 **Main blockers:** `contracts/plugins`, `plugin-sdk/python`, and
 `deploy/kubernetes` are new top-level architecture boundaries not covered by
@@ -63,9 +65,10 @@ the ADR-019 internal structure (`domain`, `application`, `ports`, `adapters`,
 and `public.py`) and pass CI-TS-03 before its owning implementation workorder can
 be DONE.
 
-- CAP-01: `backend/src/apistra/modules/identity/`, existing
+- CAP-01 (DECIDED): `backend/src/apistra/modules/identity/`, existing
   `backend/src/apistra/modules/projects/`, and
-  `apps/web/src/features/administration/`.
+  `apps/web/src/features/administration/`. The canonical module name is
+  `identity`; `identity_admin` is not an authorised alternative path.
 - CAP-02: `backend/src/apistra/modules/catalog/`,
   `backend/src/apistra/modules/agents/`,
   `backend/src/apistra/modules/policies/`, and matching web features

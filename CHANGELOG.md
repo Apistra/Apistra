@@ -28,6 +28,9 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - CAP-00 independent review and human bootstrap acceptance record; external reporting evidence remains separate.
 - Proposed administration interaction baseline for DSN-001 through DSN-004 and six repository-authoritative, atomic `MTP-PRC-01` manual test definitions covering bootstrap, authentication, session revocation, project creation/audit, and project isolation.
 - Proposed business-workorder repository path contract mapping all 133 CAP-01 through CAP-18 workorders to observed existing paths and explicitly labelled planned module, feature, contract, test, migration, staging, and evidence paths.
+- Approved CAP-01 expectation, security, architecture, design, pattern, and repository-path review with the remaining external Softwaretest.it blocker preserved.
+- Repository-owned BDD-AUTH-001 and BDD-PROJ-001 scenarios for CAP-01.
+- Deterministic, checksummed CAP-01 fixture descriptors and fail-closed integration/contract tests without product-state mutation or embedded credentials.
 
 ### Changed
 

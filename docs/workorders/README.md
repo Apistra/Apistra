@@ -9,7 +9,7 @@ Version 0.6 assigns every workorder a delivery class, one owned verification gro
 
 Only `DRAFT`, `BLOCKED`, `READY`, and `DONE` are valid workflow statuses. Implementation, evidence, and approval are recorded separately. Behavioural scenarios and manual package namespaces are governed by the [canonical test-ID catalogue](../testing/test-id-catalog.md); individual manual cases are allocated only by the owning publication workorder.
 
-Every CAP-01 through CAP-18 workorder now names literal paths from the [business repository path contract](../planning/12-repository-path-contract.md). `EXISTING` records the observed `be7e84d` location; `PLANNED` records an exact target below an approved root without claiming that it already exists. These lists remain non-executable while a workorder is DRAFT/BLOCKED, and READY review must confirm the observation, approve the affected planned child paths, and retain any CAP-16 or CAP-17 new-root blocker. An agent may not invent or use an unlisted repository path.
+Every CAP-01 through CAP-18 workorder names literal paths from the [business repository path contract](../planning/12-repository-path-contract.md). `EXISTING` records the observed `be7e84d` location; `PLANNED` records an exact target below an approved root without claiming that it already exists. CAP-01 child paths are approved; later capability mappings remain subject to their READY review, including the CAP-16 and CAP-17 new-root blockers. An agent may not invent or use an unlisted repository path.
 
 ## CAP-00
 
@@ -23,11 +23,11 @@ Every CAP-01 through CAP-18 workorder now names literal paths from the [business
 
 ## CAP-01
 
-- [WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session](CAP-01/WO-CAP-01-01.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-01-02 — Implement installation and isolated project lifecycle](CAP-01/WO-CAP-01-02.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-01-03 — Implement project-context enforcement and audit](CAP-01/WO-CAP-01-03.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-01-04 — Publish and verify PRC-01 test definitions](CAP-01/WO-CAP-01-04.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+- [WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session](CAP-01/WO-CAP-01-01.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
+- [WO-CAP-01-02 — Implement installation and isolated project lifecycle](CAP-01/WO-CAP-01-02.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
+- [WO-CAP-01-03 — Implement project-context enforcement and audit](CAP-01/WO-CAP-01-03.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
+- [WO-CAP-01-04 — Publish and verify PRC-01 test definitions](CAP-01/WO-CAP-01-04.md) — DRAFT; local package complete, Softwaretest.it publication/read-back pending
+- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — DRAFT; future acceptance after implementation and staging evidence
 
 ## CAP-02
 

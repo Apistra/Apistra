@@ -1,7 +1,7 @@
 # Architecture Decisions and Pattern Catalogue
 
-Version: 0.3-draft
-Status: DRAFT
+Version: 0.4-draft
+Status: DRAFT; CAP-01 PATTERN SLICE APPROVED
 Assurance profile: EXTENDED
 
 This document makes the software-architecture choices operational. Pattern names are not quality claims. Every decision states the concrete problem, scope, simpler alternative, intended use, prohibited use, consequences, and verification.
@@ -9,6 +9,8 @@ This document makes the software-architecture choices operational. Pattern names
 ## ADR-001 — Modular monolith as the 0.x backend system style
 
 Status: PROPOSED
+
+CAP-01 applicability: DECIDED on 2026-09-30
 
 ### Context and decision
 
@@ -18,7 +20,7 @@ Use a modular monolith for backend source and domain ownership, deployed through
 
 Modules:
 
-- identity_admin
+- identity
 - projects
 - secrets_endpoints
 - connectors
@@ -121,6 +123,8 @@ ARCH-002; route and worker dependency tests; focused use-case tests without fram
 
 Status: PROPOSED
 
+CAP-01 applicability: DECIDED on 2026-09-30
+
 ### Context and decision
 
 Some operations preserve invariants across several persisted records. A generic repository per table would hide query cost and spread invariants.
@@ -148,6 +152,14 @@ Prohibited:
 Verification:
 
 Transaction integration tests, module-boundary tests, and failure injection around commit and external hand-off.
+
+CAP-01 decision:
+
+The Project is the aggregate root and uses a project repository plus one unit
+of work per command. Race-safe Administrator bootstrap uses the same bounded
+transaction rule through dedicated `AdministratorStore` and `SessionStore`
+ports owned by the `identity` module. Administrator and session persistence do
+not introduce a generic repository or cross-module ORM relationship.
 
 ## ADR-005 — Persisted State Machine for lifecycle-heavy entities
 
@@ -409,6 +421,8 @@ ARCH-006 and ARCH-012; round-trip, compatibility, cross-language fixture, and un
 
 Status: PROPOSED
 
+CAP-01 applicability: DECIDED for mutable project administration on 2026-09-30
+
 ### Context and decision
 
 Drafts, connector settings, policies, endpoints, and knowledge settings can be edited concurrently.
@@ -641,4 +655,12 @@ Deliberately not selected globally:
 
 ## Decision gate
 
-ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-022 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED until qualified architecture review. The former durable-engine and authentication product decisions no longer block their dependent workorders, but the detailed runtime and security workorders still require their own expectation and architecture/security reviews before READY.
+ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-022 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED globally until qualified architecture review.
+
+The CAP-01 slice is approved by the readiness review dated 2026-09-30:
+ADR-001 through ADR-004 where explicitly mapped, ADR-013, ADR-014 for mutable
+project administration, ADR-017, and ADR-018. ADR-002 covers identity/session
+and Softwaretest.it boundaries; ADR-010 applies only to the Softwaretest.it
+adapter. ADR-005 is explicitly not applicable to CAP-01. ADR-019 and ADR-021
+remain the decided layout and authentication constraints. This scoped decision
+does not approve those proposed ADRs for unrelated capabilities.
