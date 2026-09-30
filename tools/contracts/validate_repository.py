@@ -8,6 +8,13 @@ import re
 from pathlib import Path
 
 EXPECTED_FLOW = ["feature/*", "test", "staging", "main"]
+EXPECTED_REQUIRED_CHECKS = [
+    "Contract and static checks",
+    "Architecture",
+    "Tests",
+    "Security and supply chain",
+    "Package candidate",
+]
 AUTOMATIC_DEPLOYMENT_PATTERN = re.compile(r"\b(deploy|deployment)\b", re.IGNORECASE)
 MARKDOWN_LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 RELEASE_VERSION_PATTERN = re.compile(
@@ -125,6 +132,40 @@ def validate_contract(contract: dict[str, object]) -> list[str]:
     return errors
 
 
+def validate_branch_policy(policy: dict[str, object]) -> list[str]:
+    errors: list[str] = []
+    branches = policy.get("branches")
+    if not isinstance(branches, dict):
+        return ["branch-protection policy must define branches"]
+    for branch_name in ("test", "staging", "main"):
+        branch = branches.get(branch_name)
+        if not isinstance(branch, dict):
+            errors.append(f"branch-protection policy must define {branch_name}")
+            continue
+        expected_values = {
+            "pull_requests_required": True,
+            "pull_request_reviews": 0,
+            "dismiss_stale_reviews": False,
+            "require_code_owner_reviews": False,
+            "require_conversation_resolution": True,
+            "strict_status_checks": True,
+            "enforce_admins": True,
+            "required_linear_history": True,
+            "allow_force_pushes": False,
+            "allow_deletions": False,
+        }
+        for field, expected in expected_values.items():
+            if branch.get(field) != expected:
+                errors.append(
+                    f"{branch_name} branch protection requires {field}={expected!r}"
+                )
+        if branch.get("required_checks") != EXPECTED_REQUIRED_CHECKS:
+            errors.append(
+                f"{branch_name} required checks must be {EXPECTED_REQUIRED_CHECKS!r}"
+            )
+    return errors
+
+
 def repository_contract(root: Path) -> dict[str, object]:
     policy = json.loads((root / ".github/branch-protection.expected.json").read_text())
     contributing = (root / "CONTRIBUTING.md").read_text(encoding="utf-8")
@@ -226,6 +267,29 @@ def _required_workorders(text: str) -> set[str]:
     if match is None or match.group(1) == "none within this capability":
         return set()
     return set(WORKORDER_ID_PATTERN.findall(match.group(1)))
+
+
+def _dependency_cycles(graph: dict[str, set[str]]) -> set[str]:
+    visiting: set[str] = set()
+    visited: set[str] = set()
+    cycles: set[str] = set()
+
+    def visit(workorder_id: str) -> None:
+        if workorder_id in visiting:
+            cycles.add(workorder_id)
+            return
+        if workorder_id in visited:
+            return
+        visiting.add(workorder_id)
+        for dependency in sorted(graph.get(workorder_id, set())):
+            if dependency in graph:
+                visit(dependency)
+        visiting.remove(workorder_id)
+        visited.add(workorder_id)
+
+    for workorder_id in sorted(graph):
+        visit(workorder_id)
+    return cycles
 
 
 def validate_workorder_contract(
@@ -436,24 +500,8 @@ def validate_planning_catalogues(root: Path) -> list[str]:
                     f"{directory}: {workorder_id} has missing or cross-capability dependency {dependency}"
                 )
 
-        visiting: set[str] = set()
-        visited: set[str] = set()
-
-        def visit(workorder_id: str) -> None:
-            if workorder_id in visiting:
-                errors.append(f"{directory}: dependency cycle includes {workorder_id}")
-                return
-            if workorder_id in visited:
-                return
-            visiting.add(workorder_id)
-            for dependency in sorted(workorder_dependencies.get(workorder_id, set())):
-                if dependency in known_workorders:
-                    visit(dependency)
-            visiting.remove(workorder_id)
-            visited.add(workorder_id)
-
-        for workorder_id in sorted(known_workorders):
-            visit(workorder_id)
+        for workorder_id in sorted(_dependency_cycles(workorder_dependencies)):
+            errors.append(f"{directory}: dependency cycle includes {workorder_id}")
 
         publication_ids = {
             workorder_id
@@ -520,6 +568,9 @@ def main() -> int:
     root = args.root.resolve()
     errors = (
         validate_contract(repository_contract(root))
+        + validate_branch_policy(
+            json.loads((root / ".github/branch-protection.expected.json").read_text())
+        )
         + validate_workflows(root)
         + validate_version_policy(root)
         + validate_test_concept(root)

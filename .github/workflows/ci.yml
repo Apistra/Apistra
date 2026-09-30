@@ -161,3 +161,49 @@ jobs:
             artifacts/cap00-candidate/sbom.spdx.json
             artifacts/cap00-result-bundle.json
             artifacts/softwaretest-outbox.json
+
+  softwaretest-roundtrip:
+    name: Softwaretest.it authenticated round-trip
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/test' ||
+       github.ref == 'refs/heads/staging' ||
+       github.ref == 'refs/heads/main')
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: softwaretest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@a6e3dba3a2bd5d18df929e50e94e04f4b01f3c5f # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Download verified CAP-00 evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cap00-evidence-${{ github.sha }}
+          path: artifacts
+      - name: CI-TS-16 authenticated Softwaretest.it preflight
+        env:
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: python engineering/softwaretest/preflight.py --require-reporting
+      - name: CI-TS-16 publish, read back and verify receipts
+        env:
+          SOFTWARETEST_ANCHOR_VERSION_ID: ${{ vars.SOFTWARETEST_ANCHOR_VERSION_ID }}
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: >-
+          python engineering/softwaretest/publisher.py
+          artifacts/cap00-result-bundle.json
+          --apply
+          --ensure-cycle
+      - name: Retain Softwaretest.it round-trip receipt
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: softwaretest-roundtrip-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          path: artifacts/softwaretest-roundtrip-receipt.json

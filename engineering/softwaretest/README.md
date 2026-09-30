@@ -2,15 +2,28 @@
 
 This folder is an engineering integration and is deliberately outside the Apistra runtime dependency graph.
 
-The authoritative contract observed on 2026-09-29 is `https://softwaretest.it/api/v1/openapi.json` (OpenAPI 3.0.3, API version 1.0.0). Authentication uses the `ProjectBearer` bearer scheme. CAP-00 needs `read` and `execution:write`; definition synchronisation additionally needs `testcase:write`. The required project token and project/cycle identifiers must be supplied through protected environment variables and must never enter files or logs.
+The authoritative contract observed on 2026-09-30 is `https://softwaretest.it/api/v1/openapi.json` (OpenAPI 3.0.3, API version 1.0.0). Authentication uses the `ProjectBearer` bearer scheme. CAP-00 needs `read`, `execution:write`, `testcase:write`, and `ci:write`. The required project token and project/cycle identifiers must be supplied through protected environment variables and must never enter files or logs.
 
-`preflight.py` verifies the public OpenAPI contract and, when credentials are present, performs an authenticated project read. `publisher.py` is safe-by-default: without `--apply` it creates a lossless redacted outbox only. With `--apply`, it creates a CI report, uploads entries, and finalises the report with a distinct idempotency key for every command. A reporting retry replays only these HTTP commands; it never reruns tests.
+`preflight.py` verifies the public OpenAPI contract and, when credentials are present, performs an authenticated project read. `publisher.py` is safe-by-default: without `--apply` it creates a lossless redacted outbox only. With `--apply`, it creates a CI report, uploads entries, finalises the report, reads the complete report back, compares every submitted field, retrieves all server-side receipts, and writes a redacted atomic evidence file. Every command has a distinct deterministic idempotency key. A reporting retry replays only these HTTP commands; it never reruns tests.
+
+```bash
+python engineering/softwaretest/preflight.py --require-reporting
+python engineering/softwaretest/publisher.py artifacts/cap00-result-bundle.json --apply --ensure-cycle
+```
+
+If a previously rejected command may have been retained by the remote idempotency store after its server-side contract changes, `--command-revision <reasoned-revision>` rotates only the command keys. It does not change or rerun the candidate tests. Arbitrary retry values are prohibited; the revision belongs in the retained receipt.
+
+The default local evidence paths are `artifacts/softwaretest-outbox.json` and `artifacts/softwaretest-roundtrip-receipt.json`. The entire `artifacts/` directory is ignored by Git. The receipt contains the selected cycle document, request hashes, server receipts, receipt readbacks, the report readback, and the comparison result; it never contains the bearer token. `--ensure-cycle` reuses an active or draft cycle named `Apistra CAP-00 Reporting`, or creates it idempotently. Before a draft cycle is started, the publisher requires at least one executable planned run. A `CycleIntent` with status `PLANNED` is not sufficient. If no run exists, the released version configured by `SOFTWARETEST_ANCHOR_VERSION_ID` is added through the cycle-item API, followed by a refreshed revision and a revision-protected start command. Planning dates remain optional.
 
 Required protected variables:
 
-- `SOFTWARETEST_BASE_URL` (defaults to `https://softwaretest.it`)
 - `SOFTWARETEST_PROJECT_ID`
-- `SOFTWARETEST_CYCLE_ID`
 - `SOFTWARETEST_TOKEN`
 
-The authenticated field-by-field write/read round-trip is intentionally still a CAP-00 gate until authorised credentials exist.
+Optional variables:
+
+- `SOFTWARETEST_BASE_URL` (defaults to `https://softwaretest.it`)
+- `SOFTWARETEST_CYCLE_ID` (otherwise `--ensure-cycle` resolves the dedicated cycle)
+- `SOFTWARETEST_ANCHOR_VERSION_ID` (required only when a draft cycle has no run)
+
+The 2026-09-30 authenticated preflight proved project, cycle, CI-report-list, definition, and test-case access. The credential UI confirms all four required scopes. A cycle with a directly planned released version was activated successfully; planning dates were incidental. The earlier cycle-start conflict occurred because `CycleIntent=PLANNED` had not produced an executable run, while the API reduced this distinction to generic `409 STATE_CONFLICT`. CI-report creation still returns `404` and automated execution creation returns `409`; this separate automation-resource prerequisite is not described by the public schema. A fresh command revision after the reported server-side fix produced the same `404`, excluding a replayed idempotency failure as the cause. No complete round-trip receipt exists yet, so the CAP-00 gate remains blocked pending controlled lifecycle clarification.

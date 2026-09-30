@@ -51,9 +51,10 @@ def main() -> int:
     parser.add_argument("--contract", type=Path, default=HERE / "contract.json")
     parser.add_argument("--openapi-file", type=Path)
     parser.add_argument("--require-auth", action="store_true")
+    parser.add_argument("--require-reporting", action="store_true")
     args = parser.parse_args()
     contract = json.loads(args.contract.read_text(encoding="utf-8"))
-    base_url = os.getenv("SOFTWARETEST_BASE_URL", contract["base_url"]).rstrip("/")
+    base_url = (os.getenv("SOFTWARETEST_BASE_URL") or contract["base_url"]).rstrip("/")
     try:
         document = (
             json.loads(args.openapi_file.read_text(encoding="utf-8"))
@@ -66,7 +67,7 @@ def main() -> int:
             return 1
         project_id = os.getenv("SOFTWARETEST_PROJECT_ID")
         token = os.getenv("SOFTWARETEST_TOKEN")
-        if args.require_auth:
+        if args.require_auth or args.require_reporting:
             if not project_id or not token:
                 print(
                     "BLOCKED: SOFTWARETEST_PROJECT_ID and SOFTWARETEST_TOKEN are required"
@@ -75,6 +76,17 @@ def main() -> int:
             project = get_json(f"{base_url}/api/v1/projects/{project_id}", token)
             if project.get("id") != project_id:
                 print("Authenticated project round-trip returned a different project")
+                return 1
+        if args.require_reporting:
+            cycles = get_json(f"{base_url}/api/v1/projects/{project_id}/cycles", token)
+            reports = get_json(
+                f"{base_url}/api/v1/projects/{project_id}/ci-reports", token
+            )
+            if not isinstance(cycles.get("results"), list):
+                print("Authenticated cycle listing has an unexpected shape")
+                return 1
+            if not isinstance(reports.get("results"), list):
+                print("Authenticated CI-report listing has an unexpected shape")
                 return 1
         print("Softwaretest.it contract preflight passed.")
         return 0
