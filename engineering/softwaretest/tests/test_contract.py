@@ -182,6 +182,30 @@ class SoftwaretestContractTests(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text()), {"verified": True})
             self.assertFalse(path.with_suffix(".json.tmp").exists())
 
+    def test_failure_receipt_is_machine_readable_and_redacted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "receipt.json"
+            publisher.write_failure_receipt(
+                path,
+                project_id="project-1",
+                base_url="https://softwaretest.it",
+                token="secret-token",
+                command_revision="v1",
+                stage="report",
+                error=RuntimeError("remote rejected secret-token"),
+                cycle={"document": {"id": "cycle-1"}},
+                request_sha256={"create": "a" * 64},
+            )
+            document = json.loads(path.read_text(encoding="utf-8"))
+            rendered = json.dumps(document)
+            self.assertFalse(document["verified"])
+            self.assertEqual(document["failure"]["stage"], "report")
+            self.assertEqual(document["failure"]["error_type"], "RuntimeError")
+            self.assertIn("[REDACTED]", document["failure"]["detail"])
+            self.assertNotIn("secret-token", rendered)
+            self.assertEqual(document["request_sha256"]["create"], "a" * 64)
+            self.assertFalse(path.with_suffix(".json.tmp").exists())
+
     def test_roundtrip_collects_receipts_and_readbacks(self) -> None:
         report = {"external_key": "cap00-a"}
         entries = [{"test_id": "CAP00-UNIT-001", "status": "PASSED"}]
