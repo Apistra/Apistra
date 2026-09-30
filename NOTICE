@@ -1,8 +1,13 @@
 Apistra
-Copyright (C) 2026 Apistra contributors
+Copyright (C) 2026 Jens Bekersch
 
-This program is offered under GNU AGPL version 3 as provided in LICENSE.
-A separate commercial licence may be available under a signed agreement.
+Required Notice: Copyright (C) 2026 Jens Bekersch (https://buildbyspec.com)
+
+Apistra is source available under the licence paths described in LICENSE.
+Commercial licensing enquiries: jens@buildbyspec.com
+
+The name Apistra and the Apistra logo identify this project and product. No
+trademark registration or trademark licence is represented by this notice.
 
 Third-party components retain their own copyright and licence terms. Candidate
 builds include an SPDX SBOM identifying packaged dependencies.
