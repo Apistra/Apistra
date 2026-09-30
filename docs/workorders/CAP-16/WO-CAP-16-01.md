@@ -65,7 +65,28 @@ A versioned, review-approved definition for signed plugin manifest and package c
 
 ## Allowed changes
 
-No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
+Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
+
+Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+
+Observed existing paths within the bounded change area:
+
+- EXISTING: `docs/workorders/CAP-16/WO-CAP-16-01.md`
+- EXISTING: `docs/capabilities/CAP-16-trusted-third-party-plugin-execution.md`
+- EXISTING: `CHANGELOG.md`
+- EXISTING: `backend/tests/contract/`
+
+Planned additions to the bounded change area after READY:
+
+- PLANNED: `backend/tests/contract/cap_16/`
+- PLANNED: `contracts/plugins/`
+- PLANNED: `plugin-sdk/python/`
+
+Workorder-class boundary: Contract definition only; no product runtime behaviour is authorised. Changes stay within the listed schema, SDK, contract-test, governance, and directly affected documentation paths.
+
+Architecture path gate: BLOCKING — `contracts/plugins/` and `plugin-sdk/python/` require a reviewed ADR-019 extension or an approved mapping into existing roots before any dependent workorder becomes READY.
+
+Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
 
 ## Stop conditions
 

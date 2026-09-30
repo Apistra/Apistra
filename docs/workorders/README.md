@@ -9,7 +9,7 @@ Version 0.6 assigns every workorder a delivery class, one owned verification gro
 
 Only `DRAFT`, `BLOCKED`, `READY`, and `DONE` are valid workflow statuses. Implementation, evidence, and approval are recorded separately. Behavioural scenarios and manual package namespaces are governed by the [canonical test-ID catalogue](../testing/test-id-catalog.md); individual manual cases are allocated only by the owning publication workorder.
 
-While a workorder is DRAFT/BLOCKED, its allowed paths remain deliberately unassigned. READY review must replace that placeholder with observed existing paths and approved additions; an agent may not invent repository structure to satisfy a draft.
+Every CAP-01 through CAP-18 workorder now names literal paths from the [business repository path contract](../planning/12-repository-path-contract.md). `EXISTING` records the observed `be7e84d` location; `PLANNED` records an exact target below an approved root without claiming that it already exists. These lists remain non-executable while a workorder is DRAFT/BLOCKED, and READY review must confirm the observation, approve the affected planned child paths, and retain any CAP-16 or CAP-17 new-root blocker. An agent may not invent or use an unlisted repository path.
 
 ## CAP-00
 

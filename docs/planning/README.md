@@ -26,6 +26,7 @@ No document in this baseline is implementation evidence. No capability is implem
 - 09-workorders.md — readiness/index view; one execution contract per file is in `../workorders/`
 - 10-traceability-and-gates.md — requirement-to-evidence mappings and release gates
 - 11-architecture-decisions-and-patterns.md — concrete ADRs, pattern scope, prohibitions, and verification
+- 12-repository-path-contract.md — observed repository roots, planned capability package mapping, workorder path boundaries, and unresolved new-root decisions
 - ../../VERSIONING.md — product version authority, compatibility meaning, and release procedure
 - ../../CHANGELOG.md — curated history of user-visible, contract, security, and operational changes
 
@@ -53,3 +54,4 @@ No document in this baseline is implementation evidence. No capability is implem
 - Independent expectation review: PENDING
 - CAP-00 implementation: IMPLEMENTED; version 0.5 is hosted verified, version 0.6 still needs current candidate evidence, and product-owner review/human acceptance are recorded; the authenticated Softwaretest.it receipt remains open
 - Business implementation: BLOCKED until CAP-00 and Softwaretest.it publishing readiness pass
+- Business workorder path contracts: COMPLETE AS PROPOSAL for all 133 workorders; qualified architecture review remains PENDING, with CAP-16 and CAP-17 new-root decisions BLOCKING

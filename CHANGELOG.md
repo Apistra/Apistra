@@ -26,12 +26,16 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Product-owner decisions ADR-020 through ADR-022 for the Apistra-owned durable runtime, local Administrator authentication, and the implemented source-available licensing boundary.
 - Source-available licence set with PolyForm Noncommercial 1.0.0, PolyForm Free Trial 1.0.0, standard commercial terms, Required Notice, and an explicit historical AGPL boundary.
 - CAP-00 independent review and human bootstrap acceptance record; external reporting evidence remains separate.
+- Proposed administration interaction baseline for DSN-001 through DSN-004 and six repository-authoritative, atomic `MTP-PRC-01` manual test definitions covering bootstrap, authentication, session revocation, project creation/audit, and project isolation.
+- Proposed business-workorder repository path contract mapping all 133 CAP-01 through CAP-18 workorders to observed existing paths and explicitly labelled planned module, feature, contract, test, migration, staging, and evidence paths.
 
 ### Changed
 
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
 - All 140 workorders now use the version 0.6 execution contract with exact workflow status, separate implementation/evidence/approval state, delivery classes, explicit outcomes, examples and counterexamples, canonical test references, workorder-specific architecture/security applicability, dependency graphs, and evidence invalidation rules.
 - Repository contract validation now checks the complete planning catalogue, exact status fields, canonical test IDs, defined ARCH/SEC references, dependency existence and cycles, delivery-class ordering, READY/DONE preconditions, membership, local links, and obsolete generic boilerplate.
+- Repository contract validation now also proves allocated manual-case file identity, required sections, consecutive atomic steps, per-step data/oracles, logged-out entry, and a retained failing counterexample.
+- Repository contract validation now rejects business-workorder path placeholders, unsafe or missing observed paths, path entries outside approved roots, and missing CAP-16/CAP-17 new-root architecture blockers; a retained failing path fixture proves the check is active.
 
 ### Fixed
 

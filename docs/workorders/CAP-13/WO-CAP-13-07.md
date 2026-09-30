@@ -65,7 +65,32 @@ One immutable capability candidate is fully tested, manually deployed to the nam
 
 ## Allowed changes
 
-No implementation path is authorised while this workorder is DRAFT/BLOCKED. Before READY, replace this paragraph through reviewed specification revision with the exact observed existing paths and any approved new path from ADR-019. The allowed set must be limited to the owning module/public contract, necessary entrypoint or UI adapter, language-neutral schema, focused tests/fixtures, migration if required, and directly affected documentation. Private cross-module imports and cross-module table access remain forbidden.
+Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
+
+Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+
+Observed existing paths within the bounded change area:
+
+- EXISTING: `docs/workorders/CAP-13/WO-CAP-13-07.md`
+- EXISTING: `docs/capabilities/CAP-13-evaluation-gates.md`
+- EXISTING: `CHANGELOG.md`
+- EXISTING: `deploy/compose/`
+- EXISTING: `tools/staging/`
+- EXISTING: `docs/testing/`
+- EXISTING: `tests/manual/`
+- EXISTING: `artifacts/`
+
+Planned additions to the bounded change area after READY:
+
+- PLANNED: `docs/testing/manual/PRC-06/`
+- PLANNED: `tests/manual/CAP-13/`
+- PLANNED: `artifacts/acceptance/CAP-13/`
+
+Workorder-class boundary: Capability acceptance only; no feature implementation is authorised. Changes stay within staging verification, acceptance definitions/evidence, and directly affected documentation.
+
+Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
+
+Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
 
 ## Stop conditions
 

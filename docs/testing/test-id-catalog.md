@@ -1,6 +1,6 @@
 # Canonical Test ID Catalogue
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
 
 ## 1. Purpose and authority
@@ -98,7 +98,18 @@ Generated capability or workorder aliases such as `BDD-CAP-*`, `BDD-WO-*`, and `
 
 ## 4. Individual manual case allocation
 
-An individual manual case receives the immutable format `MT-PRC-NN-NNN`, where `NN` identifies its package and `NNN` is a zero-padded sequence allocated by that capability's test-definition-and-publication workorder. No individual case is allocated by this draft catalogue. Allocation requires a complete procedure, prerequisites, data, objective oracle, cleanup, evidence fields, reviewer, and a successful Softwaretest.it field-level write/read verification.
+An individual manual case receives the immutable format `MT-PRC-NN-NNN`, where `NN` identifies its package and `NNN` is a zero-padded sequence allocated by that capability's test-definition-and-publication workorder. Allocation requires a complete procedure, prerequisites, data, objective oracle, cleanup, evidence fields, reviewer, and a successful Softwaretest.it field-level write/read verification before publication is considered verified.
+
+Allocated `MTP-PRC-01` definitions:
+
+- [`MT-PRC-01-001`](manual/PRC-01/MT-PRC-01-001.md) — Create the single bootstrap Administrator; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-002`](manual/PRC-01/MT-PRC-01-002.md) — Do not expose a second Administrator bootstrap after completion; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-003`](manual/PRC-01/MT-PRC-01-003.md) — Reject invalid credentials without account disclosure; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-004`](manual/PRC-01/MT-PRC-01-004.md) — Revoke a session on sign-out and reject its reuse; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-005`](manual/PRC-01/MT-PRC-01-005.md) — Create an isolated project and verify its attributable audit event; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-006`](manual/PRC-01/MT-PRC-01-006.md) — Deny direct access to a foreign project without disclosure; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+
+These IDs are now reserved and must not be renamed or reused. Their proposed UI labels derive from design revision `0.3-proposed`; design approval, executable fixture generation, Softwaretest.it publication, field-level read-back, execution, and acceptance remain separate gates.
 
 Implementation workorders reference the package only. Acceptance workorders execute the exact published case IDs; they must not create IDs during execution.
 

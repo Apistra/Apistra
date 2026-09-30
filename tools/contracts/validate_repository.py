@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 EXPECTED_FLOW = ["feature/*", "test", "staging", "main"]
 EXPECTED_REQUIRED_CHECKS = [
@@ -116,7 +116,44 @@ PLACEHOLDER_ALLOWED_PATH = (
 PROHIBITED_TEST_ALIASES = ("BDD-CAP-", "BDD-WO-", "MT-CAP-")
 BDD_ID_PATTERN = re.compile(r"\bBDD-[A-Z]+-\d{3}\b")
 MTP_ID_PATTERN = re.compile(r"\bMTP-PRC-\d{2}\b")
+MT_ID_PATTERN = re.compile(r"\bMT-PRC-\d{2}-\d{3}\b")
 WORKORDER_ID_PATTERN = re.compile(r"\bWO-CAP-\d{2}-\d{2}\b")
+MANUAL_CASE_REQUIRED_SECTIONS = {
+    "## Objective",
+    "## Preconditions",
+    "## Procedure",
+    "## Cleanup",
+    "## Required evidence and oracle",
+}
+BUSINESS_PATH_AUTHORITY = (
+    "Path authority: [Business Workorder Repository Path Contract]"
+    "(../../planning/12-repository-path-contract.md)."
+)
+BUSINESS_PATH_OBSERVATION = "Repository observation: 2026-09-30 at commit `be7e84d`."
+ALLOWED_REPOSITORY_PATH_ROOTS = {
+    "apps",
+    "artifacts",
+    "backend",
+    "connector-sdk",
+    "contracts",
+    "deploy",
+    "docs",
+    "engineering",
+    "images",
+    "LICENSES",
+    "plugin-sdk",
+    "tests",
+    "tools",
+}
+ALLOWED_REPOSITORY_ROOT_FILES = {
+    "CHANGELOG.md",
+    "COMMERCIAL-LICENSE.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "LICENSE-TRANSITION.md",
+    "NOTICE",
+    "SECURITY.md",
+}
 
 
 def validate_contract(contract: dict[str, object]) -> list[str]:
@@ -292,6 +329,88 @@ def _dependency_cycles(graph: dict[str, set[str]]) -> set[str]:
     return cycles
 
 
+def validate_business_path_contract(
+    path: Path, workorder_id: str, text: str
+) -> list[str]:
+    if workorder_id.startswith("WO-CAP-00-"):
+        return []
+
+    errors: list[str] = []
+    repository_root = path.resolve().parents[3]
+    allowed_section = text.split("## Allowed changes", 1)[-1].split(
+        "## Stop conditions", 1
+    )[0]
+
+    if PLACEHOLDER_ALLOWED_PATH in allowed_section:
+        errors.append(f"{path}: business workorder still has placeholder paths")
+    for required in (
+        BUSINESS_PATH_AUTHORITY,
+        BUSINESS_PATH_OBSERVATION,
+        "Observed existing paths within the bounded change area:",
+        "Planned additions to the bounded change area after READY:",
+        "Workorder-class boundary:",
+        "Architecture path gate:",
+        "Path boundary:",
+    ):
+        if required not in allowed_section:
+            errors.append(f"{path}: missing business path contract field: {required}")
+
+    existing_paths = re.findall(
+        r"^- EXISTING: `([^`]+)`$", allowed_section, re.MULTILINE
+    )
+    planned_paths = re.findall(r"^- PLANNED: `([^`]+)`$", allowed_section, re.MULTILINE)
+    if not existing_paths:
+        errors.append(f"{path}: business workorder must list observed EXISTING paths")
+    all_paths = existing_paths + planned_paths
+    if len(all_paths) != len(set(all_paths)):
+        errors.append(f"{path}: repository path entries must be unique")
+
+    for relative in all_paths:
+        parsed = PurePosixPath(relative.rstrip("/"))
+        if (
+            parsed.is_absolute()
+            or ".." in parsed.parts
+            or "\\" in relative
+            or any(character in relative for character in "*?[]{}")
+        ):
+            errors.append(
+                f"{path}: repository path must be literal and relative: {relative}"
+            )
+            continue
+        first = parsed.parts[0] if parsed.parts else ""
+        if (
+            first not in ALLOWED_REPOSITORY_PATH_ROOTS
+            and relative not in ALLOWED_REPOSITORY_ROOT_FILES
+        ):
+            errors.append(
+                f"{path}: repository path is outside approved roots: {relative}"
+            )
+
+    for relative in existing_paths:
+        observed = repository_root / relative.rstrip("/")
+        if not observed.exists():
+            errors.append(f"{path}: observed EXISTING path does not exist: {relative}")
+
+    if workorder_id.startswith("WO-CAP-16-"):
+        if (
+            "Architecture path gate: BLOCKING" not in allowed_section
+            or "`contracts/plugins/`" not in allowed_section
+            or "`plugin-sdk/python/`" not in allowed_section
+        ):
+            errors.append(
+                f"{path}: CAP-16 must retain the plugin-root architecture blocker"
+            )
+    if workorder_id.startswith("WO-CAP-17-"):
+        if (
+            "Architecture path gate: BLOCKING" not in allowed_section
+            or "`deploy/kubernetes/`" not in allowed_section
+        ):
+            errors.append(
+                f"{path}: CAP-17 must retain the Kubernetes-root architecture blocker"
+            )
+    return errors
+
+
 def validate_workorder_contract(
     path: Path,
     workorder_id: str,
@@ -302,6 +421,8 @@ def validate_workorder_contract(
     defined_sec_ids: set[str],
 ) -> tuple[list[str], str | None, set[str]]:
     errors: list[str] = []
+    if re.search(r"^## Stop conditions\S", text, re.MULTILINE):
+        errors.append(f"{path}: malformed Stop conditions heading")
     if "Version: 0.6-draft" not in text:
         errors.append(f"{path}: workorder contract must use Version: 0.6-draft")
 
@@ -367,6 +488,8 @@ def validate_workorder_contract(
     if re.search(r"\b(?:BDD|MT)-[^\s`,;)]+\*", text):
         errors.append(f"{path}: wildcard test identifiers are prohibited")
 
+    errors.extend(validate_business_path_contract(path, workorder_id, text))
+
     if status in {"READY", "DONE"}:
         if PLACEHOLDER_ALLOWED_PATH in text:
             errors.append(f"{path}: READY/DONE workorder still has placeholder paths")
@@ -376,6 +499,62 @@ def validate_workorder_contract(
         if phrase in text:
             errors.append(f"{path}: forbidden generic boilerplate remains: {phrase}")
     return errors, delivery_class, _required_workorders(text)
+
+
+def validate_manual_test_case(path: Path, text: str) -> list[str]:
+    errors: list[str] = []
+    test_id = path.stem
+    if not text.startswith(f"# {test_id} — "):
+        errors.append(f"{path}: heading must start with {test_id}")
+    if "Status: DRAFT; NOT PUBLISHED; NOT EXECUTED" not in text:
+        errors.append(f"{path}: manual case must declare separate draft states")
+    for section in _missing_sections(text, MANUAL_CASE_REQUIRED_SECTIONS):
+        errors.append(f"{path}: missing section {section}")
+
+    step_numbers = [
+        int(number)
+        for number in re.findall(
+            r"^(\d+)\. \*\*(?:Action|Observation) \([^)]+\):\*\* .+$",
+            text,
+            re.MULTILINE,
+        )
+    ]
+    data_count = len(re.findall(r"^\s+\*\*Test data:\*\* .+$", text, re.MULTILINE))
+    expected_count = len(
+        re.findall(r"^\s+\*\*Expected result:\*\* .+$", text, re.MULTILINE)
+    )
+    if not step_numbers:
+        errors.append(f"{path}: manual case must contain atomic role-prefixed steps")
+    elif step_numbers != list(range(1, len(step_numbers) + 1)):
+        errors.append(f"{path}: manual step numbers must be consecutive from 1")
+    if data_count != len(step_numbers) or expected_count != len(step_numbers):
+        errors.append(
+            f"{path}: every manual step must have one test data and expected result"
+        )
+    if not re.search(
+        r"^1\. \*\*Action \((?:Bootstrap visitor|Logged-out visitor)\):\*\* "
+        r"Open `STAGING_SIGN_IN_URL`",
+        text,
+        re.MULTILINE,
+    ):
+        errors.append(f"{path}: first step must start logged out at sign-in")
+    return errors
+
+
+def validate_manual_test_definitions(root: Path, test_catalog: str) -> list[str]:
+    errors: list[str] = []
+    manual_root = root / "docs/testing/manual"
+    catalogue_ids = set(MT_ID_PATTERN.findall(test_catalog))
+    case_files = sorted(manual_root.glob("PRC-*/MT-PRC-??-???.md"))
+    file_ids = {path.stem for path in case_files}
+
+    for test_id in sorted(catalogue_ids - file_ids):
+        errors.append(f"{manual_root}: allocated manual case {test_id} has no file")
+    for test_id in sorted(file_ids - catalogue_ids):
+        errors.append(f"{manual_root}: manual case file {test_id} is not allocated")
+    for path in case_files:
+        errors.extend(validate_manual_test_case(path, path.read_text(encoding="utf-8")))
+    return errors
 
 
 def validate_planning_catalogues(root: Path) -> list[str]:
@@ -397,8 +576,8 @@ def validate_planning_catalogues(root: Path) -> list[str]:
     defined_arch_ids = set(re.findall(r"^(ARCH-\d{3}) —", architecture, re.MULTILINE))
     defined_sec_ids = set(re.findall(r"^(SEC-\d{3}) —", security, re.MULTILINE))
 
-    if "Version: 0.6-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
-        errors.append(f"{test_catalog_path}: must declare the 0.6 draft authority")
+    if "Version: 0.7-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
+        errors.append(f"{test_catalog_path}: must declare the 0.7 draft authority")
     if len(canonical_bdd_ids) != 47:
         errors.append(
             f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
@@ -407,6 +586,7 @@ def validate_planning_catalogues(root: Path) -> list[str]:
         errors.append(
             f"{test_catalog_path}: manual package catalogue must be PRC-01 through PRC-14"
         )
+    errors.extend(validate_manual_test_definitions(root, test_catalog))
 
     capability_files = sorted(capabilities.glob("CAP-*.md"))
     observed_capability_ids = [path.name[:6] for path in capability_files]
@@ -632,6 +812,32 @@ def main() -> int:
             "prohibited generated test alias" in error for error in invalid_errors
         ):
             errors.append("negative workorder test-ID fixture must fail")
+        invalid_path_workorder = re.sub(
+            r"^- EXISTING: `[^`]+`$",
+            "- EXISTING: `missing/path/`",
+            fixture_text,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        invalid_path_errors, _, _ = validate_workorder_contract(
+            fixture_args[0], fixture_args[1], invalid_path_workorder, *fixture_args[2:]
+        )
+        if not any(
+            "observed EXISTING path does not exist" in error
+            for error in invalid_path_errors
+        ):
+            errors.append("negative business path fixture must fail")
+        manual_path = root / "docs/testing/manual/PRC-01/MT-PRC-01-001.md"
+        manual_text = manual_path.read_text(encoding="utf-8")
+        if validate_manual_test_case(manual_path, manual_text):
+            errors.append("positive manual test definition fixture must pass")
+        invalid_manual = manual_text.replace("**Expected result:**", "**Result:**", 1)
+        invalid_manual_errors = validate_manual_test_case(manual_path, invalid_manual)
+        if not any(
+            "every manual step must have one test data and expected result" in error
+            for error in invalid_manual_errors
+        ):
+            errors.append("negative manual test definition fixture must fail")
     for error in errors:
         print(error)
     if errors:
