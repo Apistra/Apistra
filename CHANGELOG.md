@@ -31,6 +31,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Approved CAP-01 expectation, security, architecture, design, pattern, and repository-path review with the remaining external Softwaretest.it blocker preserved.
 - Repository-owned BDD-AUTH-001 and BDD-PROJ-001 scenarios for CAP-01.
 - Deterministic, checksummed CAP-01 fixture descriptors and fail-closed integration/contract tests without product-state mutation or embedded credentials.
+- Versioned Softwaretest.it CI-guide validation, structured precondition diagnostics, revision-bound command keys, explicit run start, and an opt-in protected round-trip trigger.
 
 ### Changed
 
@@ -39,6 +40,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Repository contract validation now checks the complete planning catalogue, exact status fields, canonical test IDs, defined ARCH/SEC references, dependency existence and cycles, delivery-class ordering, READY/DONE preconditions, membership, local links, and obsolete generic boilerplate.
 - Repository contract validation now also proves allocated manual-case file identity, required sections, consecutive atomic steps, per-step data/oracles, logged-out entry, and a retained failing counterexample.
 - Repository contract validation now rejects business-workorder path placeholders, unsafe or missing observed paths, path entries outside approved roots, and missing CAP-16/CAP-17 new-root architecture blockers; a retained failing path fixture proves the check is active.
+- CAP-00 result bundles now identify the concrete GitHub run and attempt so external reporting retries remain traceable.
 
 ### Fixed
 

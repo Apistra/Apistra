@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -22,6 +23,12 @@ def main() -> int:
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     now = datetime.now(UTC).isoformat()
+    run_id = os.getenv("GITHUB_RUN_ID", "local")
+    run_attempt = os.getenv("GITHUB_RUN_ATTEMPT", "1")
+    pipeline_id = (
+        f"github-{run_id}-attempt-{run_attempt}" if run_id != "local" else "local"
+    )
+    job_id = os.getenv("GITHUB_JOB", "cap00-candidate")
     stages = [
         ("CAP00-CONTRACT-001", "CI-TS-01 contract consistency"),
         ("CAP00-STATIC-002", "CI-TS-02 static analysis and build"),
@@ -48,8 +55,8 @@ def main() -> int:
         },
         "started_at": now,
         "finished_at": now,
-        "pipeline_id": "local-or-github",
-        "job_id": "cap00-candidate",
+        "pipeline_id": pipeline_id,
+        "job_id": job_id,
         "results": [
             {
                 "test_id": test_id,

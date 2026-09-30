@@ -30,10 +30,9 @@ class SoftwaretestContractTests(unittest.TestCase):
         )
 
     def test_required_operations_and_scheme_pass(self) -> None:
-        paths = {
-            path: {method.lower(): {}}
-            for method, path in self.contract["operations"].values()
-        }
+        paths = {}
+        for method, path in self.contract["operations"].values():
+            paths.setdefault(path, {})[method.lower()] = {}
         document = {
             "openapi": "3.0.3",
             "info": {"title": "softwaretest.it REST API", "version": "1.0.0"},
@@ -41,6 +40,41 @@ class SoftwaretestContractTests(unittest.TestCase):
             "components": {"securitySchemes": {"ProjectBearer": {}}},
         }
         self.assertEqual(preflight.validate_openapi(document, self.contract), [])
+
+    def test_ci_integration_guide_passes_and_drift_fails_closed(self) -> None:
+        guide = {
+            "contract": "softwaretest.it-ci-integration",
+            "version": "1.0.0",
+            "command_protocol": {
+                "read_before_write": True,
+                "revision_header": "If-Match",
+                "idempotency_header": "Idempotency-Key",
+            },
+            "cycle_execution": {
+                "planned_window_required": False,
+                "start_preconditions": {
+                    "cycle_status": "DRAFT",
+                    "minimum_run_count": 1,
+                    "current_revision_required": True,
+                },
+                "steps": [
+                    {"operation_id": "cycle_create"},
+                    {"operation_id": "cycle_item_create"},
+                    {"operation_id": "cycle_start"},
+                    {"operation_id": "run_start"},
+                ],
+                "failure_recovery": {
+                    code: "documented"
+                    for code in self.contract["integration_guide"]["failure_codes"]
+                },
+            },
+        }
+        self.assertEqual(preflight.validate_integration_guide(guide, self.contract), [])
+        guide["cycle_execution"]["steps"].pop()
+        self.assertIn(
+            "cycle execution operation order changed",
+            preflight.validate_integration_guide(guide, self.contract),
+        )
 
     def test_contract_drift_fails_closed(self) -> None:
         self.assertGreater(
@@ -79,6 +113,32 @@ class SoftwaretestContractTests(unittest.TestCase):
         first = publisher.stable_key("create", "candidate")
         self.assertEqual(first, publisher.stable_key("create", "candidate"))
         self.assertNotEqual(first, publisher.stable_key("finalize", "candidate"))
+
+    def test_command_keys_rotate_with_revision_and_attempt(self) -> None:
+        first = publisher.command_key("pipeline-1", "cycle", "cycle-1", "start", 1, 1)
+        self.assertEqual(
+            first,
+            publisher.command_key("pipeline-1", "cycle", "cycle-1", "start", 1, 1),
+        )
+        self.assertNotEqual(
+            first,
+            publisher.command_key("pipeline-1", "cycle", "cycle-1", "start", 2, 2),
+        )
+
+    def test_problem_details_preserve_actionable_fields_without_headers(self) -> None:
+        error = publisher.ApiError(
+            409,
+            {
+                "code": "CYCLE_START_PRECONDITION_FAILED",
+                "detail": "Cycle cannot start.",
+                "request_id": "request-1",
+                "errors": {"failed_precondition": "minimum_run_count"},
+            },
+        )
+        self.assertEqual(error.code, "CYCLE_START_PRECONDITION_FAILED")
+        self.assertEqual(error.request_id, "request-1")
+        self.assertEqual(error.errors["failed_precondition"], "minimum_run_count")
+        self.assertNotIn("Authorization", str(error))
 
     def test_redaction_is_recursive(self) -> None:
         self.assertEqual(
@@ -180,17 +240,30 @@ class SoftwaretestContractTests(unittest.TestCase):
         def fake_request(
             url, token, *, method="GET", key="", if_match="", payload=None
         ):
+            if "/runs?" in url:
+                return {
+                    "results": [
+                        {
+                            "id": "run-1",
+                            "cycle_id": "cycle-1",
+                            "status": "IN_PROGRESS",
+                            "revision": 2,
+                        }
+                    ]
+                }
             return {
                 "results": [
                     {
                         "id": "cycle-1",
                         "name": "Apistra CAP-00 Reporting",
                         "status": "ACTIVE",
+                        "revision": 2,
+                        "run_count": 1,
                     }
                 ]
             }
 
-        cycle, created = publisher.ensure_cycle(
+        cycle, created, run = publisher.ensure_cycle(
             base_url="https://softwaretest.it",
             project_id="project-1",
             token="secret",
@@ -198,6 +271,7 @@ class SoftwaretestContractTests(unittest.TestCase):
         )
         self.assertEqual(cycle["id"], "cycle-1")
         self.assertFalse(created)
+        self.assertEqual(run["status"], "IN_PROGRESS")
 
     def test_cycle_resolution_creates_with_idempotency_key(self) -> None:
         calls = []
@@ -210,6 +284,17 @@ class SoftwaretestContractTests(unittest.TestCase):
             nonlocal cycle_created, item_planned
             calls.append((url, method, key, if_match, payload))
             if method == "GET":
+                if "/runs?" in url:
+                    return {
+                        "results": [
+                            {
+                                "id": "run-1",
+                                "cycle_id": "cycle-1",
+                                "status": "NOT_STARTED",
+                                "revision": 1,
+                            }
+                        ]
+                    }
                 if item_planned:
                     return {
                         "results": [
@@ -223,7 +308,14 @@ class SoftwaretestContractTests(unittest.TestCase):
                         ]
                     }
                 return {"results": []}
-            if url.endswith(":start"):
+            if url.endswith("/runs/run-1:start"):
+                return {
+                    "id": "run-1",
+                    "cycle_id": "cycle-1",
+                    "status": "IN_PROGRESS",
+                    "revision": 2,
+                }
+            if url.endswith("/cycles/cycle-1:start"):
                 return {
                     "id": "cycle-1",
                     "name": "Apistra CAP-00 Reporting",
@@ -242,22 +334,83 @@ class SoftwaretestContractTests(unittest.TestCase):
                 "run_count": 0,
             }
 
-        cycle, created = publisher.ensure_cycle(
+        cycle, created, run = publisher.ensure_cycle(
             base_url="https://softwaretest.it",
             project_id="project-1",
             token="secret",
             anchor_version_id="version-1",
+            pipeline_run_id="pipeline-1",
             requester=fake_request,
         )
         self.assertEqual(cycle["id"], "cycle-1")
         self.assertTrue(created)
-        self.assertEqual(calls[1][1], "POST")
-        self.assertTrue(calls[1][2].startswith("apistra-cap00-cycle-"))
         self.assertTrue(cycle_created)
-        self.assertTrue(calls[2][0].endswith("cycle-1/items"))
-        self.assertEqual(calls[2][3], '"1"')
-        self.assertTrue(calls[4][0].endswith("cycle-1:start"))
-        self.assertEqual(calls[4][3], '"2"')
+        self.assertEqual(run["status"], "IN_PROGRESS")
+        cycle_create = next(
+            call for call in calls if call[0].endswith("/cycles") and call[1] == "POST"
+        )
+        item_create = next(call for call in calls if call[0].endswith("/items"))
+        cycle_start = next(
+            call for call in calls if call[0].endswith("/cycles/cycle-1:start")
+        )
+        run_start = next(
+            call for call in calls if call[0].endswith("/runs/run-1:start")
+        )
+        self.assertTrue(cycle_create[2].startswith("apistra-cap00-cycle-create-"))
+        self.assertEqual(item_create[3], '"1"')
+        self.assertEqual(cycle_start[3], '"2"')
+        self.assertEqual(run_start[3], '"1"')
+
+    def test_run_start_refetches_and_rotates_key_on_revision_conflict(self) -> None:
+        calls = []
+        list_count = 0
+
+        def fake_request(
+            url, token, *, method="GET", key="", if_match="", payload=None
+        ):
+            nonlocal list_count
+            calls.append((url, method, key, if_match, payload))
+            if method == "GET":
+                list_count += 1
+                return {
+                    "results": [
+                        {
+                            "id": "run-1",
+                            "cycle_id": "cycle-1",
+                            "status": "NOT_STARTED",
+                            "revision": list_count,
+                        }
+                    ]
+                }
+            if len([call for call in calls if call[1] == "POST"]) == 1:
+                raise publisher.ApiError(
+                    409,
+                    {
+                        "code": "REVISION_CONFLICT",
+                        "detail": "Revision changed.",
+                        "request_id": "request-1",
+                        "errors": {"current_etag": '"2"'},
+                    },
+                )
+            return {
+                "id": "run-1",
+                "cycle_id": "cycle-1",
+                "status": "IN_PROGRESS",
+                "revision": 3,
+            }
+
+        run = publisher._start_cycle_run(
+            base_url="https://softwaretest.it",
+            project_id="project-1",
+            cycle_id="cycle-1",
+            token="secret",
+            pipeline_run_id="pipeline-1",
+            requester=fake_request,
+        )
+        posts = [call for call in calls if call[1] == "POST"]
+        self.assertEqual(run["status"], "IN_PROGRESS")
+        self.assertEqual([call[3] for call in posts], ['"1"', '"2"'])
+        self.assertNotEqual(posts[0][2], posts[1][2])
 
 
 if __name__ == "__main__":

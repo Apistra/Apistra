@@ -11,6 +11,7 @@ import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 ALLOWED_STATUSES = {"PASSED", "FAILED", "SKIPPED", "ERROR", "CANCELLED"}
 
@@ -20,17 +21,38 @@ class ApiError(RuntimeError):
 
     def __init__(self, status: int, problem: dict[str, Any]) -> None:
         self.status = status
+        self.code = str(problem.get("code", ""))[:100]
         self.problem_type = str(problem.get("type", ""))[:200]
         self.title = str(problem.get("title", ""))[:200]
         self.detail = str(problem.get("detail", ""))[:500]
-        summary = self.title or self.problem_type or "API request failed"
+        self.request_id = str(problem.get("request_id", ""))[:200]
+        raw_errors = problem.get("errors", {})
+        self.errors = raw_errors if isinstance(raw_errors, dict) else {}
+        summary = self.code or self.title or self.problem_type or "API request failed"
         if self.detail:
             summary = f"{summary}: {self.detail}"
+        if self.request_id:
+            summary = f"{summary} (request_id={self.request_id})"
         super().__init__(f"HTTP {status} {summary}")
 
 
 def stable_key(prefix: str, value: str) -> str:
     return f"apistra-cap00-{prefix}-{hashlib.sha256(value.encode()).hexdigest()[:24]}"
+
+
+def command_key(
+    pipeline_run_id: str,
+    resource_type: str,
+    resource_id: str,
+    command: str,
+    revision: int | str,
+    attempt: int,
+) -> str:
+    value = (
+        f"{pipeline_run_id}:{resource_type}:{resource_id}:{command}:"
+        f"rev-{revision}:attempt-{attempt}"
+    )
+    return stable_key(f"{resource_type}-{command}", value)
 
 
 def payload_sha256(payload: Any) -> str:
@@ -283,6 +305,129 @@ def execute_roundtrip(
     }
 
 
+def _revision(document: dict[str, Any], resource: str) -> int:
+    value = document.get("revision")
+    if not isinstance(value, int):
+        raise TypeError(f"{resource} has no revision")
+    return value
+
+
+def _find_cycle(page: dict[str, Any], cycle_id: str) -> dict[str, Any] | None:
+    return next(
+        (
+            cycle
+            for cycle in page.get("results", [])
+            if isinstance(cycle, dict) and cycle.get("id") == cycle_id
+        ),
+        None,
+    )
+
+
+def _refresh_cycle(url: str, token: str, cycle_id: str, requester) -> dict[str, Any]:
+    selected = _find_cycle(requester(url, token, method="GET"), cycle_id)
+    if selected is None:
+        raise ValueError("cycle disappeared from project listing")
+    return selected
+
+
+def _problem_context(error: ApiError) -> str:
+    parts = [error.code or "API_ERROR"]
+    failed = error.errors.get("failed_precondition")
+    current_etag = error.errors.get("current_etag")
+    if failed:
+        parts.append(f"failed_precondition={failed}")
+    if current_etag:
+        parts.append(f"current_etag={current_etag}")
+    if error.request_id:
+        parts.append(f"request_id={error.request_id}")
+    return "; ".join(parts)
+
+
+def _read_cycle_runs(
+    *, base_url: str, project_id: str, cycle_id: str, token: str, requester
+) -> list[dict[str, Any]]:
+    query = urlencode({"cycle": cycle_id, "page_size": 100})
+    page = requester(
+        f"{base_url}/api/v1/projects/{project_id}/runs?{query}",
+        token,
+        method="GET",
+    )
+    results = page.get("results", [])
+    if not isinstance(results, list):
+        raise TypeError("run listing has an unexpected shape")
+    return [
+        run
+        for run in results
+        if isinstance(run, dict) and run.get("cycle_id") == cycle_id
+    ]
+
+
+def _start_cycle_run(
+    *,
+    base_url: str,
+    project_id: str,
+    cycle_id: str,
+    token: str,
+    pipeline_run_id: str,
+    requester,
+) -> dict[str, Any]:
+    runs = _read_cycle_runs(
+        base_url=base_url,
+        project_id=project_id,
+        cycle_id=cycle_id,
+        token=token,
+        requester=requester,
+    )
+    in_progress = [run for run in runs if run.get("status") == "IN_PROGRESS"]
+    if in_progress:
+        return in_progress[0]
+    startable = [run for run in runs if run.get("status") == "NOT_STARTED"]
+    if not startable:
+        raise ValueError("active cycle has no NOT_STARTED or IN_PROGRESS run")
+    selected = startable[0]
+    run_id = str(selected.get("id", ""))
+    if not run_id:
+        raise ValueError("planned run has no id")
+    revision = _revision(selected, "planned run")
+    url = f"{base_url}/api/v1/projects/{project_id}/runs/{run_id}:start"
+    try:
+        started = requester(
+            url,
+            token,
+            method="POST",
+            key=command_key(pipeline_run_id, "run", run_id, "start", revision, 1),
+            if_match=f'"{revision}"',
+        )
+    except ApiError as error:
+        if error.code != "REVISION_CONFLICT":
+            raise ValueError(f"run start failed: {_problem_context(error)}") from None
+        refreshed_runs = _read_cycle_runs(
+            base_url=base_url,
+            project_id=project_id,
+            cycle_id=cycle_id,
+            token=token,
+            requester=requester,
+        )
+        refreshed = next(
+            (run for run in refreshed_runs if run.get("id") == run_id), None
+        )
+        if refreshed is None:
+            raise ValueError("run disappeared after revision conflict") from None
+        if refreshed.get("status") == "IN_PROGRESS":
+            return refreshed
+        revision = _revision(refreshed, "planned run")
+        started = requester(
+            url,
+            token,
+            method="POST",
+            key=command_key(pipeline_run_id, "run", run_id, "start", revision, 2),
+            if_match=f'"{revision}"',
+        )
+    if started.get("status") != "IN_PROGRESS":
+        raise ValueError("run start did not return an IN_PROGRESS run")
+    return started
+
+
 def ensure_cycle(
     *,
     base_url: str,
@@ -290,9 +435,10 @@ def ensure_cycle(
     token: str,
     configured_id: str = "",
     anchor_version_id: str = "",
+    pipeline_run_id: str = "local",
     requester=request_json,
-) -> tuple[dict[str, Any], bool]:
-    """Return a configured or reusable CAP-00 cycle, creating it idempotently."""
+) -> tuple[dict[str, Any], bool, dict[str, Any]]:
+    """Return an active CAP-00 cycle and its started execution run."""
     url = f"{base_url}/api/v1/projects/{project_id}/cycles"
     cycle_name = "Apistra CAP-00 Reporting"
     page = requester(url, token, method="GET")
@@ -331,7 +477,9 @@ def ensure_cycle(
             url,
             token,
             method="POST",
-            key=stable_key("cycle", f"{project_id}:cap00-integration"),
+            key=command_key(
+                pipeline_run_id, "cycle", "cap00-integration", "create", "none", 1
+            ),
             payload=payload,
         )
         created_cycle = True
@@ -344,45 +492,88 @@ def ensure_cycle(
                 "draft cycle has no planned run; SOFTWARETEST_ANCHOR_VERSION_ID "
                 "is required"
             )
-        revision = selected.get("revision")
-        if not isinstance(revision, int):
-            raise ValueError("draft cycle has no revision")
-        requester(
-            f"{url}/{selected['id']}/items",
-            token,
-            method="POST",
-            key=stable_key("cycle-item", f"{selected['id']}:{anchor_version_id}"),
-            if_match=f'"{revision}"',
-            payload={"version_id": anchor_version_id},
-        )
-        refreshed_page = requester(url, token, method="GET")
-        selected = next(
-            (
-                cycle
-                for cycle in refreshed_page.get("results", [])
-                if cycle.get("id") == selected["id"]
-            ),
-            None,
-        )
-        if selected is None:
-            raise ValueError("planned cycle disappeared from project listing")
+        cycle_id = str(selected["id"])
+        revision = _revision(selected, "draft cycle")
+        item_url = f"{url}/{cycle_id}/items"
+        try:
+            requester(
+                item_url,
+                token,
+                method="POST",
+                key=command_key(
+                    pipeline_run_id, "cycle", cycle_id, "add-item", revision, 1
+                ),
+                if_match=f'"{revision}"',
+                payload={"version_id": anchor_version_id},
+            )
+        except ApiError as error:
+            if error.code != "REVISION_CONFLICT":
+                raise ValueError(
+                    f"cycle item creation failed: {_problem_context(error)}"
+                ) from None
+            selected = _refresh_cycle(url, token, cycle_id, requester)
+            if selected.get("run_count", 0) < 1:
+                revision = _revision(selected, "draft cycle")
+                requester(
+                    item_url,
+                    token,
+                    method="POST",
+                    key=command_key(
+                        pipeline_run_id, "cycle", cycle_id, "add-item", revision, 2
+                    ),
+                    if_match=f'"{revision}"',
+                    payload={"version_id": anchor_version_id},
+                )
+        selected = _refresh_cycle(url, token, cycle_id, requester)
 
     if selected.get("status") == "DRAFT":
         if selected.get("run_count", 0) < 1:
             raise ValueError("draft cycle still has no executable planned run")
-        revision = selected.get("revision")
-        if not isinstance(revision, int):
-            raise ValueError("draft cycle has no revision")
-        selected = requester(
-            f"{url}/{selected['id']}:start",
-            token,
-            method="POST",
-            key=stable_key("cycle-start", f"{selected['id']}:{revision}"),
-            if_match=f'"{revision}"',
-        )
+        cycle_id = str(selected["id"])
+        revision = _revision(selected, "draft cycle")
+        start_url = f"{url}/{cycle_id}:start"
+        try:
+            selected = requester(
+                start_url,
+                token,
+                method="POST",
+                key=command_key(
+                    pipeline_run_id, "cycle", cycle_id, "start", revision, 1
+                ),
+                if_match=f'"{revision}"',
+            )
+        except ApiError as error:
+            if error.code == "CYCLE_START_PRECONDITION_FAILED":
+                raise ValueError(
+                    f"cycle start precondition failed: {_problem_context(error)}"
+                ) from None
+            if error.code != "REVISION_CONFLICT":
+                raise ValueError(
+                    f"cycle start failed: {_problem_context(error)}"
+                ) from None
+            selected = _refresh_cycle(url, token, cycle_id, requester)
+            if selected.get("status") == "DRAFT":
+                revision = _revision(selected, "draft cycle")
+                selected = requester(
+                    start_url,
+                    token,
+                    method="POST",
+                    key=command_key(
+                        pipeline_run_id, "cycle", cycle_id, "start", revision, 2
+                    ),
+                    if_match=f'"{revision}"',
+                )
     if selected.get("status") != "ACTIVE":
         raise ValueError("CAP-00 cycle is not active")
-    return selected, created_cycle
+    run = _start_cycle_run(
+        base_url=base_url,
+        project_id=project_id,
+        cycle_id=str(selected["id"]),
+        token=token,
+        pipeline_run_id=pipeline_run_id,
+        requester=requester,
+    )
+    return selected, created_cycle, run
 
 
 def main() -> int:
@@ -419,23 +610,29 @@ def main() -> int:
     cycle_evidence: dict[str, Any] = {}
     if args.apply and token and project_id and args.ensure_cycle:
         try:
-            cycle, created = ensure_cycle(
+            cycle, created, run = ensure_cycle(
                 base_url=base_url,
                 project_id=project_id,
                 token=token,
                 configured_id=cycle_id,
                 anchor_version_id=anchor_version_id,
+                pipeline_run_id=str(bundle.get("pipeline_id", "local")),
             )
             cycle_id = cycle["id"]
-            cycle_evidence = {"created": created, "document": cycle}
+            cycle_evidence = {"created": created, "document": cycle, "run": run}
         except (
             ApiError,
             OSError,
             urllib.error.URLError,
             json.JSONDecodeError,
+            TypeError,
             ValueError,
         ) as error:
-            print(f"Cycle resolution failed safely: {type(error).__name__}")
+            detail = (
+                str(error)
+                if isinstance(error, (ApiError, TypeError, ValueError))
+                else type(error).__name__
+            )
             return 1
     effective_cycle_id = cycle_id or "BLOCKED-AUTHORISED-CYCLE-REQUIRED"
     report, entries, final = build_payloads(bundle, effective_cycle_id)
@@ -482,6 +679,7 @@ def main() -> int:
         urllib.error.URLError,
         json.JSONDecodeError,
         RuntimeError,
+        TypeError,
         ValueError,
     ) as error:
         detail = str(error) if isinstance(error, RuntimeError) else type(error).__name__

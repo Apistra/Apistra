@@ -51,7 +51,7 @@ python tools/release/create_result_bundle.py artifacts/cap00-candidate/candidate
 python engineering/softwaretest/publisher.py artifacts/cap00-result-bundle.json
 ```
 
-The publisher defaults to a redacted, lossless dry-run outbox. `--apply` is only permitted with protected `SOFTWARETEST_TOKEN`, `SOFTWARETEST_PROJECT_ID`, and `SOFTWARETEST_CYCLE_ID` values after repository administration authorises the external write. Reporting retries replay HTTP commands with stable command-specific idempotency keys and never rerun tests.
+The publisher defaults to a redacted, lossless dry-run outbox. `--apply` is only permitted with protected `SOFTWARETEST_TOKEN` and `SOFTWARETEST_PROJECT_ID` values after repository administration authorises the external write. `SOFTWARETEST_CYCLE_ID` is optional when `--ensure-cycle` is used; a draft cycle without a run additionally requires `SOFTWARETEST_ANCHOR_VERSION_ID`. The adapter validates the published CI guide, follows revision-protected cycle/run commands, and records a redacted field-level receipt. Reporting retries replay only HTTP commands with revision-aware idempotency keys and never rerun tests.
 
 ## Final acceptance
 

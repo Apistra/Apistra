@@ -36,6 +36,55 @@ def validate_openapi(
     return errors
 
 
+def validate_integration_guide(
+    document: dict[str, object], contract: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    expected = contract["integration_guide"]
+    if not isinstance(expected, dict):
+        return ["integration guide contract is not an object"]
+    if document.get("contract") != expected["contract"]:
+        errors.append("integration guide contract changed")
+    if document.get("version") != expected["version"]:
+        errors.append("integration guide version changed")
+    protocol = document.get("command_protocol", {})
+    if not isinstance(protocol, dict):
+        errors.append("integration guide command protocol is absent")
+    else:
+        if protocol.get("read_before_write") is not True:
+            errors.append("read-before-write is no longer required")
+        if protocol.get("revision_header") != expected["revision_header"]:
+            errors.append("revision header changed")
+        if protocol.get("idempotency_header") != expected["idempotency_header"]:
+            errors.append("idempotency header changed")
+    execution = document.get("cycle_execution", {})
+    if not isinstance(execution, dict):
+        return [*errors, "cycle execution guide is absent"]
+    operations = [
+        step.get("operation_id")
+        for step in execution.get("steps", [])
+        if isinstance(step, dict)
+    ]
+    if operations != expected["cycle_operations"]:
+        errors.append("cycle execution operation order changed")
+    preconditions = execution.get("start_preconditions", {})
+    if not isinstance(preconditions, dict):
+        errors.append("cycle start preconditions are absent")
+    elif (
+        preconditions.get("cycle_status") != "DRAFT"
+        or preconditions.get("minimum_run_count") != 1
+        or preconditions.get("current_revision_required") is not True
+        or execution.get("planned_window_required") is not False
+    ):
+        errors.append("cycle start preconditions changed")
+    recovery = execution.get("failure_recovery", {})
+    if not isinstance(recovery, dict) or not set(expected["failure_codes"]).issubset(
+        recovery
+    ):
+        errors.append("required failure recovery codes are absent")
+    return errors
+
+
 def get_json(url: str, token: str | None = None) -> dict[str, object]:
     headers = {"Accept": "application/json"}
     if token:
@@ -61,7 +110,11 @@ def main() -> int:
             if args.openapi_file
             else get_json(base_url + contract["openapi_path"])
         )
-        errors = validate_openapi(document, contract)
+        guide = get_json(base_url + contract["integration_guide"]["path"])
+        errors = [
+            *validate_openapi(document, contract),
+            *validate_integration_guide(guide, contract),
+        ]
         if errors:
             print("; ".join(errors))
             return 1

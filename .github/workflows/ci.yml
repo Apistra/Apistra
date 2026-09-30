@@ -1,6 +1,13 @@
 name: CI
 
 on:
+  workflow_dispatch:
+    inputs:
+      softwaretest_roundtrip:
+        description: Run the protected Softwaretest.it round-trip
+        required: true
+        type: boolean
+        default: false
   pull_request:
     branches: [test, staging, main]
   push:
@@ -165,10 +172,12 @@ jobs:
   softwaretest-roundtrip:
     name: Softwaretest.it authenticated round-trip
     if: >-
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/test' ||
-       github.ref == 'refs/heads/staging' ||
-       github.ref == 'refs/heads/main')
+      (github.event_name == 'push' &&
+       (github.ref == 'refs/heads/test' ||
+        github.ref == 'refs/heads/staging' ||
+        github.ref == 'refs/heads/main')) ||
+      (github.event_name == 'workflow_dispatch' &&
+       inputs.softwaretest_roundtrip == true)
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 10
