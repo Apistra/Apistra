@@ -228,6 +228,38 @@ def write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
     temporary.replace(path)
 
 
+def write_failure_receipt(
+    path: Path,
+    *,
+    project_id: str,
+    base_url: str,
+    token: str,
+    command_revision: str,
+    stage: str,
+    error: Exception,
+    cycle: dict[str, Any] | None = None,
+    request_sha256: dict[str, str] | None = None,
+) -> None:
+    """Retain redacted machine-readable evidence for a failed remote operation."""
+    evidence: dict[str, Any] = {
+        "schema_version": "1.0",
+        "generated_at": datetime.now(UTC).isoformat(),
+        "project_id": project_id,
+        "base_url": base_url,
+        "cycle": cycle or {},
+        "command_revision": command_revision,
+        "verified": False,
+        "failure": {
+            "stage": stage,
+            "error_type": type(error).__name__,
+            "detail": str(error) or type(error).__name__,
+        },
+    }
+    if request_sha256:
+        evidence["request_sha256"] = request_sha256
+    write_json_atomic(path, redact(evidence, (token,)))
+
+
 def execute_roundtrip(
     *,
     base_url: str,
@@ -628,10 +660,19 @@ def main() -> int:
             TypeError,
             ValueError,
         ) as error:
-            detail = (
-                str(error)
-                if isinstance(error, (ApiError, TypeError, ValueError))
-                else type(error).__name__
+            write_failure_receipt(
+                args.receipt,
+                project_id=project_id,
+                base_url=base_url,
+                token=token,
+                command_revision=args.command_revision,
+                stage="cycle",
+                error=error,
+            )
+            detail = str(error) or type(error).__name__
+            print(
+                "Cycle preparation failed safely; failure receipt retained at "
+                f"{args.receipt}: {detail}"
             )
             return 1
     effective_cycle_id = cycle_id or "BLOCKED-AUTHORISED-CYCLE-REQUIRED"
@@ -682,8 +723,23 @@ def main() -> int:
         TypeError,
         ValueError,
     ) as error:
-        detail = str(error) if isinstance(error, RuntimeError) else type(error).__name__
-        print(f"Reporting failed safely; outbox retained: {detail}")
+        write_failure_receipt(
+            args.receipt,
+            project_id=project_id,
+            base_url=base_url,
+            token=token,
+            command_revision=args.command_revision,
+            stage="report",
+            error=error,
+            cycle=cycle_evidence,
+            request_sha256={
+                "create": payload_sha256(report),
+                "entries": payload_sha256({"entries": entries}),
+                "finalize": payload_sha256(final),
+            },
+        )
+        detail = str(error) or type(error).__name__
+        print(f"Reporting failed safely; outbox and failure receipt retained: {detail}")
         return 1
 
 
