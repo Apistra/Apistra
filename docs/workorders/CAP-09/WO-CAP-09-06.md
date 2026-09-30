@@ -78,7 +78,6 @@ Observed existing paths within the bounded change area:
 - EXISTING: `tools/staging/`
 - EXISTING: `docs/testing/`
 - EXISTING: `tests/manual/`
-- EXISTING: `artifacts/`
 
 Planned additions to the bounded change area after READY:
 

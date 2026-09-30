@@ -387,6 +387,11 @@ def validate_business_path_contract(
             )
 
     for relative in existing_paths:
+        if relative == "artifacts/" or relative.startswith("artifacts/"):
+            errors.append(
+                f"{path}: generated artifact path cannot be observed EXISTING: {relative}"
+            )
+            continue
         observed = repository_root / relative.rstrip("/")
         if not observed.exists():
             errors.append(f"{path}: observed EXISTING path does not exist: {relative}")
