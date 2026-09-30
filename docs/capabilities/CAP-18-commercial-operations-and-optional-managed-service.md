@@ -47,7 +47,7 @@ Operators can apply offline commercial entitlements and, if separately approved,
 
 ## Binding rules
 
-- AGPL and commercial use remain distinct
+- PolyForm noncommercial/free-trial rights and separately signed commercial rights remain distinct
 - No mandatory phone-home
 - Support export is explicit and redacted
 - Managed hosting needs a separate production contract

@@ -23,7 +23,7 @@ Stakeholders include Administrators, developers, AI engineers, solution architec
 
 ## 2. Constraints
 
-- Public AGPL repository with commercial alternative
+- Public build-in-public repository; future releases transition to the source-available licensing model in ADR-022 after legal implementation
 - No external contributions initially
 - English project language
 - Next.js and TypeScript for the web application
@@ -74,7 +74,7 @@ Trust boundaries:
 - Project boundary inside one installation
 - Apistra to each model or embedding endpoint
 - Apistra to each connector target
-- API service to worker and durable engine
+- API service to the Apistra runtime and workers
 - Services to PostgreSQL and Qdrant
 - CI to repository and artefact store
 - Local staging environment to operator workstation
@@ -179,7 +179,7 @@ The domain model deliberately shows only architecturally significant aggregates 
 1. API client authenticates with a project API key.
 2. The API validates project, workflow version, input schema, idempotency key, and limits.
 3. The API creates or returns the existing run and responds with 202 and the run ID.
-4. The durable engine schedules work.
+4. The Apistra runtime commits dispatch intent and schedules work.
 5. Workers execute nodes through provider-neutral ports.
 6. Each attempt records correlated state, usage, safe diagnostics, and checkpoint.
 7. The run reaches completed, failed, cancelled, or waiting state.
@@ -208,7 +208,7 @@ The domain model deliberately shows only architecturally significant aggregates 
 
 ### 6.5 Recovery
 
-After interruption, the durable engine resumes from a committed checkpoint. Completed non-repeatable side effects are protected by idempotency records or explicit compensation. All attempts remain visible.
+After interruption, the Apistra runtime resumes from committed state and journal records. Completed non-repeatable side effects are protected by idempotency records or explicit compensation. All attempts remain visible.
 
 ### 6.6 Runtime sequence diagrams
 
@@ -393,9 +393,9 @@ ARCH-007 — Immutable publication
 
 ARCH-008 — Durable execution boundary
 - Status: DECIDED
-- Rule: Long-running state transitions use the selected durable engine through an application port. API processes do not own in-memory run state.
+- Rule: Long-running state transitions are owned by the Apistra runtime and committed to PostgreSQL before dispatch. API and worker processes do not own authoritative in-memory run state, and no external orchestration product or control plane is a runtime prerequisite.
 - Violation: approval waits stored only in a web process.
-- Verification: restart and recovery tests.
+- Verification: dependency tests plus restart, worker-loss, lease-expiry, duplicate-delivery, and recovery tests.
 
 ARCH-009 — Idempotent external effects
 - Status: DECIDED

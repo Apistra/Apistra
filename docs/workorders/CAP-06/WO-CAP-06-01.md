@@ -89,7 +89,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 - Rules: ARCH-008, ARCH-014
 - Applicability: durable execution selection, local/offline operability, bounded recovery, and recorded decision authority.
-- ADRs/patterns: ADR-001 through ADR-011, ADR-013, ADR-015, ADR-017, ADR-018, ADR-PENDING-001
+- ADRs/patterns: ADR-001 through ADR-011, ADR-013, ADR-015, ADR-017, ADR-018, ADR-020
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 

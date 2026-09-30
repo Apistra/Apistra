@@ -21,7 +21,7 @@ REQ-013 — Configurable resource and cost controls
 REQ-014 — Restricted runtime network access
 REQ-015 — Offline operation
 REQ-016 — Local-first observability and audit
-REQ-017 — AGPL and commercial offline licence
+REQ-017 — Source-available noncommercial/evaluation and commercial offline licensing
 REQ-018 — English documentation and English or German UI
 REQ-019 — Controlled branch promotion without automatic deployment
 REQ-020 — Softwaretest.it test management and complete result reporting
@@ -208,7 +208,7 @@ Every executed test or gate must bind:
 - GATE-PLN-01: PENDING
 - GATE-EXP-01: PENDING
 - GATE-DES-01: PENDING
-- GATE-CAP00-READY: READY FOR INDEPENDENT REVIEW
+- GATE-CAP00-READY: REVIEWED; HUMAN ACCEPTANCE RECORDED
 - GATE-CAP00-DONE: BLOCKED
 - GATE-WO-READY: BLOCKED
 - GATE-WO-DONE: BLOCKED
@@ -218,16 +218,15 @@ Every executed test or gate must bind:
 
 ## 8. Known evidence gaps
 
-- No independent expectation review
-- No approved ADR for durable execution
-- No authentication implementation ADR
+- Detailed Apistra-owned runtime architecture and slice expectations still require qualified review before CAP-06 workorders become READY; ownership is decided by ADR-020
+- Authentication is decided by ADR-021; CAP-01 security defaults and tests still require qualified review before affected workorders become READY
 - ADR-019 repository layout is approved and implemented; the remaining pattern ADRs still require qualified architecture review
 - Public Softwaretest.it OpenAPI contract is verified; authorised project/cycle binding and write/read round-trip are pending
 - Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
-- Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; GitHub Actions run 36618729112 accepted the committed candidate, while independent implementation review remains pending
+- Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; GitHub Actions run 36618729112 accepted the committed candidate, and product-owner independent review was recorded on 2026-09-30
 - GitHub Actions run 36618729112 built the clean committed immutable candidate and passed staging health, controlled failure, and unchanged-image recovery
-- The manual case is defined but has not received an independent human ACCEPTED decision
-- The live `test` and `staging` branches exist, but protected-branch settings are not configured
-- The official AGPLv3 text is present; commercial terms, rights-holder details, and legal review remain pending before commercial release
+- Product-owner human bootstrap acceptance was recorded on 2026-09-30; its final immutable-candidate binding remains coupled to the missing Softwaretest.it receipt
+- Live branch protection is active for `test`, `staging`, and `main`; mandatory independent approvals remain deferred until a second qualified maintainer is available
+- The official AGPLv3 text remains effective for already published revisions; ADR-022 approves the future source-available model, while rights-holder details, transition commit, notices, commercial terms, dependency compatibility, and legal review remain pending before licence-file changes
 
 These are expected planning gaps and must not be represented as failures of implemented software. They remain blockers for their assigned future gates.

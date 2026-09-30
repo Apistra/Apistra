@@ -89,7 +89,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 - Rules: ARCH-002, ARCH-005, ARCH-008, ARCH-009, ARCH-010, ARCH-011, ARCH-012, ARCH-014, ARCH-015
 - Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
-- ADRs/patterns: ADR-001 through ADR-005, ADR-010, ADR-013, ADR-017, ADR-018, ADR-PENDING-004
+- ADRs/patterns: ADR-001 through ADR-005, ADR-010, ADR-013, ADR-017, ADR-018, ADR-021
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 

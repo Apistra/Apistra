@@ -2,10 +2,10 @@
 
 Version: 0.6-draft
 Status: BLOCKED
-Status reason: authorised Softwaretest.it publication and field-level read-back remain unavailable
+Status reason: required token scopes and authenticated reads are confirmed, but the API's undocumented automation-resource lifecycle still blocks execution and CI-report creation
 Implementation state: PARTIALLY IMPLEMENTED
-Evidence state: PARTIAL — public preflight and dry-run checks pass; authenticated write/read round-trip is absent
-Approval state: NOT APPROVED
+Evidence state: PARTIAL — authenticated project/reporting reads, definition registration, and test-case setup pass; execution write/read round-trip is absent
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; external reporting evidence remains blocking
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -15,7 +15,7 @@ Assurance: EXTENDED
 - Process: PRC-07
 - Capability contract: ../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md
 - CI test group: TST-WO-CAP-00-05
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PARTIAL; CAP-00 integration definition and anchor testcase exist, but no accepted execution receipt exists
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-00-05
 - Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
@@ -37,7 +37,9 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-CAP-00 implementation and hosted evidence exist against the 0.4 workorder revision. This 0.5 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
+CAP-00 implementation and earlier hosted evidence exist against prior workorder revisions. This 0.6 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
+
+On 2026-09-30, protected project credentials passed project, cycle, definition, testcase, and CI-report-list access; the credential UI confirms `read`, `testcase:write`, `execution:write`, and `ci:write`. `planned_start` and `planned_end` are optional. The successfully activated `Apistra CAP-00 Reporting` cycle differed because a released version had been added directly as a planned run. The earlier cycle contained only `CycleIntent=PLANNED`, which is not an executable test plan; the API obscured this distinction behind generic `409 STATE_CONFLICT`. Automated execution creation still returns `409`, and CI-report creation returns `404` even against the active cycle and with a fresh post-fix idempotency namespace. That separate automation-resource prerequisite remains unresolved, and no execution or reporting receipt is claimed.
 
 ## Target result
 

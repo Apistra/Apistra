@@ -2,10 +2,10 @@
 
 Version: 0.6-draft
 Status: BLOCKED
-Status reason: branch protection, authenticated reporting, independent review, and human bootstrap acceptance remain open
+Status reason: authenticated reporting receipt and final immutable-candidate evidence binding remain open
 Implementation state: NOT COMPLETE
 Evidence state: PARTIAL — constituent technical checks exist, but the complete acceptance package is absent
-Approval state: NOT APPROVED
+Approval state: HUMAN ACCEPTED — product-owner decision recorded 2026-09-30; production remains unapproved
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-CAP-00 implementation and hosted evidence exist against the 0.4 workorder revision. This 0.5 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
+CAP-00 implementation and earlier hosted evidence exist against prior workorder revisions. This 0.6 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
 
 ## Target result
 
@@ -121,6 +121,8 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Positive expectation: The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - Counterexample: A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+
+The product-owner independent expectation/implementation review and human bootstrap acceptance are recorded in [the CAP-00 review and acceptance record](../../testing/cap00-review-and-acceptance.md). No unresolved discrepancy was stated. This closes the human decision dimensions but does not replace the missing Softwaretest.it receipt or exact final-candidate binding.
 
 ## Required tests
 

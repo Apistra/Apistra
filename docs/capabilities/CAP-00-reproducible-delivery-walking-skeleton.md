@@ -8,9 +8,9 @@ Assurance: EXTENDED
 ## Control summary
 
 **Result:** A maintainer can build, verify, stage, diagnose, and recover an immutable minimal Apistra candidate without business functionality.
-**Evidence:** Implementation and hosted CI evidence exist; formal acceptance is still blocked.
-**Main blocker:** Branch protection, authenticated Softwaretest.it round-trip, independent review, and human acceptance remain blocking.
-**Next step:** Complete prerequisite gates and an independent expectation review before implementation READY.
+**Evidence:** Implementation, hosted CI, independent review, and the human acceptance decision exist; formal completion is still blocked on external reporting evidence and final candidate binding.
+**Main blocker:** The authenticated Softwaretest.it write/read round-trip and atomic receipt remain blocking.
+**Next step:** After the provider fix, publish and read back the unchanged final candidate results, retain the receipt, and complete the candidate-bound gate package.
 
 ## Goal and value
 
@@ -107,7 +107,7 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-Branch protection, authenticated Softwaretest.it round-trip, independent review, and human acceptance remain blocking.
+Independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30 in [the CAP-00 review record](../testing/cap00-review-and-acceptance.md). The authenticated Softwaretest.it round-trip and final candidate-bound receipt remain blocking. Live branch protection is active on `test`, `staging`, and `main` with a solo-maintainer-safe review policy.
 
 No implementing agent may resolve a blocking decision implicitly.
 

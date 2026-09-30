@@ -115,7 +115,7 @@ CI-TS-06 — Schema and consumer contracts
 
 CI-TS-07 — Integration tests
 - Trigger: data, adapter, execution, or infrastructure changes
-- Scope: PostgreSQL, Qdrant, durable engine, model and connector simulators
+- Scope: PostgreSQL, Qdrant, Apistra runtime persistence and dispatch, model and connector simulators
 - Oracle: state, idempotency, transactions, and error paths match the contract
 
 CI-TS-08 — Automated BDD end-to-end

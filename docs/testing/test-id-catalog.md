@@ -76,7 +76,7 @@ Generated capability or workorder aliases such as `BDD-CAP-*`, `BDD-WO-*`, and `
 - `BDD-K8S-003` — Enforce the supported hardening, health, and readiness contract.
 - `BDD-LIC-001` — Validate a commercial licence offline with explicit valid, expired, and invalid outcomes.
 - `BDD-LIC-002` — Expose licence status and administration without leaking signed licence material.
-- `BDD-LIC-003` — Keep the AGPL usage path functional when no commercial licence is installed.
+- `BDD-LIC-003` — Keep the applicable noncommercial or evaluation path functional without mandatory online activation.
 - `BDD-MANAGED-001` — Enforce the documented privacy, tenancy, and responsibility boundary of an optional managed service.
 
 ## 3. Manual package catalogue

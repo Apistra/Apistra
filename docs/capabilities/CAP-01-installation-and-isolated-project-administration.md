@@ -9,7 +9,7 @@ Assurance: EXTENDED
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
 **Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** ADR-PENDING-004 blocks authentication implementation READY.
+**Main blocker:** CAP-00 completion and the independent CAP-01 expectation/security review block implementation READY; the authentication mechanism is decided by ADR-021.
 **Next step:** Complete prerequisite gates and an independent expectation review before implementation READY.
 
 ## Goal and value
@@ -106,7 +106,7 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-ADR-PENDING-004 blocks authentication implementation READY.
+ADR-021 decides the local authentication mechanism. Its security details, defaults, and tests require independent review before the affected workorders become READY.
 
 No implementing agent may resolve a blocking decision implicitly.
 

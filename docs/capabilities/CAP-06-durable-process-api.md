@@ -9,7 +9,7 @@ Assurance: EXTENDED
 
 **Result:** An API client can start, observe, cancel, and obtain schema-valid results from a durable, idempotent workflow run.
 **Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** ADR-PENDING-001 and callback-signing decisions block affected workorders.
+**Main blocker:** CAP-00 completion, detailed Apistra-runtime architecture review, and callback-signing decisions block affected workorders; runtime ownership is decided by ADR-020.
 **Next step:** Complete prerequisite gates and an independent expectation review before implementation READY.
 
 ## Goal and value
@@ -26,7 +26,7 @@ An API client can start, observe, cancel, and obtain schema-valid results from a
 
 ## Scope
 
-- durable engine
+- Apistra-owned durable execution runtime
 - run and attempt states
 - Process API
 - API keys and start idempotency
@@ -112,7 +112,7 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-ADR-PENDING-001 and callback-signing decisions block affected workorders.
+ADR-020 decides runtime ownership. Detailed state, lease, worker, timer, versioning, recovery, and callback-signing contracts remain blocking before the affected workorders become READY.
 
 No implementing agent may resolve a blocking decision implicitly.
 

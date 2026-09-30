@@ -1,6 +1,6 @@
 # CAP-00 bootstrap operations
 
-Status: IMPLEMENTED, awaiting final external and human acceptance
+Status: IMPLEMENTED, human acceptance recorded; awaiting final external reporting evidence and immutable-candidate binding
 
 ## Purpose
 

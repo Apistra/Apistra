@@ -158,7 +158,7 @@ Contract:
 Integration:
 - PostgreSQL transactions and isolation
 - Qdrant provenance and deletion
-- durable engine checkpoints and retries
+- Apistra runtime state transitions, journal, leases, checkpoints, timers, retries, and recovery
 - endpoint and connector simulators
 
 Automated BDD E2E:
@@ -303,11 +303,11 @@ Logs, metrics, traces, and audit records must allow failure localisation without
 - Test concept: DRAFT
 - CAP-00 automated architecture, contract, unit, integration, BDD, security, recovery, packaging, and evidence checks: IMPLEMENTED AND HOSTED VERIFIED
 - Business capability automated tests: NOT IMPLEMENTED
-- CAP-00 manual test definition: IMPLEMENTED; independent execution and human acceptance remain PENDING
+- CAP-00 manual test definition: IMPLEMENTED; product-owner review and human acceptance recorded 2026-09-30, final candidate/receipt binding pending
 - Business capability manual packages: NOT YET EXPANDED OR PUBLISHED
 - CAP-00 synthetic engineering fixtures: IMPLEMENTED; business fixtures expand with their owning capabilities
 - Softwaretest.it public API contract: VERIFIED; authenticated project, plan, and result round-trip remains BLOCKED
-- CAP-00 formal acceptance: BLOCKED on repository protection, authenticated Softwaretest.it evidence, independent review, and human acceptance
+- CAP-00 formal completion: BLOCKED on authenticated Softwaretest.it evidence and final immutable-candidate binding
 - Business capability acceptance: NOT STARTED
 
 ## 14. Review obligations

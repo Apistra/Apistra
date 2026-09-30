@@ -16,10 +16,11 @@ Implemented controls:
 - SPDX SBOM and candidate/archive checksums;
 - synthetic `.invalid` identities and credential references rather than secret values;
 - safe-by-default dry-run external reporting and recursive redaction.
+- live branch protection for `test`, `staging`, and `main`, including strict required checks, pull requests, linear history, resolved conversations, administrator enforcement, and force-push/deletion prevention.
 
 Open risks and gates:
 
-- GitHub branch protection is specified but not configured on the live repository.
+- Required approving and CODEOWNERS reviews remain disabled while only one qualified maintainer exists; enable them when independent maintainers are available.
 - Softwaretest.it authentication, scopes, project/cycle binding, and write/read round-trip need authorised protected credentials.
 - Commercial terms still require a signed agreement; no certification or production warranty exists.
 - A qualified independent implementation/security review and human bootstrap acceptance remain pending.

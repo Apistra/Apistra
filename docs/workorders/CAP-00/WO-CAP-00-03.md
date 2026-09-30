@@ -5,7 +5,7 @@ Status: BLOCKED
 Status reason: 0.6 change-impact revalidation and external reporting confirmation remain open
 Implementation state: IMPLEMENTED
 Evidence state: STALE — hosted packaging evidence predates revision 0.6
-Approval state: NOT APPROVED
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; DONE remains evidence-gated
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-CAP-00 implementation and hosted evidence exist against the 0.4 workorder revision. This 0.5 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
+CAP-00 implementation and earlier hosted evidence exist against prior workorder revisions. This 0.6 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
 
 ## Target result
 
