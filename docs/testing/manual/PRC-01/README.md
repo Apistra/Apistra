@@ -8,6 +8,7 @@ Capability: [CAP-01](../../../capabilities/CAP-01-installation-and-isolated-proj
 Owning workorder: [WO-CAP-01-04](../../../workorders/CAP-01/WO-CAP-01-04.md)
 Execution owner: [WO-CAP-01-05](../../../workorders/CAP-01/WO-CAP-01-05.md)
 Design baseline: [0.3 approved for DSN-001 through DSN-004 and the narrow CAP-01 audit evidence view](../../../planning/07-design-contract.md)
+Execution guide: [Run the exact candidate and all six cases](execution-guide.md)
 
 ## Package objective
 
@@ -58,6 +59,12 @@ secret-free JSON receipt containing the environment, run ID, fixture revision,
 fixture identity checksum, application time, and resulting row counts. Actual
 application to an immutable candidate and retention of that receipt belong to
 WO-CAP-01-05.
+
+The candidate-bound session controller is implemented in
+`tools/staging/manual_acceptance.py`. It starts and identifies the exact local
+candidate, applies only the named deterministic fixtures, retains secret-free
+receipts, and removes runtime secrets during teardown. Its presence is tooling
+evidence only; it does not imply that any manual case was executed.
 
 ## Cases
 
