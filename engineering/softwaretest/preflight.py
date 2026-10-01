@@ -78,10 +78,44 @@ def validate_integration_guide(
     ):
         errors.append("cycle start preconditions changed")
     recovery = execution.get("failure_recovery", {})
-    if not isinstance(recovery, dict) or not set(expected["failure_codes"]).issubset(
-        recovery
-    ):
+    if not isinstance(recovery, dict) or not set(
+        expected["cycle_failure_codes"]
+    ).issubset(recovery):
         errors.append("required failure recovery codes are absent")
+
+    reporting = document.get("ci_reporting", {})
+    if not isinstance(reporting, dict):
+        return [*errors, "CI reporting guide is absent"]
+    reporting_operations = [
+        step.get("operation_id")
+        for step in reporting.get("steps", [])
+        if isinstance(step, dict)
+    ]
+    if reporting_operations != expected["reporting_operations"]:
+        errors.append("CI reporting operation order changed")
+    if reporting.get("required_scopes") != expected["reporting_required_scopes"]:
+        errors.append("CI reporting required scopes changed")
+    if reporting.get("required_headers") != expected["reporting_required_headers"]:
+        errors.append("CI reporting required headers changed")
+    if reporting.get("uses_if_match") is not expected["reporting_uses_if_match"]:
+        errors.append("CI reporting revision contract changed")
+    prerequisites = reporting.get("prerequisites", {})
+    if not isinstance(prerequisites, dict):
+        errors.append("CI reporting prerequisites are absent")
+    else:
+        automation_resource = str(prerequisites.get("automation_resource", ""))
+        automation_required = "no pre-provisioned automation resource" not in (
+            automation_resource.lower()
+        )
+        if automation_required != expected["automation_resource_required"]:
+            errors.append("CI reporting automation-resource prerequisite changed")
+        if not prerequisites.get("cycle") or not prerequisites.get("project"):
+            errors.append("CI reporting project/cycle prerequisites are absent")
+    reporting_recovery = reporting.get("failure_recovery", {})
+    if not isinstance(reporting_recovery, dict) or not set(
+        expected["reporting_failure_codes"]
+    ).issubset(reporting_recovery):
+        errors.append("required CI reporting failure recovery codes are absent")
     return errors
 
 

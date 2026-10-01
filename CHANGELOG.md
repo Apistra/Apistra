@@ -32,6 +32,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Repository-owned BDD-AUTH-001 and BDD-PROJ-001 scenarios for CAP-01.
 - Deterministic, checksummed CAP-01 fixture descriptors and fail-closed integration/contract tests without product-state mutation or embedded credentials.
 - Versioned Softwaretest.it CI-guide validation, structured precondition diagnostics, revision-bound command keys, explicit run start, and an opt-in protected round-trip trigger.
+- Softwaretest.it CI guide 1.1 contract validation, direct cycle-bound report publication, and structured missing-cycle remediation evidence without an inferred automation-resource prerequisite.
 
 ### Changed
 
@@ -56,6 +57,6 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Known limitations
 
-- CAP-00 formal completion still requires clarification of Softwaretest.it's undocumented automation-resource prerequisite and a successful authenticated write/read round-trip with receipts bound to the final immutable candidate. Independent review and human bootstrap acceptance were recorded on 2026-09-30. All required token scopes, authenticated reads, testcase writes, direct run planning, and cycle activation are confirmed.
+- CAP-00 formal completion still requires a successful authenticated Softwaretest.it write/import/finalize/readback round-trip with all receipts bound to the final immutable candidate. Guide 1.1.0 removes the previously inferred automation-resource prerequisite. Independent review and human bootstrap acceptance were recorded on 2026-09-30.
 - CAP-01 through CAP-18 are planning contracts only and are not implemented or accepted.
 - No production environment or automatic deployment path exists.
