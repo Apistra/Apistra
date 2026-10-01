@@ -25,7 +25,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - ARCH-015 for explicit, versioned, fail-closed policy decisions.
 - Product-owner decisions ADR-020 through ADR-022 for the Apistra-owned durable runtime, local Administrator authentication, and the implemented source-available licensing boundary.
 - Source-available licence set with PolyForm Noncommercial 1.0.0, PolyForm Free Trial 1.0.0, standard commercial terms, Required Notice, and an explicit historical AGPL boundary.
-- CAP-00 independent review and human bootstrap acceptance record; external reporting evidence remains separate.
+- CAP-00 independent review and human bootstrap acceptance record with external reporting retained as a separate evidence dimension.
 - Proposed administration interaction baseline for DSN-001 through DSN-004 and six repository-authoritative, atomic `MTP-PRC-01` manual test definitions covering bootstrap, authentication, session revocation, project creation/audit, and project isolation.
 - Proposed business-workorder repository path contract mapping all 133 CAP-01 through CAP-18 workorders to observed existing paths and explicitly labelled planned module, feature, contract, test, migration, staging, and evidence paths.
 - Approved CAP-01 expectation, security, architecture, design, pattern, and repository-path review with the remaining external Softwaretest.it blocker preserved.
@@ -34,6 +34,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Versioned Softwaretest.it CI-guide validation, structured precondition diagnostics, revision-bound command keys, explicit run start, and an opt-in protected round-trip trigger.
 - Softwaretest.it CI guide 1.1 contract validation, direct cycle-bound report publication, and structured missing-cycle remediation evidence without an inferred automation-resource prerequisite.
 - Complete Softwaretest.it report batches with an explicit required-stage result and canonical UTC-millisecond timestamps for exact field-level readback.
+- Verified the protected Softwaretest.it create/import/finalize/readback flow with one stage, sixteen tests, and three confirmed command receipts against the immutable `test` candidate.
 
 ### Changed
 
@@ -58,6 +59,5 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Known limitations
 
-- CAP-00 formal completion still requires a successful authenticated Softwaretest.it write/import/finalize/readback round-trip with all receipts bound to the final immutable candidate. Guide 1.1.0 removes the previously inferred automation-resource prerequisite. Independent review and human bootstrap acceptance were recorded on 2026-09-30.
 - CAP-01 through CAP-18 are planning contracts only and are not implemented or accepted.
 - No production environment or automatic deployment path exists.

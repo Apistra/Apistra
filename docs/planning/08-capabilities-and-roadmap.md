@@ -7,9 +7,9 @@ Status: DRAFT
 
 **Result:** Apistra is split into nineteen vertically testable capabilities with one canonical contract per file and a gate-based release order.
 **Change:** The former catalogue summaries are now indexed to detailed files under `docs/capabilities/`; no implementation or acceptance is inferred.
-**Current position:** CAP-00 is implemented and hosted-verified; product-owner review and human acceptance are recorded, while the authenticated Softwaretest.it receipt and final candidate binding remain open. CAP-01 through CAP-18 remain DRAFT.
-**Main blocker:** Business implementation remains blocked by GATE-CAP00-DONE and Softwaretest.it publishing readiness.
-**Next step:** Close CAP-00, then independently review and approve the next capability and only its first one or two workorders.
+**Current position:** CAP-00 is accepted with hosted candidate, staging/recovery, human, and authenticated Softwaretest.it evidence. CAP-01 through CAP-18 remain DRAFT.
+**Main blocker:** CAP-01 implementation remains blocked only by publication and readback of its separate reviewed test-definition package.
+**Next step:** Execute that CAP-01 publication workorder, then approve only an independently executable first implementation workorder as READY.
 
 The roadmap has no dates. Progress depends on evidence gates, not elapsed time. The [capability catalogue](../capabilities/README.md) is canonical for capability scope, rules, acceptance, tests, dependencies, decisions, and workorder links.
 

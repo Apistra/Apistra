@@ -1,11 +1,11 @@
 # WO-CAP-00-03 — Package immutable container candidates
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: 0.6 change-impact revalidation and external reporting confirmation remain open
+Status: DONE
+Status reason: immutable packaging and external candidate-bound reporting passed in the protected workflow
 Implementation state: IMPLEMENTED
-Evidence state: STALE — hosted packaging evidence predates revision 0.6
-Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; DONE remains evidence-gated
+Evidence state: VERIFIED — GitHub Actions run 36875393087 built, verified, and externally reported the immutable candidate
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30 and remains applicable
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 

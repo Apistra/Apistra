@@ -1,11 +1,11 @@
 # WO-CAP-00-04 — Establish isolated local staging and recovery
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: 0.6 change-impact revalidation remains open
+Status: DONE
+Status reason: isolated staging, controlled failure, and unchanged-image recovery passed on the accepted candidate
 Implementation state: IMPLEMENTED
-Evidence state: STALE — hosted staging/recovery evidence predates revision 0.6
-Approval state: REVIEWED — CAP-00 product-owner review and human bootstrap acceptance recorded 2026-09-30; DONE remains evidence-gated
+Evidence state: VERIFIED — GitHub Actions run 36875393087 revalidated staging and recovery in the complete candidate workflow
+Approval state: REVIEWED — product-owner review and human bootstrap acceptance recorded 2026-09-30 remain applicable
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 

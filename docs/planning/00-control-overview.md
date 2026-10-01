@@ -23,10 +23,10 @@ Implementation:
 
 Evidence:
 
-- GitHub Actions run 36710458961 passed all required jobs for commit 593725d, including contracts/static checks, architecture, tests, security/supply chain, and candidate packaging. The authenticated Softwaretest.it round-trip was correctly skipped on the feature branch and remains separate external evidence.
+- GitHub Actions run 36875393087 passed all required jobs for commit `e1619a0d6fe5d5edd7cca1c88a57e5b9845084e6`, including contracts/static checks, architecture, tests, security/supply chain, candidate packaging, isolated staging/recovery, and the protected Softwaretest.it round-trip.
 - Live branch protection is enabled for `test`, `staging`, and `main`: pull requests, strict required checks, linear history, resolved conversations, administrator enforcement, and force-push/deletion prevention are active. Required approvals and CODEOWNERS reviews are deliberately disabled while the repository has only one maintainer.
 - The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, exact workflow statuses and separated state fields, canonical test IDs, delivery classes, positive/negative oracles, rule references and applicability, dependency existence and acyclicity, catalogue membership, local links, forbidden generic boilerplate, and the existence/safety of every business-workorder `EXISTING` repository path. A retained negative fixture proves that a falsely observed path fails validation.
-- The public Softwaretest.it OpenAPI preflight and dry-run adapter tests pass; an authenticated project/test-plan round-trip remains unavailable.
+- Softwaretest.it guide 1.1.0, authenticated preflight, report creation, stage/test import, finalisation, full report readback, and all command-receipt readbacks pass without mismatches.
 - Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
 
 Approval:
@@ -40,16 +40,16 @@ Approval:
 
 ## 4. Blocking obligations
 
-1. Complete the authorised Softwaretest.it project/test-plan write and field-level read-back.
-2. Bind the Softwaretest.it receipt, complete required matrix, staging environment, and recorded human decision to the same immutable final candidate.
-3. For CAP-01, only authenticated Softwaretest.it publication/read-back remains before implementation READY. For later capabilities, close their named architecture, security, design, test-management, and prerequisite decisions.
+1. Publish and read back the separate CAP-01 BDD/manual test-definition package through the now-verified Softwaretest.it integration.
+2. Move only the independently executable first CAP-01 workorder to READY after that publication receipt is reviewed.
+3. For later capabilities, close their named architecture, security, design, test-management, and prerequisite decisions.
 4. The CAP-01 capability-to-package mapping is approved. CAP-02 through CAP-18 remain in review; CAP-16 and CAP-17 retain their new-root blockers.
 
 ## 5. Next responsible steps
 
 Authorised test-management operator:
 
-- Provide the protected Softwaretest.it project, plan/cycle, and token context for the round-trip.
+- Publish the reviewed CAP-01 definitions and retain field-/step-order readback evidence.
 
 Independent reviewer and product owner:
 
@@ -60,4 +60,4 @@ Independent reviewer and product owner:
 
 ## 6. Decision required now
 
-No business implementation should begin until the authenticated Softwaretest.it publishing receipt closes the remaining external readiness gap. CAP-00 review/acceptance and the CAP-01 planning, security, architecture, path, design, BDD, manual-case, and fixture-definition decisions are recorded. Later capability decisions remain outside this CAP-01 approval. Required PR approvals and CODEOWNERS review must be reconsidered when a second qualified maintainer joins.
+CAP-00 is accepted, but no CAP-01 product implementation should begin until the separate CAP-01 definition-publication receipt closes its remaining readiness gap. CAP-01 planning, security, architecture, path, design, BDD, manual-case, and fixture-definition decisions are recorded. Later capability decisions remain outside this CAP-01 approval. Required PR approvals and CODEOWNERS review must be reconsidered when a second qualified maintainer joins.

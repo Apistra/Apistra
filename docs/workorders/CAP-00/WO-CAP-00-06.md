@@ -1,11 +1,11 @@
 # WO-CAP-00-06 — Provide synthetic staging fixtures
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: 0.6 change-impact revalidation remains open
+Status: DONE
+Status reason: synthetic fixtures and their negative proofs passed the complete protected revision 0.6 workflow
 Implementation state: IMPLEMENTED
-Evidence state: STALE — fixture checks passed before revision 0.6
-Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; DONE remains evidence-gated
+Evidence state: VERIFIED — GitHub Actions run 36875393087 revalidated fixture and repository proof contracts
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30 and remains applicable
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 

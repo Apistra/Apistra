@@ -1,11 +1,11 @@
 # WO-CAP-00-01 — Establish repository governance and planning checks
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: the 0.6 hosted repair run and change-impact evidence remain incomplete
+Status: DONE
+Status reason: revision 0.6 repository, governance, and protected hosted checks passed on the accepted candidate
 Implementation state: IMPLEMENTED
-Evidence state: PARTIAL — live branch protection is verified; the 0.6 Ruff repair and change-impact review remain open
-Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; DONE remains evidence-gated
+Evidence state: VERIFIED — live branch protection and the complete protected test workflow are recorded
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30 and reused after non-behavioural reporting repairs
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 

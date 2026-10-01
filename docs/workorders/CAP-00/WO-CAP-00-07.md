@@ -1,10 +1,10 @@
 # WO-CAP-00-07 — Complete bootstrap candidate gate
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: authenticated reporting receipt and final immutable-candidate evidence binding remain open
-Implementation state: NOT COMPLETE
-Evidence state: PARTIAL — constituent technical checks exist, but the complete acceptance package is absent
+Status: DONE
+Status reason: the full candidate matrix, staging/recovery, external receipts, independent review, and human acceptance are recorded
+Implementation state: COMPLETE
+Evidence state: VERIFIED — run 36875393087 bound the complete matrix and Softwaretest.it receipts to commit e1619a0d6fe5d5edd7cca1c88a57e5b9845084e6
 Approval state: HUMAN ACCEPTED — product-owner decision recorded 2026-09-30; production remains unapproved
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED

@@ -13,7 +13,7 @@ The product owner independently reviewed the CAP-00 expectations and implementat
 
 ## Applicability and remaining evidence
 
-This record closes the independent expectation/implementation review and the human-decision dimensions. It does not fabricate or waive an external result receipt. GATE-CAP00-DONE remains blocked until the authenticated Softwaretest.it write/read round-trip succeeds and its receipt, the complete required matrix, and the accepted result are bound to the same immutable final candidate and environment attempt.
+This record closes the independent expectation/implementation review and the human-decision dimensions. GitHub Actions run 36875393087 subsequently completed the external evidence dimension for commit `e1619a0d6fe5d5edd7cca1c88a57e5b9845084e6`: the full protected matrix passed, Softwaretest.it returned a COMPLETE/PASSED report with no readback mismatches, and all three command receipts were CONFIRMED. GATE-CAP00-DONE is therefore satisfied; production approval remains NOT GRANTED.
 
 A change-impact review must repeat affected technical checks and request renewed human confirmation only if a later change materially alters the reviewed CAP-00 behaviour, security boundary, deployment/recovery contract, or acceptance result. A reporting-only repair does not automatically invalidate this decision, but its final candidate binding must be recorded.
 

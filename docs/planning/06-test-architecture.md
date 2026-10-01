@@ -303,11 +303,11 @@ Logs, metrics, traces, and audit records must allow failure localisation without
 - Test concept: DRAFT
 - CAP-00 automated architecture, contract, unit, integration, BDD, security, recovery, packaging, and evidence checks: IMPLEMENTED AND HOSTED VERIFIED
 - Business capability automated tests: NOT IMPLEMENTED
-- CAP-00 manual test definition: IMPLEMENTED; product-owner review and human acceptance recorded 2026-09-30, final candidate/receipt binding pending
+- CAP-00 manual test definition: IMPLEMENTED; product-owner review and human acceptance recorded 2026-09-30, final candidate/receipt binding verified in run 36875393087
 - Business capability manual packages: NOT YET EXPANDED OR PUBLISHED
 - CAP-00 synthetic engineering fixtures: IMPLEMENTED; business fixtures expand with their owning capabilities
-- Softwaretest.it public API contract: VERIFIED; authenticated project, plan, and result round-trip remains BLOCKED
-- CAP-00 formal completion: BLOCKED on authenticated Softwaretest.it evidence and final immutable-candidate binding
+- Softwaretest.it public API and CI-reporting contract: VERIFIED; authenticated CAP-00 project/cycle/report/receipt round-trip passed in run 36875393087
+- CAP-00 formal completion: VERIFIED with authenticated Softwaretest.it evidence and final immutable-candidate binding
 - Business capability acceptance: NOT STARTED
 
 ## 14. Review obligations

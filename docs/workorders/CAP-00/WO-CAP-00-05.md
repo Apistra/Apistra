@@ -1,11 +1,11 @@
 # WO-CAP-00-05 — Establish Softwaretest.it publishing readiness
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: Softwaretest.it guide 1.1.0 removes the former automation-resource ambiguity; the authenticated CI-report round-trip and receipts remain to be proven
-Implementation state: PARTIALLY IMPLEMENTED
-Evidence state: PARTIAL — authenticated project/reporting reads, cycle activation, definition registration, and test-case setup pass; CI-report write/read round-trip is absent
-Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; external reporting evidence remains blocking
+Status: DONE
+Status reason: guide 1.1.0 and the authenticated create/import/finalize/readback contract are implemented and verified
+Implementation state: IMPLEMENTED
+Evidence state: VERIFIED — run 36875393087 retained a candidate-bound COMPLETE/PASSED report and three CONFIRMED receipts
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30 and the external evidence gate is closed
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -39,7 +39,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 CAP-00 implementation and earlier hosted evidence exist against prior workorder revisions. This 0.6 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
 
-On 2026-09-30, protected project credentials passed project, cycle, definition, testcase, and CI-report-list access; the credential UI confirms `read`, `testcase:write`, `execution:write`, and `ci:write`. `planned_start` and `planned_end` are optional. The successfully activated `Apistra CAP-00 Reporting` cycle contains a directly planned released version; a `CycleIntent=PLANNED` alone is not an executable test plan. On 2026-10-01, guide 1.1.0 and the OpenAPI contract explicitly established that CI-report creation needs this existing same-project cycle but no pre-provisioned automation resource or automated definition. The earlier `404` is retained as historical failure evidence; a new authenticated round-trip against the repaired server remains required.
+On 2026-09-30, protected project credentials passed project, cycle, definition, testcase, and CI-report-list access; the credential UI confirms `read`, `testcase:write`, `execution:write`, and `ci:write`. `planned_start` and `planned_end` are optional. The successfully activated `Apistra CAP-00 Reporting` cycle contains a directly planned released version; a `CycleIntent=PLANNED` alone is not an executable test plan. On 2026-10-01, guide 1.1.0 and the OpenAPI contract established that CI-report creation needs this existing same-project cycle but no pre-provisioned automation resource or automated definition. GitHub Actions run 36875393087 then verified the complete authenticated write/read protocol and retained all command receipts without credential material.
 
 ## Target result
 
