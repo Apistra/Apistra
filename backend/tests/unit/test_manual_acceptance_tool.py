@@ -1,9 +1,14 @@
 import json
 import stat
+import sys
 from pathlib import Path
 
 import pytest
-from tools.staging.manual_acceptance import (
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+
+from tools.staging.manual_acceptance import (  # noqa: E402
     FIXTURE_FRESH,
     _environment,
     _initial_state,
