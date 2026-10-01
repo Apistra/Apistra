@@ -8,11 +8,12 @@ Assurance: EXTENDED
 ## Control summary
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
-**Evidence:** WO-CAP-01-01 implementation and automated verification are in progress; no workorder
-completion, full capability result, manual execution, or acceptance evidence is claimed yet.
+**Evidence:** WO-CAP-01-01 is DONE at implementation snapshot `c5601e4`; hosted CI run
+`36890612241` passed its full owned matrix. No complete capability result, manual execution, or
+human capability acceptance is claimed yet.
 **Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
-**Next step:** Complete immutable-candidate verification for WO-CAP-01-01, then continue only the
-next dependency-satisfied workorder on its own feature branch.
+**Next step:** Integrate WO-CAP-01-01 into `test`, then execute the next dependency-satisfied
+workorder on its own feature branch.
 
 ## Goal and value
 

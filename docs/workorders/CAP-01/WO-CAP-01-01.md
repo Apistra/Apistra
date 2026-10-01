@@ -1,11 +1,11 @@
 # WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session
 
-Version: 0.7-ready
-Status: READY
-Status reason: CAP-00 and WO-CAP-01-04 are integrated; authenticated definitions and read-back receipt are verified
-Implementation state: IN PROGRESS
-Evidence state: NOT EXECUTED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Version: 0.8-done
+Status: DONE
+Status reason: implementation snapshot c5601e4 passed the complete owned local and hosted CI matrix
+Implementation state: COMPLETE
+Evidence state: COMPLETE FOR THIS WORKORDER; CAPABILITY MATRIX REMAINS WITH WO-CAP-01-05
+Approval state: TECHNICAL WORKORDER REVIEW COMPLETE; CAPABILITY HUMAN ACCEPTANCE REMAINS WITH WO-CAP-01-05
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED by WO-CAP-01-04; released testcase keys APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-01
-- Specification revision: 0.7-ready; path-only change impact reviewed before implementation
+- Specification revision: 0.8-done; implementation evidence is bound to snapshot c5601e4
 
 ## Risk profile and escalation
 
@@ -209,6 +209,18 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+
+Completion evidence:
+
+- implementation snapshot: `c5601e4ab4e1a8932940a5d9c9812483151dac2b`;
+- hosted CI run: `36890612241`, all required feature-branch jobs passed, including real
+  PostgreSQL integration/migration, 93% backend coverage, architecture, security, packaging,
+  SBOM, isolated staging, identity round-trip, and recovery;
+- local isolated candidate run `local-wo01-complete` passed with API image
+  `sha256:93227e6021e82e7ea52c7e956a8555722155e2b996f185094131407b03888918`, web image
+  `sha256:cc3af3e6dd4e31a4506d8212b012044982d21706a26dc63a5504419abcd02682`, and worker
+  image `sha256:202dd0a9b89227de77dabb4ccc7c2cc2f25f233c7afaed2fa79715c794d0601e`;
+- no password, raw session value, CSRF value, or database credential is retained in evidence.
 
 ## Definition of Done
 
