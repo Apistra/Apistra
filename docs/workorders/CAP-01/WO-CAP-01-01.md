@@ -1,9 +1,9 @@
 # WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session
 
-Version: 0.6-draft
-Status: DRAFT
-Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
-Implementation state: NOT STARTED
+Version: 0.7-ready
+Status: READY
+Status reason: CAP-00 and WO-CAP-01-04 are integrated; authenticated definitions and read-back receipt are verified
+Implementation state: IN PROGRESS
 Evidence state: NOT EXECUTED
 Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-01
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED by WO-CAP-01-04; released testcase keys APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-01
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-ready; path-only change impact reviewed before implementation
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md; the authenticated Softwaretest.it publication/read-back receipt remains the only READY blocker.
+Current evidence does not yet establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md. WO-CAP-01-04 is DONE and the authenticated Softwaretest.it publication/read-back receipt closes the former READY blocker.
 
 ## Target result
 
@@ -76,6 +76,19 @@ Observed existing paths within the bounded change area:
 - EXISTING: `CHANGELOG.md`
 - EXISTING: `backend/src/apistra/modules/`
 - EXISTING: `backend/src/apistra/entrypoints/api/composition.py`
+- EXISTING: `backend/src/apistra/entrypoints/api/main.py`
+- EXISTING: `backend/src/apistra/entrypoints/migration.py`
+- EXISTING: `backend/src/apistra/platform/runtime.py`
+- EXISTING: `backend/pyproject.toml`
+- EXISTING: `backend/uv.lock`
+- EXISTING: `apps/web/src/app/page.tsx`
+- EXISTING: `apps/web/src/app/layout.tsx`
+- EXISTING: `apps/web/src/app/styles.css`
+- EXISTING: `apps/web/next.config.mjs`
+- EXISTING: `.github/workflows/ci.yml`
+- EXISTING: `deploy/compose/compose.staging.yml`
+- EXISTING: `tools/staging/verify_candidate.py`
+- EXISTING: `tools/contracts/validate_repository.py`
 - EXISTING: `backend/src/apistra/entrypoints/worker/composition.py`
 - EXISTING: `apps/web/src/features/`
 - EXISTING: `backend/tests/unit/`
@@ -98,6 +111,13 @@ Planned additions to the bounded change area after READY:
 - PLANNED: `backend/src/apistra/platform/database/migrations/cap_01/`
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
+
+Change-impact reconciliation: the additional existing paths above are the observed dependency-lock,
+runtime configuration, HTTP/web composition, migration entrypoint, isolated staging composition,
+staging verifier, and CI integration points required
+to make the already-approved identity module reachable and verifiable. They introduce no new capability,
+top-level root, deployment target, or architecture boundary. The expectation, security, and design
+baselines remain unchanged; tests for the touched integration points are mandatory in this workorder.
 
 Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
 
@@ -168,7 +188,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-WO-CAP-01-04 must define and publish the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-01-05 unless a case is explicitly assigned here.
+WO-CAP-01-04 defined and published the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) before this workorder became READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-01-05 unless a case is explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 

@@ -1,10 +1,12 @@
 [project]
 name = "apistra-backend"
 version = "0.0.0"
-description = "Apistra CAP-00 health-only walking skeleton"
+description = "Apistra backend services"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "argon2-cffi==25.1.0",
   "fastapi==0.142.0",
+  "psycopg[binary]==3.3.3",
   "uvicorn==0.54.0",
 ]
 

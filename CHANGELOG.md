@@ -11,6 +11,11 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Added
 
+- CAP-01 local Administrator bootstrap with Argon2id credentials, opaque revocable sessions,
+  server-side CSRF verification, safe audit events, PostgreSQL persistence/migration, a versioned
+  HTTP contract, and the approved dark first-run administration interface.
+- Digest-pinned PostgreSQL and an idempotent migration gate in isolated candidate staging, plus
+  real PostgreSQL integration coverage in CI.
 - BuildBySpec planning baseline covering product scope, decisions, arc42 architecture, security, delivery/CI, test architecture, design, traceability, and gates.
 - Nineteen granular capability contracts and 140 individual workorder contracts for the 0.x roadmap.
 - Architecture decision and pattern catalogue with executable Python and TypeScript boundary tests and retained negative fixtures.
@@ -41,6 +46,8 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Changed
 
+- Workorder validation now supports controlled 0.x DRAFT, READY, and DONE revisions while requiring
+  the specification binding to match, with retained negative status and path fixtures.
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
 - All 140 workorders now use the version 0.6 execution contract with exact workflow status, separate implementation/evidence/approval state, delivery classes, explicit outcomes, examples and counterexamples, canonical test references, workorder-specific architecture/security applicability, dependency graphs, and evidence invalidation rules.
 - Repository contract validation now checks the complete planning catalogue, exact status fields, canonical test IDs, defined ARCH/SEC references, dependency existence and cycles, delivery-class ordering, READY/DONE preconditions, membership, local links, and obsolete generic boilerplate.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import secrets
 import subprocess
 import time
 import urllib.error
@@ -80,6 +81,8 @@ def main() -> int:
             "APISTRA_WORKER_IMAGE": manifest["images"]["worker"]["reference"],
             "APISTRA_WEB_IMAGE": manifest["images"]["web"]["reference"],
             "APISTRA_API_PORT": str(args.api_port),
+            "APISTRA_COMMIT": commit,
+            "APISTRA_DB_PASSWORD": secrets.token_urlsafe(32),
             "APISTRA_WEB_PORT": str(args.web_port),
             "APISTRA_ENVIRONMENT": f"local-staging-{args.run_id}",
         }

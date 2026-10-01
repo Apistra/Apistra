@@ -14,11 +14,11 @@ def test_repository_contract_matches_approved_flow() -> None:
     assert validate_contract(repository_contract(ROOT)) == []
 
 
-def test_openapi_contract_has_only_health_business_surface() -> None:
+def test_openapi_contract_retains_the_cap00_health_surface() -> None:
     observed = app.openapi()
     expected = json.loads((ROOT / "contracts/openapi/cap00-health.openapi.json").read_text())
-    assert set(observed["paths"]) == set(expected["paths"])
-    assert set(observed["paths"]) == {"/health/live", "/health/ready"}
+    assert set(expected["paths"]) == {"/health/live", "/health/ready"}
+    assert set(expected["paths"]) <= set(observed["paths"])
 
 
 def test_result_bundle_contract_covers_all_reporting_statuses() -> None:
@@ -52,10 +52,13 @@ def test_docker_base_images_are_digest_pinned() -> None:
 
 def test_bootstrap_shell_has_semantic_accessibility_contract() -> None:
     page = (ROOT / "apps/web/src/app/page.tsx").read_text(encoding="utf-8")
+    administration = (ROOT / "apps/web/src/features/administration/public.tsx").read_text(
+        encoding="utf-8"
+    )
     styles = (ROOT / "apps/web/src/app/styles.css").read_text(encoding="utf-8")
-    assert "<main>" in page
-    assert 'aria-labelledby="title"' in page
-    assert '<h1 id="title">' in page
-    assert 'aria-hidden="true"' in page
+    assert "<main" in page
+    assert 'aria-labelledby="bootstrap-title"' in administration
+    assert '<h1 id="bootstrap-title">' in administration
+    assert 'aria-hidden="true"' in administration
     assert "color-scheme: dark" in styles
     assert "prefers-reduced-motion: reduce" in styles

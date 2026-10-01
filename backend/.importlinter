@@ -48,3 +48,48 @@ source_modules =
     apistra.modules.projects.adapters
 forbidden_modules =
     apistra.entrypoints
+
+[importlinter:contract:identity-domain-independence]
+name = ARCH-001 identity domain independence
+type = forbidden
+source_modules =
+    apistra.modules.identity.domain
+forbidden_modules =
+    apistra.modules.identity.application
+    apistra.modules.identity.ports
+    apistra.modules.identity.adapters
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:identity-application-boundary]
+name = ARCH-002 identity application controls use cases
+type = forbidden
+source_modules =
+    apistra.modules.identity.application
+forbidden_modules =
+    apistra.modules.identity.adapters
+    apistra.entrypoints
+    fastapi
+    psycopg
+
+[importlinter:contract:identity-ports-boundary]
+name = ARCH-003 identity ports remain provider neutral
+type = forbidden
+source_modules =
+    apistra.modules.identity.ports
+forbidden_modules =
+    apistra.modules.identity.application
+    apistra.modules.identity.adapters
+    apistra.entrypoints
+    fastapi
+    psycopg
+
+[importlinter:contract:identity-adapter-containment]
+name = ARCH-011 identity adapters do not own composition
+type = forbidden
+source_modules =
+    apistra.modules.identity.adapters
+forbidden_modules =
+    apistra.entrypoints
