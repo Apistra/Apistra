@@ -1,0 +1,5 @@
+{
+  "flow": ["feature/*", "test", "staging", "main"],
+  "automatic_deployment": false,
+  "external_contributions": false
+}

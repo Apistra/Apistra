@@ -1,6 +1,6 @@
 # Apistra Architecture
 
-Version: 0.2-draft
+Version: 0.4-draft
 Status: DRAFT
 Architecture profile: EXTENDED
 
@@ -23,7 +23,7 @@ Stakeholders include Administrators, developers, AI engineers, solution architec
 
 ## 2. Constraints
 
-- Public AGPL repository with commercial alternative
+- Public build-in-public repository; future releases transition to the source-available licensing model in ADR-022 after legal implementation
 - No external contributions initially
 - English project language
 - Next.js and TypeScript for the web application
@@ -74,7 +74,7 @@ Trust boundaries:
 - Project boundary inside one installation
 - Apistra to each model or embedding endpoint
 - Apistra to each connector target
-- API service to worker and durable engine
+- API service to the Apistra runtime and workers
 - Services to PostgreSQL and Qdrant
 - CI to repository and artefact store
 - Local staging environment to operator workstation
@@ -113,21 +113,22 @@ Strategy by quality goal:
 
 ## 5. Building-block view
 
-### 5.1 Planned deployable units
+### 5.1 Approved repository and deployable boundaries
 
-- apps/web — Next.js user interface and localisation
-- services/api — FastAPI management and Process API
-- services/worker — workflow execution activities
-- packages/contracts — canonical OpenAPI, JSON Schema, events, and workflow schema
-- packages/domain — provider-neutral domain rules and state models
-- packages/application — use cases and ports
-- packages/adapters — persistence and external integrations
-- packages/connector-sdk — public connector contract and test kit
-- packages/test-support — synthetic fixtures and service virtualisation
-- deploy/compose — local, test, and staging profiles
-- engineering/softwaretest — publishing and result-reporting adapter
+- `apps/web` — Next.js user interface, feature-public contracts, and localisation
+- `backend` — one installable Python package shared by the API and worker entrypoints
+- `backend/src/apistra/modules/<module>` — module-first business ownership with `domain`, `application`, `ports`, `adapters`, and `public.py`
+- `backend/src/apistra/entrypoints/api` — API composition root
+- `backend/src/apistra/entrypoints/worker` — worker composition root
+- `backend/src/apistra/platform` — shared database, observability, and security infrastructure without business ownership
+- `contracts/{openapi,workflow,events,connectors}` — canonical language-neutral contracts
+- `connector-sdk/python` — public connector contract and compatibility kit
+- `deploy/compose` — local, test, and isolated staging profiles
+- `engineering/softwaretest` — publishing and result-reporting adapter outside the product runtime graph
+- `tests/architecture-fixtures` — retained allowed and forbidden dependency graphs
+- `tools/architecture` — repository architecture checks
 
-These are planned paths, not observed implementation.
+The boundaries and the representative `projects` module skeleton are implemented. Empty product modules are not pre-created; every new module must satisfy the same enforced internal structure when its capability workorder introduces it. No API, worker, or business behaviour is implied by this foundation.
 
 ### 5.2 Domain modules
 
@@ -149,7 +150,7 @@ These are planned paths, not observed implementation.
 
 Domain and application modules define behaviour and ports. Framework, database, provider, transport, and vendor types remain in adapters. Deployable services compose implementations at their outer boundary.
 
-No module may read another module's tables directly. Cross-module access uses an application contract, a documented query interface, or a versioned event.
+No module may read another module's tables directly. Python cross-module imports use only `modules.<name>.public`; semantic interaction uses a documented application contract, query interface, or versioned event. Dependencies point inward: domain; then application and ports; then adapters; then the API or worker composition root.
 
 ### 5.4 Container and module diagrams
 
@@ -178,7 +179,7 @@ The domain model deliberately shows only architecturally significant aggregates 
 1. API client authenticates with a project API key.
 2. The API validates project, workflow version, input schema, idempotency key, and limits.
 3. The API creates or returns the existing run and responds with 202 and the run ID.
-4. The durable engine schedules work.
+4. The Apistra runtime commits dispatch intent and schedules work.
 5. Workers execute nodes through provider-neutral ports.
 6. Each attempt records correlated state, usage, safe diagnostics, and checkpoint.
 7. The run reaches completed, failed, cancelled, or waiting state.
@@ -207,7 +208,7 @@ The domain model deliberately shows only architecturally significant aggregates 
 
 ### 6.5 Recovery
 
-After interruption, the durable engine resumes from a committed checkpoint. Completed non-repeatable side effects are protected by idempotency records or explicit compensation. All attempts remain visible.
+After interruption, the Apistra runtime resumes from committed state and journal records. Completed non-repeatable side effects are protected by idempotency records or explicit compensation. All attempts remain visible.
 
 ### 6.6 Runtime sequence diagrams
 
@@ -334,13 +335,14 @@ Explicit non-decisions:
 Pending ADRs:
 
 - Durable execution engine
-- Monorepo build tooling
 - Authentication library and session architecture
 - Local event transport
 - Callback signing format
 - Migration tooling
 
 Each pending ADR blocks only the workorders that depend on it.
+
+The approved repository-layout decision is ADR-019. Its executable checks are described in the [Architecture test system](../architecture/testing.md) and run as CI-TS-03.
 
 ## 10. Quality requirements
 
@@ -391,9 +393,9 @@ ARCH-007 — Immutable publication
 
 ARCH-008 — Durable execution boundary
 - Status: DECIDED
-- Rule: Long-running state transitions use the selected durable engine through an application port. API processes do not own in-memory run state.
+- Rule: Long-running state transitions are owned by the Apistra runtime and committed to PostgreSQL before dispatch. API and worker processes do not own authoritative in-memory run state, and no external orchestration product or control plane is a runtime prerequisite.
 - Violation: approval waits stored only in a web process.
-- Verification: restart and recovery tests.
+- Verification: dependency tests plus restart, worker-loss, lease-expiry, duplicate-delivery, and recovery tests.
 
 ARCH-009 — Idempotent external effects
 - Status: DECIDED
@@ -428,6 +430,13 @@ ARCH-014 — Local-first runtime
 - Status: DECIDED
 - Rule: Product startup and configured local execution must not require an external SaaS call.
 - Verification: offline Compose acceptance test.
+
+ARCH-015 — Explicit versioned policy decisions
+- Status: DECIDED
+- Rule: Authorisation, approval, evaluation, licensing, and other consequential policies are immutable versioned policy objects evaluated through side-effect-free decision services. Every decision returns a typed outcome, reason, and policy version; missing or invalid policy fails closed.
+- Allowed: an application use case applies the returned decision and records the selected policy version with the resulting state transition.
+- Violation: a route, model response, adapter, or global bypass flag deciding a protected action without a pinned policy and attributable decision record.
+- Verification: decision-table tests, policy-version binding tests, deny-by-default counterexamples, audit assertions, and dependency review against ADR-011.
 
 ## 11. Risks and technical debt
 

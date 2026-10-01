@@ -1,0 +1,1 @@
+"""Allowed fixture package."""

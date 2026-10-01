@@ -1,7 +1,11 @@
 # Apistra UX and UI Design Contract
 
-Version: 0.2-draft
-Status: IN_REVIEW
+Version: 0.3
+Status: APPROVED FOR DSN-001 THROUGH DSN-004; IN_REVIEW OTHERWISE
+
+Approval date: 2026-09-30
+Approval scope: CAP-01 administration labels, paths, states, and maintained
+references for DSN-001 through DSN-004
 
 ## 1. Scope and responsibility
 
@@ -102,6 +106,82 @@ Initial page inventory:
 Maintainable SVG source and generated PNG preview:
 
 ![Apistra application information architecture](../visuals/design/information-architecture.png)
+
+### 4.2 Approved CAP-01 administration interaction baseline
+
+The following English labels and routes are approved for CAP-01 so that UI
+implementation and tests share one exact contract. This scope approval does
+not approve unrelated pages or claim implementation or test execution.
+
+| Context | Proposed visible contract |
+| --- | --- |
+| DSN-001 Sign in | Fields `Username` and `Password`; primary action `Sign in`; conditional bootstrap action `Create Administrator` |
+| Failed sign-in | Inline alert `Sign-in failed. Check your credentials and try again.`; do not disclose whether the username exists |
+| Expired or revoked session | Inline alert `Your session has expired. Sign in again.` followed by DSN-001 |
+| DSN-002 Bootstrap Administrator | Fields `Username`, `Password`, and `Confirm password`; primary action `Create Administrator`; secondary action `Back to sign in` |
+| Completed bootstrap | Status `Administrator bootstrap is complete.`; no second creation form is rendered |
+| Authenticated shell | Project selector accessible name `Current project`; administrator menu accessible name `Administrator menu` |
+| Administrator menu | Actions `Installation status` and `Sign out` |
+| DSN-003 Project overview | Page title `Project overview`; primary action `Create project`; navigation items `Overview` and `Audit` |
+| DSN-004 Project creation | Fields `Project name` and `Project key`; primary action `Create project`; secondary action `Cancel` |
+| Required field validation | Inline message `This field is required.` associated with the empty field |
+| Duplicate project key | Inline message `Project key is already in use.` associated with `Project key` |
+| Unauthorised or unknown project | Page title `Project not found`; body `The project does not exist or you do not have access.`; no project metadata is rendered |
+| Audit evidence | Page title `Audit log`; event labels `administrator.bootstrap.completed`, `session.revoked`, and `project.created` |
+
+### 4.3 Approved navigation paths for DSN-001 through DSN-004
+
+1. A logged-out visit to the application root resolves to DSN-001 `Sign in`.
+2. When bootstrap is available, `Create Administrator` on DSN-001 opens
+   DSN-002. It is absent after bootstrap has completed.
+3. Successful bootstrap opens DSN-003 `Project overview`. If no project exists,
+   the view presents an empty state and the `Create project` action.
+4. Successful sign-in opens the last authorised project on DSN-003. If none
+   exists, the same empty state is shown.
+5. `Create project` opens DSN-004. `Cancel` returns to DSN-003 without creating
+   a project.
+6. Successful project creation returns to DSN-003 with the new project selected
+   in `Current project`.
+7. `Audit` opens DSN-020 `Audit log`; returning through `Overview` opens
+   DSN-003.
+8. `Administrator menu` > `Installation status` opens the installation-status
+   view containing the immutable bootstrap-complete state.
+9. `Administrator menu` > `Sign out` revokes the active session and returns to
+   DSN-001.
+
+Direct URLs are stable test inputs, not visible navigation labels:
+
+- `STAGING_SIGN_IN_URL`
+- `STAGING_BOOTSTRAP_URL`
+- `STAGING_PROJECT_OVERVIEW_URL`
+- `STAGING_PROJECT_URL_TEMPLATE`, containing `{project_id}`
+
+### 4.4 Approved administration state rules
+
+- Password values are masked, are never copied into evidence, and are supplied
+  only through protected execution parameter `STAGING_ADMIN_PASSWORD`.
+- Submitting an invalid sign-in retains `Username`, clears `Password`, moves
+  focus to the sign-in error, and does not identify which credential failed.
+- Bootstrap availability is decided server-side and is race-safe. A stale or
+  direct second bootstrap request renders only the completed state.
+- Project creation remains disabled until both required fields are non-empty.
+- `Project key` is normalised to uppercase and accepts only `A-Z`, `0-9`, and
+  `-`; validation does not silently change an already submitted key.
+- The project selector exposes only authorised projects. Direct access to an
+  existing but unauthorised project is indistinguishable from an unknown
+  project in status, title, body, and rendered metadata.
+- Every successful bootstrap, session revocation, and project creation produces
+  one attributable audit event with actor, UTC timestamp, correlation ID, and
+  affected installation or project identifier.
+
+### 4.5 Approval boundary for revision 0.3
+
+The product owner approved this exact revision on 2026-09-30 for DSN-001
+through DSN-004 and the six `MTP-PRC-01` cases. The maintained sources and
+rendered previews define information hierarchy; implementation still must
+prove states, responsive behaviour, accessibility, and interaction. No
+approval is inferred for DSN-005 through DSN-021. Test definitions remain
+`NOT PUBLISHED` and `NOT EXECUTED` until their separate gates are satisfied.
 
 ## 5. Workflow editor contract
 
@@ -302,7 +382,8 @@ Now present:
 
 Still required before the first UI workorder is READY:
 
-- product-owner review and explicit selection of reference version 0.2;
+- product-owner approval for the design references required by that workorder;
+  revision 0.3 already satisfies this requirement for DSN-001 through DSN-004;
 - logo rights, vector master, reversed wordmark, monochrome and icon variants;
 - measured contrast, keyboard, focus, reflow, reduced-motion, and screen-reader evidence;
 - detailed references for validation, error, conflict, permission, disabled, loading, empty, and offline states;
@@ -318,6 +399,7 @@ The research screenshot is inspiration, not implementation evidence.
 - Logo rights and production variants: BLOCKING for public brand release
 - Information architecture: IN_REVIEW
 - Tokens and component details: IN_REVIEW
-- Rendered reference sources: PRESENT, approval pending
+- Rendered reference sources: PRESENT; DSN-001 through DSN-004 scope approved
 - Accessibility test oracles: DRAFT
-- Human design approval: PENDING
+- Human design approval: APPROVED for DSN-001 through DSN-004; pending elsewhere
+- Administration labels and paths for DSN-001 through DSN-004: APPROVED 2026-09-30

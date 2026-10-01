@@ -1,0 +1,35 @@
+# Apistra Source-Available Licence Notice
+
+Copyright (C) 2026 Jens Bekersch
+
+Apistra is source available. Subject to the transition rule below, you may use
+the software under one of these paths:
+
+1. **Noncommercial use.** The PolyForm Noncommercial License 1.0.0 in
+   [LICENSES/PolyForm-Noncommercial-1.0.0.txt](LICENSES/PolyForm-Noncommercial-1.0.0.txt)
+   applies to the purposes it permits.
+2. **Company evaluation.** The PolyForm Free Trial License 1.0.0 in
+   [LICENSES/PolyForm-Free-Trial-1.0.0.txt](LICENSES/PolyForm-Free-Trial-1.0.0.txt)
+   permits evaluation for fewer than 32 consecutive calendar days. It does not
+   permit redistribution.
+3. **Commercial use.** Productive commercial use, internal business operation,
+   commercial integration, redistribution, resale, software-as-a-service, or
+   managed-service operation requires a separate written commercial licence
+   signed by the licensee and Jens Bekersch. The standard terms are published
+   in [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+
+No path grants trademark rights or rights in third-party components. Third-party
+components remain subject to their own licence terms.
+
+## Historical GNU AGPL grant
+
+Commit `af526acf70345f2d94ad6af2663bf9b6c07bd6f1` and its ancestors were
+published under GNU Affero General Public License version 3. Those grants remain
+valid and are not withdrawn. This source-available notice begins with the
+transition commit identified in [LICENSE-TRANSITION.md](LICENSE-TRANSITION.md).
+
+## Contact
+
+- Licensor: Jens Bekersch
+- Licence email: jens@buildbyspec.com
+- Website: https://buildbyspec.com

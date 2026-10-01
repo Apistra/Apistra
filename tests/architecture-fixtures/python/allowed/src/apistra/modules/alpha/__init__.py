@@ -1,0 +1,1 @@
+"""Allowed alpha module."""
