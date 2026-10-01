@@ -11,6 +11,11 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Added
 
+- CAP-01 isolated project lifecycle with owner-scoped PostgreSQL persistence, idempotent creation,
+  optimistic version checks, safe foreign/unknown-project handling, attributable project audit
+  events, a versioned administration API contract, and the approved sign-in/project UI flow.
+- Immutable staging verification of project create, list, update, archive, session revocation, and
+  unchanged-image recovery through the same-origin web boundary.
 - CAP-01 local Administrator bootstrap with Argon2id credentials, opaque revocable sessions,
   server-side CSRF verification, safe audit events, PostgreSQL persistence/migration, a versioned
   HTTP contract, and the approved dark first-run administration interface.
@@ -69,5 +74,6 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Known limitations
 
-- CAP-01 through CAP-18 are planning contracts only and are not implemented or accepted.
+- CAP-01 implementation is in sequential review and is not capability-accepted; CAP-02 through
+  CAP-18 remain planning contracts only.
 - No production environment or automatic deployment path exists.
