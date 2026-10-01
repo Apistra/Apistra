@@ -103,6 +103,7 @@ Planned additions to the bounded change area after READY:
 
 - PLANNED: `backend/src/apistra/modules/identity/`
 - PLANNED: `apps/web/src/features/administration/`
+- PLANNED: `apps/web/src/app/api/v1/`
 - PLANNED: `backend/tests/unit/cap_01/`
 - PLANNED: `backend/tests/component/cap_01/`
 - PLANNED: `backend/tests/contract/cap_01/`

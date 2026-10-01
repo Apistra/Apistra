@@ -3,14 +3,6 @@ const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: `${process.env.APISTRA_API_URL ?? "http://127.0.0.1:8000"}/api/v1/:path*`
-      }
-    ];
-  },
   async headers() {
     return [
       {

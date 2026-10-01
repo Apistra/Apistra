@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import http.cookiejar
 import json
 import os
 import secrets
@@ -28,6 +29,51 @@ def run(
 def get_json(url: str) -> dict[str, object]:
     with urllib.request.urlopen(url, timeout=3) as response:
         return json.load(response)
+
+
+def verify_identity_round_trip(web_base: str) -> None:
+    """Exercise bootstrap and immediate revocation through the web/API boundary."""
+
+    cookies = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies))
+    installation = json.load(opener.open(f"{web_base}/api/v1/installation", timeout=3))
+    if installation != {"bootstrap_available": True}:
+        raise RuntimeError("fresh candidate did not expose the bootstrap state")
+    username = "candidate-administrator"
+    password = secrets.token_urlsafe(24)
+    request = urllib.request.Request(
+        f"{web_base}/api/v1/administrators:bootstrap",
+        data=json.dumps({"username": username, "password": password}).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "x-correlation-id": "staging-bootstrap",
+        },
+        method="POST",
+    )
+    with opener.open(request, timeout=5) as response:
+        if response.status != 201:
+            raise RuntimeError("administrator bootstrap did not return 201")
+        receipt = json.load(response)
+    if receipt.get("administrator", {}).get("username") != username:
+        raise RuntimeError("administrator bootstrap receipt did not match")
+    current = json.load(opener.open(f"{web_base}/api/v1/session", timeout=3))
+    if current.get("administrator", {}).get("username") != username:
+        raise RuntimeError("issued session was not readable")
+    revoke = urllib.request.Request(
+        f"{web_base}/api/v1/session",
+        headers={"x-csrf-token": receipt["csrf_token"]},
+        method="DELETE",
+    )
+    with opener.open(revoke, timeout=3) as response:
+        if response.status != 204:
+            raise RuntimeError("session revocation did not return 204")
+    try:
+        opener.open(f"{web_base}/api/v1/session", timeout=3)
+    except urllib.error.HTTPError as error:
+        if error.code != 401:
+            raise
+    else:
+        raise RuntimeError("revoked session remained usable")
 
 
 def wait_for(url: str, expected_status: str, timeout: float = 60) -> dict[str, object]:
@@ -98,6 +144,7 @@ def main() -> int:
             or web["deployment"]["commit"] != commit
         ):
             raise RuntimeError("deployment marker does not match candidate commit")
+        verify_identity_round_trip(f"http://127.0.0.1:{args.web_port}")
         env["APISTRA_WORKER_FORCE_NOT_READY"] = "true"
         run([*compose, "up", "--detach", "--force-recreate", "worker"], env)
         container = f"{env['APISTRA_COMPOSE_PROJECT']}-worker-1"
