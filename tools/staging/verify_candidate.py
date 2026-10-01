@@ -62,6 +62,58 @@ def verify_identity_round_trip(web_base: str) -> None:
     session_cookie = set_cookie.split(";", 1)[0]
     if receipt.get("administrator", {}).get("username") != username:
         raise RuntimeError("administrator bootstrap receipt did not match")
+    project_request = urllib.request.Request(
+        f"{web_base}/api/v1/projects",
+        data=json.dumps({"name": "Atlas Research", "key": "ATLAS"}).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "cookie": session_cookie,
+            "idempotency-key": "staging-create-atlas",
+            "x-csrf-token": receipt["csrf_token"],
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(project_request, timeout=5) as response:
+        if response.status != 201 or response.headers.get("etag") != '"1"':
+            raise RuntimeError("project creation did not return its initial version")
+        project = json.load(response)
+    project_id = project.get("id")
+    if project.get("key") != "ATLAS" or project.get("status") != "ACTIVE":
+        raise RuntimeError("project creation receipt did not match")
+    listed_request = urllib.request.Request(
+        f"{web_base}/api/v1/projects", headers={"cookie": session_cookie}
+    )
+    listed = json.load(urllib.request.urlopen(listed_request, timeout=3))
+    if [item.get("id") for item in listed.get("items", [])] != [project_id]:
+        raise RuntimeError("authorised project list did not match")
+    update_request = urllib.request.Request(
+        f"{web_base}/api/v1/projects/{project_id}",
+        data=json.dumps({"name": "Atlas Platform", "key": "ATLAS-2"}).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "cookie": session_cookie,
+            "if-match": '"1"',
+            "x-csrf-token": receipt["csrf_token"],
+        },
+        method="PATCH",
+    )
+    with urllib.request.urlopen(update_request, timeout=5) as response:
+        updated = json.load(response)
+    if updated.get("version") != 2 or updated.get("key") != "ATLAS-2":
+        raise RuntimeError("version-checked project update did not match")
+    archive_request = urllib.request.Request(
+        f"{web_base}/api/v1/projects/{project_id}:archive",
+        data=b"",
+        headers={
+            "cookie": session_cookie,
+            "if-match": '"2"',
+            "x-csrf-token": receipt["csrf_token"],
+        },
+        method="POST",
+    )
+    archived = json.load(urllib.request.urlopen(archive_request, timeout=5))
+    if archived.get("status") != "ARCHIVED" or archived.get("version") != 3:
+        raise RuntimeError("version-checked project archive did not match")
     current_request = urllib.request.Request(
         f"{web_base}/api/v1/session", headers={"cookie": session_cookie}
     )
