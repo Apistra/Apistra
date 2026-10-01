@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import http.cookiejar
 import json
 import os
 import secrets
@@ -34,9 +33,7 @@ def get_json(url: str) -> dict[str, object]:
 def verify_identity_round_trip(web_base: str) -> None:
     """Exercise bootstrap and immediate revocation through the web/API boundary."""
 
-    cookies = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies))
-    installation = json.load(opener.open(f"{web_base}/api/v1/installation", timeout=3))
+    installation = get_json(f"{web_base}/api/v1/installation")
     if installation != {"bootstrap_available": True}:
         raise RuntimeError("fresh candidate did not expose the bootstrap state")
     username = "candidate-administrator"
@@ -50,25 +47,37 @@ def verify_identity_round_trip(web_base: str) -> None:
         },
         method="POST",
     )
-    with opener.open(request, timeout=5) as response:
+    with urllib.request.urlopen(request, timeout=5) as response:
         if response.status != 201:
             raise RuntimeError("administrator bootstrap did not return 201")
         receipt = json.load(response)
+        set_cookie = response.headers.get("set-cookie", "")
+    if not all(
+        attribute in set_cookie
+        for attribute in ("HttpOnly", "Secure", "SameSite=strict")
+    ):
+        raise RuntimeError(
+            "administrator session cookie is missing required security attributes"
+        )
+    session_cookie = set_cookie.split(";", 1)[0]
     if receipt.get("administrator", {}).get("username") != username:
         raise RuntimeError("administrator bootstrap receipt did not match")
-    current = json.load(opener.open(f"{web_base}/api/v1/session", timeout=3))
+    current_request = urllib.request.Request(
+        f"{web_base}/api/v1/session", headers={"cookie": session_cookie}
+    )
+    current = json.load(urllib.request.urlopen(current_request, timeout=3))
     if current.get("administrator", {}).get("username") != username:
         raise RuntimeError("issued session was not readable")
     revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
-        headers={"x-csrf-token": receipt["csrf_token"]},
+        headers={"cookie": session_cookie, "x-csrf-token": receipt["csrf_token"]},
         method="DELETE",
     )
-    with opener.open(revoke, timeout=3) as response:
+    with urllib.request.urlopen(revoke, timeout=3) as response:
         if response.status != 204:
             raise RuntimeError("session revocation did not return 204")
     try:
-        opener.open(f"{web_base}/api/v1/session", timeout=3)
+        urllib.request.urlopen(current_request, timeout=3)
     except urllib.error.HTTPError as error:
         if error.code != 401:
             raise
