@@ -257,6 +257,15 @@ def write_failure_receipt(
     }
     if request_sha256:
         evidence["request_sha256"] = request_sha256
+    if isinstance(error, ApiError):
+        evidence["failure"]["problem"] = {
+            "status": error.status,
+            "code": error.code,
+            "type": error.problem_type,
+            "title": error.title,
+            "request_id": error.request_id,
+            "errors": error.errors,
+        }
     write_json_atomic(path, redact(evidence, (token,)))
 
 
@@ -282,16 +291,13 @@ def execute_roundtrip(
     report_id = ""
     for command, configured_url, payload in commands:
         url = configured_url or f"{root}/{report_id}/{command}"
-        try:
-            response = requester(
-                url,
-                token,
-                method="POST",
-                key=stable_key(command, f"{external_key}:{command_revision}"),
-                payload=payload,
-            )
-        except ApiError as error:
-            raise RuntimeError(f"{command} request returned {error}") from None
+        response = requester(
+            url,
+            token,
+            method="POST",
+            key=stable_key(command, f"{external_key}:{command_revision}"),
+            payload=payload,
+        )
         if command == "create":
             report_id = response.get("report_id", "")
             if not report_id:
@@ -300,10 +306,7 @@ def execute_roundtrip(
             raise ValueError(f"{command} receipt references another report")
         receipts[command] = response
 
-    try:
-        document = requester(f"{root}/{report_id}", token, method="GET")
-    except ApiError as error:
-        raise RuntimeError(f"report readback returned {error}") from None
+    document = requester(f"{root}/{report_id}", token, method="GET")
     if document.get("report_id") != report_id:
         raise ValueError("readback references another report")
     mismatches = verify_readback(report, entries, document)
@@ -313,14 +316,9 @@ def execute_roundtrip(
     for command, receipt in receipts.items():
         receipt_id = receipt.get("receipt_id")
         if receipt_id:
-            try:
-                receipt_documents[command] = requester(
-                    f"{receipt_root}/{receipt_id}", token, method="GET"
-                )
-            except ApiError as error:
-                raise RuntimeError(
-                    f"{command} receipt readback returned {error}"
-                ) from None
+            receipt_documents[command] = requester(
+                f"{receipt_root}/{receipt_id}", token, method="GET"
+            )
 
     return {
         "report_id": report_id,
@@ -626,7 +624,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--command-revision",
-        default="v1",
+        default="ci-guide-1.1",
         help="Rotate idempotency keys after a rejected command contract changes.",
     )
     parser.add_argument("--apply", action="store_true")

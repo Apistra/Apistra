@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-09-30",
+  "observed_at": "2026-10-01",
   "base_url": "https://softwaretest.it",
   "openapi_path": "/api/v1/openapi.json",
   "openapi_version": "3.0.3",
@@ -8,15 +8,21 @@
   "integration_guide": {
     "path": "/api/v1/integration-guides/ci.json",
     "contract": "softwaretest.it-ci-integration",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "revision_header": "If-Match",
     "idempotency_header": "Idempotency-Key",
     "cycle_operations": ["cycle_create", "cycle_item_create", "cycle_start", "run_start"],
-    "failure_codes": [
+    "cycle_failure_codes": [
       "CYCLE_START_PRECONDITION_FAILED",
       "REVISION_CONFLICT",
       "IDEMPOTENCY_CONFLICT"
-    ]
+    ],
+    "reporting_operations": ["ci_report_create", "ci_report_import", "ci_report_finalize", "ci_report_retrieve", "reporting_receipt_retrieve"],
+    "reporting_required_scopes": ["ci:write", "read"],
+    "reporting_required_headers": ["Authorization", "Content-Type", "Idempotency-Key"],
+    "reporting_uses_if_match": false,
+    "reporting_failure_codes": ["CI_REPORT_CYCLE_NOT_FOUND"],
+    "automation_resource_required": false
   },
   "authentication": {"scheme": "ProjectBearer", "type": "http", "scheme_name": "bearer", "required_scopes": ["read", "execution:write", "testcase:write", "ci:write"]},
   "operations": {

@@ -44,7 +44,7 @@ class SoftwaretestContractTests(unittest.TestCase):
     def test_ci_integration_guide_passes_and_drift_fails_closed(self) -> None:
         guide = {
             "contract": "softwaretest.it-ci-integration",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "command_protocol": {
                 "read_before_write": True,
                 "revision_header": "If-Match",
@@ -65,8 +65,33 @@ class SoftwaretestContractTests(unittest.TestCase):
                 ],
                 "failure_recovery": {
                     code: "documented"
-                    for code in self.contract["integration_guide"]["failure_codes"]
+                    for code in self.contract["integration_guide"][
+                        "cycle_failure_codes"
+                    ]
                 },
+            },
+            "ci_reporting": {
+                "required_scopes": ["ci:write", "read"],
+                "required_headers": [
+                    "Authorization",
+                    "Content-Type",
+                    "Idempotency-Key",
+                ],
+                "uses_if_match": False,
+                "prerequisites": {
+                    "project": "credential is bound to the project",
+                    "cycle": "cycle_id identifies an existing cycle",
+                    "automation_resource": (
+                        "No pre-provisioned automation resource is required."
+                    ),
+                },
+                "steps": [
+                    {"operation_id": operation}
+                    for operation in self.contract["integration_guide"][
+                        "reporting_operations"
+                    ]
+                ],
+                "failure_recovery": {"CI_REPORT_CYCLE_NOT_FOUND": "documented"},
             },
         }
         self.assertEqual(preflight.validate_integration_guide(guide, self.contract), [])
@@ -74,6 +99,17 @@ class SoftwaretestContractTests(unittest.TestCase):
         self.assertIn(
             "cycle execution operation order changed",
             preflight.validate_integration_guide(guide, self.contract),
+        )
+        guide["cycle_execution"]["steps"].append({"operation_id": "run_start"})
+        guide["ci_reporting"]["uses_if_match"] = True
+        self.assertIn(
+            "CI reporting revision contract changed",
+            preflight.validate_integration_guide(guide, self.contract),
+        )
+
+    def test_ci_reporting_guide_requires_no_automation_resource(self) -> None:
+        self.assertFalse(
+            self.contract["integration_guide"]["automation_resource_required"]
         )
 
     def test_contract_drift_fails_closed(self) -> None:
@@ -205,6 +241,35 @@ class SoftwaretestContractTests(unittest.TestCase):
             self.assertNotIn("secret-token", rendered)
             self.assertEqual(document["request_sha256"]["create"], "a" * 64)
             self.assertFalse(path.with_suffix(".json.tmp").exists())
+
+    def test_failure_receipt_retains_ci_cycle_remediation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "receipt.json"
+            error = publisher.ApiError(
+                404,
+                {
+                    "code": "CI_REPORT_CYCLE_NOT_FOUND",
+                    "detail": "Cycle not found.",
+                    "request_id": "request-2",
+                    "errors": {
+                        "cycle_id": "cycle-1",
+                        "remediation": "Use an existing project cycle.",
+                    },
+                },
+            )
+            publisher.write_failure_receipt(
+                path,
+                project_id="project-1",
+                base_url="https://softwaretest.it",
+                token="secret-token",
+                command_revision="ci-guide-1.1",
+                stage="report",
+                error=error,
+            )
+            problem = json.loads(path.read_text())["failure"]["problem"]
+            self.assertEqual(problem["code"], "CI_REPORT_CYCLE_NOT_FOUND")
+            self.assertEqual(problem["errors"]["cycle_id"], "cycle-1")
+            self.assertIn("remediation", problem["errors"])
 
     def test_roundtrip_collects_receipts_and_readbacks(self) -> None:
         report = {"external_key": "cap00-a"}
