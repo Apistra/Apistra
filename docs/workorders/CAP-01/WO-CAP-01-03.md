@@ -1,11 +1,11 @@
 # WO-CAP-01-03 — Implement project-context enforcement and audit
 
-Version: 0.6-draft
-Status: DRAFT
-Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
-Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Version: 0.8-done
+Status: DONE
+Status reason: owned implementation, conformance review, local immutable staging/recovery, and hosted CI matrix complete; capability acceptance remains with WO-CAP-01-05
+Implementation state: COMPLETE AT `0e4b8674f39102860416ee4614c64a1aa19647dd`
+Evidence state: LOCAL AND HOSTED OWNED MATRIX VERIFIED
+Approval state: CAP-01 PLANNING APPROVED; WO-CAP-01-03 IMPLEMENTATION CONFORMANCE APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-03
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-01-04; APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-03
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-done; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md; the authenticated Softwaretest.it publication/read-back receipt remains the only READY blocker.
+Project-context enforcement and attributable audit are implemented at `0e4b8674f39102860416ee4614c64a1aa19647dd`. Owner-scoped application/adapter reads, an authenticated aggregate audit API, safe project-route behavior, the approved audit labels, and immutable staging/recovery are locally verified. Hosted run `36900029244` passed the complete feature-branch matrix at `478146c`; final capability acceptance remains separate in WO-CAP-01-05.
 
 ## Target result
 
@@ -85,6 +85,9 @@ Observed existing paths within the bounded change area:
 - EXISTING: `backend/src/apistra/modules/projects/`
 - EXISTING: `contracts/openapi/`
 - EXISTING: `contracts/events/`
+- EXISTING: `apps/web/src/app/`
+- EXISTING: `contracts/openapi/cap01-administration.openapi.json`
+- EXISTING: `tools/staging/verify_candidate.py`
 
 Planned additions to the bounded change area after READY:
 
@@ -149,7 +152,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** Every project-owned use case receives and audits the authenticated project context before repository or adapter access.
 - **Negative oracle:** A missing or mismatched project context fails before data access and cannot be bypassed through a direct API call.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -188,6 +191,17 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+
+Observed local evidence for implementation snapshot `0e4b8674f39102860416ee4614c64a1aa19647dd`:
+
+- The exact CI-style backend matrix passed 76 tests against PostgreSQL 17.6 with 91.38% aggregate coverage.
+- Eleven web tests passed with 100% imported line/function coverage; TypeScript typecheck, production build, and TypeScript architecture rules passed.
+- Python architecture fixtures, eight Import Linter contracts, repository contracts and negative fixtures, Ruff format/static checks, and the secret-scan negative fixture passed.
+- Twenty-seven Softwaretest.it adapter/definition contract tests, the local definition manifest, and the public integration-guide preflight passed without an external mutation.
+- Local immutable staging run `local-wo03-complete` passed Administrator bootstrap, project create/list/update/archive, owner-scoped audit read, session revocation attribution, controlled worker failure, recovery, and unchanged image identity.
+- Candidate image IDs: API `sha256:8d9ff0ae5ca5a7e49507b8946a26641d677ecfa3d9bca85550a5fd801a6a4ccf`; web `sha256:826b5e1fb0d9a360d63eb8df5b0def74703d77b505ceaf6c562e9b7390615f86`; worker `sha256:0e3c8a08f1cd5885ec9fe5074e4b75dbd5b1108b4f3120f399667dc076fa5615`.
+- Hosted CI run `36900029244` passed contract/static, architecture, security/supply-chain, full PostgreSQL-backed tests, deterministic resource limits, package/SBOM, isolated staging, controlled failure, recovery, and evidence-bundle stages on commit `478146c`.
+- The implementation conformance review found no unresolved scope, architecture, security, project-isolation, safe-error, or audit-attribution discrepancy. No capability acceptance is claimed.
 
 ## Definition of Done
 

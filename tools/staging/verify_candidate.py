@@ -69,6 +69,7 @@ def verify_identity_round_trip(web_base: str) -> None:
             "content-type": "application/json",
             "cookie": session_cookie,
             "idempotency-key": "staging-create-atlas",
+            "x-correlation-id": "staging-project-create",
             "x-csrf-token": receipt["csrf_token"],
         },
         method="POST",
@@ -114,6 +115,39 @@ def verify_identity_round_trip(web_base: str) -> None:
     archived = json.load(urllib.request.urlopen(archive_request, timeout=5))
     if archived.get("status") != "ARCHIVED" or archived.get("version") != 3:
         raise RuntimeError("version-checked project archive did not match")
+    audit_request = urllib.request.Request(
+        f"{web_base}/api/v1/audit-events", headers={"cookie": session_cookie}
+    )
+    audit = json.load(urllib.request.urlopen(audit_request, timeout=3))
+    events = audit.get("items", [])
+    event_types = {event.get("event_type") for event in events}
+    if not {
+        "administrator.bootstrap.completed",
+        "project.created",
+    }.issubset(event_types):
+        raise RuntimeError("authenticated audit did not contain required CAP-01 events")
+    project_events = [
+        event for event in events if event.get("event_type") == "project.created"
+    ]
+    if len(project_events) != 1:
+        raise RuntimeError(
+            "authenticated audit did not contain exactly one project creation"
+        )
+    if project_events != [
+        {
+            "id": project_events[0].get("id"),
+            "event_type": "project.created",
+            "created_at": project_events[0].get("created_at"),
+            "correlation_id": "staging-project-create",
+            "actor": username,
+            "subject_id": project_id,
+            "project_id": project_id,
+            "project_key": "ATLAS",
+        }
+    ]:
+        raise RuntimeError(
+            "project audit attribution did not match the authenticated context"
+        )
     current_request = urllib.request.Request(
         f"{web_base}/api/v1/session", headers={"cookie": session_cookie}
     )
@@ -135,6 +169,43 @@ def verify_identity_round_trip(web_base: str) -> None:
             raise
     else:
         raise RuntimeError("revoked session remained usable")
+    sign_in_request = urllib.request.Request(
+        f"{web_base}/api/v1/sessions",
+        data=json.dumps({"username": username, "password": password}).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "x-correlation-id": "staging-sign-in-after-revoke",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(sign_in_request, timeout=5) as response:
+        if response.status != 201:
+            raise RuntimeError("sign-in after revocation did not return 201")
+        new_receipt = json.load(response)
+        new_cookie = response.headers.get("set-cookie", "").split(";", 1)[0]
+    post_revoke_audit = json.load(
+        urllib.request.urlopen(
+            urllib.request.Request(
+                f"{web_base}/api/v1/audit-events", headers={"cookie": new_cookie}
+            ),
+            timeout=3,
+        )
+    )
+    if "session.revoked" not in {
+        event.get("event_type") for event in post_revoke_audit.get("items", [])
+    }:
+        raise RuntimeError("session revocation was not attributable in the audit log")
+    cleanup_revoke = urllib.request.Request(
+        f"{web_base}/api/v1/session",
+        headers={
+            "cookie": new_cookie,
+            "x-csrf-token": new_receipt["csrf_token"],
+        },
+        method="DELETE",
+    )
+    with urllib.request.urlopen(cleanup_revoke, timeout=3) as response:
+        if response.status != 204:
+            raise RuntimeError("cleanup session revocation did not return 204")
 
 
 def wait_for(url: str, expected_status: str, timeout: float = 60) -> dict[str, object]:

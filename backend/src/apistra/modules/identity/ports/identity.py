@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Protocol
+from uuid import UUID
 
 from apistra.modules.identity.domain import Administrator, AuditEvent, Session, SessionContext
 
@@ -47,3 +48,5 @@ class IdentityStore(Protocol):
         revoked_at: datetime,
         audit_event: AuditEvent,
     ) -> bool: ...
+
+    def list_audit_events(self, actor_id: UUID) -> list[AuditEvent]: ...

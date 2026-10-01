@@ -142,3 +142,60 @@ def test_project_request_contract_rejects_missing_headers_and_extra_fields() -> 
     )
     assert no_idempotency.status_code == 422
     assert extra.status_code == 422
+
+
+def test_audit_api_is_authenticated_attributable_and_owner_scoped() -> None:
+    api, projects, _store, csrf = client()
+    owned = api.post(
+        "/api/v1/projects",
+        json={"name": "Atlas Research", "key": "ATLAS"},
+        headers=mutation_headers(
+            csrf,
+            **{
+                "idempotency-key": "own-audit",
+                "x-correlation-id": "corr-owned-project",
+            },
+        ),
+    ).json()
+    foreign = projects.create(
+        uuid4(), "foreign.admin", "Foreign Secret", "SECRET", "foreign-audit", "corr-foreign"
+    ).value
+
+    response = api.get("/api/v1/audit-events")
+
+    assert response.status_code == 200
+    events = response.json()["items"]
+    assert {event["event_type"] for event in events} >= {
+        "administrator.bootstrap.completed",
+        "project.created",
+    }
+    project_event = next(event for event in events if event["event_type"] == "project.created")
+    assert project_event["project_id"] == owned["id"]
+    assert project_event["project_key"] == "ATLAS"
+    assert project_event["actor"] == "admin.alpha"
+    assert project_event["correlation_id"] == "corr-owned-project"
+    assert str(foreign.id) not in response.text
+    assert "Foreign Secret" not in response.text
+    assert "SECRET" not in response.text
+    assert "corr-foreign" not in response.text
+    assert api.get("/api/v1/audit-events", headers={"cookie": ""}).status_code == 401
+
+
+def test_revocation_is_visible_only_after_a_new_authenticated_session() -> None:
+    api, _projects, _store, csrf = client()
+    assert (
+        api.delete(
+            "/api/v1/session",
+            headers={"x-csrf-token": csrf},
+        ).status_code
+        == 204
+    )
+    assert api.get("/api/v1/audit-events").status_code == 401
+
+    signed_in = api.post(
+        "/api/v1/sessions",
+        json={"username": "admin.alpha", "password": "correct horse battery"},
+    )
+    assert signed_in.status_code == 201
+    events = api.get("/api/v1/audit-events").json()["items"]
+    assert "session.revoked" in {event["event_type"] for event in events}

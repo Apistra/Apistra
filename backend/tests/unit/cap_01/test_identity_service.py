@@ -57,7 +57,7 @@ def test_bootstrap_is_single_use_and_audited_without_secrets() -> None:
     assert replay.error and replay.error.code is IdentityErrorCode.BOOTSTRAP_CLOSED
     assert identity.installation_status() == {"bootstrap_available": False}
     assert [event.event_type for event in store.audit_events] == [
-        "identity.administrator.bootstrapped"
+        "administrator.bootstrap.completed"
     ]
     assert "correct horse battery" not in repr(store.audit_events)
     assert first.value.raw_token not in repr(store.audit_events)
@@ -105,7 +105,21 @@ def test_session_requires_matching_csrf_and_revocation_is_immediate() -> None:
     revoked = identity.revoke_session(issued.raw_token, issued.csrf_token, "corr-3")
     assert revoked.succeeded
     assert identity.verify_session(issued.raw_token).error.code is IdentityErrorCode.SESSION_INVALID
-    assert [event.event_type for event in store.audit_events][-1] == "identity.session.revoked"
+    assert [event.event_type for event in store.audit_events][-1] == "session.revoked"
+
+
+def test_identity_audit_events_are_filtered_by_actor() -> None:
+    identity, _store, _clock = service()
+    issued = identity.bootstrap("administrator", "correct horse battery", "corr-1").value
+    identity.authenticate("administrator", "correct horse battery", "corr-2")
+
+    events = identity.audit_events(issued.administrator_id)
+
+    assert {event.event_type for event in events} == {
+        "session.created",
+        "administrator.bootstrap.completed",
+    }
+    assert all(event.actor_id == issued.administrator_id for event in events)
 
 
 def test_expired_and_missing_sessions_are_rejected_identically() -> None:

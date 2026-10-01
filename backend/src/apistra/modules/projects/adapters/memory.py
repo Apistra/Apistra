@@ -101,3 +101,16 @@ class InMemoryProjectStore:
             self._projects[project_id] = archived
             self.audit_events.append(replace(event, created_at=updated_at))
             return archived, None
+
+    def list_audit_for_owner(self, owner_id: UUID) -> list[ProjectAuditEvent]:
+        with self._lock:
+            owned = {
+                project.id
+                for project in self._projects.values()
+                if project.owner_administrator_id == owner_id
+            }
+            return sorted(
+                (event for event in self.audit_events if event.project_id in owned),
+                key=lambda event: (event.created_at, str(event.id)),
+                reverse=True,
+            )

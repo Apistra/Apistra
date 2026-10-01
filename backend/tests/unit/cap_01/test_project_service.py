@@ -97,3 +97,19 @@ def test_concurrent_idempotent_delivery_creates_one_project_and_event() -> None:
     assert len({result.value.id for result in results}) == 1
     assert len(projects.list(owner).value) == 1
     assert [event.event_type for event in store.audit_events] == ["project.created"]
+
+
+def test_audit_events_are_filtered_by_authenticated_owner() -> None:
+    projects, _store = service()
+    owner = uuid4()
+    foreign_owner = uuid4()
+    owned = create_project(projects, owner, "OWNED").value
+    foreign = create_project(projects, foreign_owner, "SECRET").value
+
+    events = projects.audit_events(owner).value
+
+    assert [(event.event_type, event.project_id, event.project_key) for event in events] == [
+        ("project.created", owned.id, "OWNED")
+    ]
+    assert foreign.id not in {event.project_id for event in events}
+    assert "SECRET" not in repr(events)

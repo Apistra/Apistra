@@ -10,6 +10,17 @@ export interface ProjectView {
   updated_at: string;
 }
 
+export interface AuditEventView {
+  id: string;
+  event_type: string;
+  created_at: string;
+  correlation_id: string;
+  actor: string | null;
+  subject_id: string | null;
+  project_id: string | null;
+  project_key: string | null;
+}
+
 async function payload<T>(response: Response): Promise<T> {
   const body = (await response.json()) as T | ProblemDetail;
   if (!response.ok) {
@@ -42,4 +53,14 @@ export async function createProject(
     },
     body: JSON.stringify(input)
   }));
+}
+
+export async function listAuditEvents(
+  request: typeof fetch = fetch
+): Promise<AuditEventView[]> {
+  const response = await request("/api/v1/audit-events", {
+    credentials: "same-origin",
+    cache: "no-store"
+  });
+  return (await payload<{ items: AuditEventView[] }>(response)).items;
 }

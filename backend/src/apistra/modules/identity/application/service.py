@@ -6,7 +6,7 @@ import hmac
 import re
 from dataclasses import dataclass
 from datetime import timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from apistra.modules.identity.domain import (
     Administrator,
@@ -71,7 +71,7 @@ class IdentityService:
         issued, session = self._new_session(administrator, now)
         event = AuditEvent(
             id=uuid4(),
-            event_type="identity.administrator.bootstrapped",
+            event_type="administrator.bootstrap.completed",
             created_at=now,
             correlation_id=correlation_id,
             actor_id=administrator.id,
@@ -107,7 +107,7 @@ class IdentityService:
         issued, session = self._new_session(administrator, now)
         event = AuditEvent(
             id=uuid4(),
-            event_type="identity.session.created",
+            event_type="session.created",
             created_at=now,
             correlation_id=correlation_id,
             actor_id=administrator.id,
@@ -144,6 +144,11 @@ class IdentityService:
             )
         return result
 
+    def audit_events(self, administrator_id: UUID) -> list[AuditEvent]:
+        """Return only audit records attributable to the authenticated Administrator."""
+
+        return self._store.list_audit_events(administrator_id)
+
     def revoke_session(
         self,
         raw_token: str | None,
@@ -165,7 +170,7 @@ class IdentityService:
         now = self._clock.now()
         event = AuditEvent(
             id=uuid4(),
-            event_type="identity.session.revoked",
+            event_type="session.revoked",
             created_at=now,
             correlation_id=correlation_id,
             actor_id=context.session.administrator_id,
