@@ -169,6 +169,10 @@ def test_audit_api_is_authenticated_attributable_and_owner_scoped() -> None:
         "administrator.bootstrap.completed",
         "project.created",
     }
+    bootstrap_event = next(
+        event for event in events if event["event_type"] == "administrator.bootstrap.completed"
+    )
+    assert bootstrap_event["installation_id"] == "local"
     project_event = next(event for event in events if event["event_type"] == "project.created")
     assert project_event["project_id"] == owned["id"]
     assert project_event["project_key"] == "ATLAS"

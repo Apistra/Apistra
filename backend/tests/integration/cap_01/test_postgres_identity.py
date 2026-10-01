@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 
 import psycopg
@@ -75,3 +76,29 @@ def test_postgres_round_trip_persists_only_hashes_and_audit(clean_database: str)
         assert len(token_hash) == len(csrf_hash) == 64
         assert created.value.raw_token not in {token_hash, csrf_hash}
         assert created.value.csrf_token not in {token_hash, csrf_hash}
+
+
+def test_concurrent_bootstrap_creates_exactly_one_login_principal(
+    clean_database: str,
+) -> None:
+    def bootstrap(index: int) -> bool:
+        service = IdentityService(
+            PostgresIdentityStore(clean_database),
+            Argon2PasswordHasher(),
+            SecureTokenService(),
+            UtcClock(),
+            timedelta(hours=12),
+        )
+        return service.bootstrap(
+            f"administrator.{index}",
+            "correct horse battery",
+            f"corr-bootstrap-{index}",
+        ).succeeded
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(bootstrap, (1, 2)))
+
+    assert sorted(results) == [False, True]
+    with psycopg.connect(clean_database) as connection, connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM identity_administrators WHERE login_enabled")
+        assert cursor.fetchone()[0] == 1

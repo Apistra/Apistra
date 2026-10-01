@@ -174,6 +174,21 @@ Status: DECIDED; IMPLEMENTED
 
 Apistra releases from the transition commit use PolyForm Noncommercial 1.0.0 for its permitted noncommercial purposes and PolyForm Free Trial 1.0.0 for company evaluation for fewer than 32 consecutive calendar days. Productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, and managed-service operation require a separate licence signed by the licensee and Jens Bekersch. The repository remains public and build-in-public but is described as source available, not OSI Open Source. Existing AGPL grants remain valid for versions already published. `LICENSE`, `NOTICE`, `COMMERCIAL-LICENSE.md`, and `LICENSE-TRANSITION.md` implement the decision without mandatory online activation.
 
+### ADR-023 — Multiple local principals and isolated acceptance fixtures
+
+Status: DECIDED
+
+One installation may persist multiple local principals so project ownership and
+future role assignment do not depend on a single-row identity schema. The
+first login-enabled Administrator is still created exactly once: bootstrap
+serialises competing attempts in PostgreSQL and closes after a login-enabled
+principal exists. Non-login principals may own synthetic foreign projects only
+through the guarded CAP-01 fixture entrypoint on explicitly identified isolated
+local staging. The entrypoint is not exposed through the product API, requires
+independent environment, run, fixture, and reset confirmations, and emits a
+secret-free receipt. This decision does not introduce user-management UI,
+additional release-0.1 roles, or production fixture execution.
+
 ## Explicitly deferred decisions
 
 - Managed hosting provider and region model

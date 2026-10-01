@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import {
@@ -11,6 +11,7 @@ import {
   signOut,
   type Credentials,
   type SessionView,
+  focusErrorAlert,
   validateCredentials
 } from "./internal/identity-client";
 import {
@@ -21,12 +22,12 @@ import {
   type ProjectView
 } from "./internal/project-client";
 
-type Screen = "loading" | "sign-in" | "bootstrap" | "overview" | "create-project" | "audit" | "not-found";
+type Screen = "loading" | "sign-in" | "bootstrap" | "overview" | "create-project" | "audit" | "installation-status" | "not-found";
 const CSRF_STORAGE_KEY = "apistra.csrf";
 
 export function AdministrationApp({ requestedProjectId, initialView = "overview" }: {
   requestedProjectId?: string;
-  initialView?: "overview" | "audit";
+  initialView?: "overview" | "audit" | "bootstrap";
 }) {
   const [screen, setScreen] = useState<Screen>("loading");
   const [bootstrapAvailable, setBootstrapAvailable] = useState(false);
@@ -57,8 +58,18 @@ export function AdministrationApp({ requestedProjectId, initialView = "overview"
     void Promise.all([installationStatus(), currentSession()])
       .then(async ([installation, activeSession]) => {
         setBootstrapAvailable(installation.bootstrap_available);
-        if (activeSession) await openOverview(activeSession);
-        else setScreen("sign-in");
+        if (initialView === "bootstrap") {
+          setSession(activeSession);
+          setScreen(installation.bootstrap_available ? "bootstrap" : "installation-status");
+        } else if (activeSession) {
+          await openOverview(activeSession);
+        } else {
+          if (sessionStorage.getItem(CSRF_STORAGE_KEY)) {
+            sessionStorage.removeItem(CSRF_STORAGE_KEY);
+            setMessage("Your session has expired. Sign in again.");
+          }
+          setScreen("sign-in");
+        }
       })
       .catch(() => {
         setMessage("The local service is unavailable.");
@@ -111,16 +122,26 @@ export function AdministrationApp({ requestedProjectId, initialView = "overview"
       />
     );
   }
+  if (screen === "installation-status") {
+    return (
+      <InstallationStatus
+        onBack={() => setScreen(session ? "overview" : "sign-in")}
+        onSignOut={doSignOut}
+        session={session}
+      />
+    );
+  }
   if (screen === "not-found") {
-    return <ProjectNotFound onSignOut={doSignOut} session={session!} />;
+    return <ProjectNotFound onInstallationStatus={() => setScreen("installation-status")} onSignOut={doSignOut} session={session!} />;
   }
   if (screen === "audit") {
-    return <AuditLog events={auditEvents} onSignOut={doSignOut} session={session!} />;
+    return <AuditLog events={auditEvents} onInstallationStatus={() => setScreen("installation-status")} onSignOut={doSignOut} session={session!} />;
   }
   return (
     <ProjectOverview
       currentProject={currentProject}
       onCreate={() => setScreen("create-project")}
+      onInstallationStatus={() => setScreen("installation-status")}
       onProjectChange={setCurrentProject}
       onSignOut={doSignOut}
       projects={projects}
@@ -138,6 +159,11 @@ function SignIn({ bootstrapAvailable, message, onBootstrap, onSignedIn }: {
   const [credentials, setCredentials] = useState<Credentials>({ username: "", password: "" });
   const [error, setError] = useState<string | null>(message);
   const [submitting, setSubmitting] = useState(false);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (error) focusErrorAlert(errorRef.current);
+  }, [error]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -164,7 +190,7 @@ function SignIn({ bootstrapAvailable, message, onBootstrap, onSignedIn }: {
         <input id="username" autoComplete="username" value={credentials.username} onChange={(event) => setCredentials({ ...credentials, username: event.target.value })} />
         <label htmlFor="password">Password</label>
         <input id="password" autoComplete="current-password" type="password" value={credentials.password} onChange={(event) => setCredentials({ ...credentials, password: event.target.value })} />
-        {error ? <p className="form-message" role="alert">{error}</p> : null}
+        {error ? <p className="form-message" ref={errorRef} role="alert" tabIndex={-1}>{error}</p> : null}
         <button disabled={submitting} type="submit">{submitting ? "Signing in…" : "Sign in"}</button>
         {bootstrapAvailable ? <button className="secondary" onClick={onBootstrap} type="button">Create Administrator</button> : null}
       </form>
@@ -202,7 +228,7 @@ export function AdministratorBootstrap({ onCancel = () => undefined, onCreated }
   return (
     <section aria-labelledby="bootstrap-title" className="bootstrap-panel">
       <p className="eyebrow">Local installation · First run</p>
-      <h1 id="bootstrap-title">Create Administrator</h1>
+      <h1 id="bootstrap-title">Bootstrap Administrator</h1>
       <p className="summary">No default account exists. Bootstrap closes after the first successful account.</p>
       <form onSubmit={submit} noValidate>
         <label htmlFor="bootstrap-username">Username</label>
@@ -219,9 +245,10 @@ export function AdministratorBootstrap({ onCancel = () => undefined, onCreated }
   );
 }
 
-function ProjectOverview({ currentProject, onCreate, onProjectChange, onSignOut, projects, session }: {
+function ProjectOverview({ currentProject, onCreate, onInstallationStatus, onProjectChange, onSignOut, projects, session }: {
   currentProject: string;
   onCreate: () => void;
+  onInstallationStatus: () => void;
   onProjectChange: (id: string) => void;
   onSignOut: () => void;
   projects: ProjectView[];
@@ -232,7 +259,7 @@ function ProjectOverview({ currentProject, onCreate, onProjectChange, onSignOut,
       <header className="workspace-header">
         <div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div>
         <label>Current project<select aria-label="Current project" value={currentProject} onChange={(event) => onProjectChange(event.target.value)}><option value="">No project selected</option>{projects.filter((item) => item.status === "ACTIVE").map((project) => <option key={project.id} value={project.id}>{project.key} · {project.name}</option>)}</select></label>
-        <button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button>
+        <AdministratorMenu onInstallationStatus={onInstallationStatus} onSignOut={onSignOut} />
       </header>
       <nav aria-label="Project navigation"><a aria-current="page" href="/">Overview</a><a href="/audit">Audit</a></nav>
       <div className="workspace-content">
@@ -245,31 +272,32 @@ function ProjectOverview({ currentProject, onCreate, onProjectChange, onSignOut,
   );
 }
 
-function AuditLog({ events, onSignOut, session }: {
+export function AuditLog({ events, onInstallationStatus, onSignOut, session }: {
   events: AuditEventView[];
+  onInstallationStatus: () => void;
   onSignOut: () => void;
   session: SessionView;
 }) {
   return (
     <section className="workspace" aria-labelledby="audit-title">
-      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button></header>
+      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><AdministratorMenu onInstallationStatus={onInstallationStatus} onSignOut={onSignOut} /></header>
       <nav aria-label="Project navigation"><a href="/">Overview</a><a aria-current="page" href="/audit">Audit</a></nav>
-      <div className="workspace-content"><p className="eyebrow">Attributable evidence</p><h1 id="audit-title">Audit log</h1>{events.length === 0 ? <p className="summary">No audit events are available.</p> : <ol className="audit-list">{events.map((event) => <li key={event.id}><strong>{event.event_type}</strong><span>{event.actor ?? "System"} · {new Date(event.created_at).toISOString()}</span><code>{event.correlation_id}</code></li>)}</ol>}</div>
+      <div className="workspace-content"><p className="eyebrow">Attributable evidence</p><h1 id="audit-title">Audit log</h1>{events.length === 0 ? <p className="summary">No audit events are available.</p> : <ol className="audit-list">{events.map((event) => <li key={event.id}><strong>{event.event_type}</strong><span>{event.actor ?? "System"} · {new Date(event.created_at).toISOString()}</span>{event.installation_id ? <code>Installation: {event.installation_id}</code> : null}{event.project_key ? <code>Project: {event.project_key}</code> : null}<code>Correlation: {event.correlation_id}</code></li>)}</ol>}</div>
     </section>
   );
 }
 
-function ProjectNotFound({ onSignOut, session }: { onSignOut: () => void; session: SessionView }) {
+function ProjectNotFound({ onInstallationStatus, onSignOut, session }: { onInstallationStatus: () => void; onSignOut: () => void; session: SessionView }) {
   return (
     <section className="workspace" aria-labelledby="not-found-title">
-      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button></header>
+      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><AdministratorMenu onInstallationStatus={onInstallationStatus} onSignOut={onSignOut} /></header>
       <nav aria-label="Project navigation"><a href="/">Overview</a><a href="/audit">Audit</a></nav>
       <div className="workspace-content"><p className="eyebrow">Safe project boundary</p><h1 id="not-found-title">Project not found</h1><p className="summary">The project does not exist or you do not have access.</p></div>
     </section>
   );
 }
 
-function ProjectCreate({ onCancel, onCreated }: { onCancel: () => void; onCreated: (project: ProjectView) => void }) {
+export function ProjectCreate({ onCancel, onCreated }: { onCancel: () => void; onCreated: (project: ProjectView) => void }) {
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -288,13 +316,54 @@ function ProjectCreate({ onCancel, onCreated }: { onCancel: () => void; onCreate
 
   return (
     <section className="bootstrap-panel" aria-labelledby="project-create-title">
-      <p className="eyebrow">Isolated workspace</p><h1 id="project-create-title">Create project</h1>
+      <p className="eyebrow">Isolated workspace</p><h1 id="project-create-title">Project creation</h1>
       <form onSubmit={submit} noValidate>
         <label htmlFor="project-name">Project name</label><input id="project-name" maxLength={128} value={name} onChange={(event) => setName(event.target.value)} />
         <label htmlFor="project-key">Project key</label><input id="project-key" maxLength={32} pattern="[A-Z0-9-]+" value={key} onChange={(event) => setKey(event.target.value.toUpperCase())} />
         {error ? <p className="form-message" role="alert">{error}</p> : null}
         <button disabled={!ready} type="submit">Create project</button><button className="secondary" onClick={onCancel} type="button">Cancel</button>
       </form>
+    </section>
+  );
+}
+
+export function AdministratorMenu({ onInstallationStatus, onSignOut }: {
+  onInstallationStatus: () => void;
+  onSignOut: () => void;
+}) {
+  return (
+    <details className="administrator-menu">
+      <summary aria-label="Administrator menu">Administrator menu</summary>
+      <div aria-label="Administrator actions" className="administrator-actions">
+        <button className="secondary compact" onClick={onInstallationStatus} type="button">Installation status</button>
+        <button className="secondary compact" onClick={onSignOut} type="button">Sign out</button>
+      </div>
+    </details>
+  );
+}
+
+export function InstallationStatus({ onBack, onSignOut, session }: {
+  onBack: () => void;
+  onSignOut: () => void;
+  session: SessionView | null;
+}) {
+  const content = (
+    <div className="workspace-content">
+      <p className="eyebrow">Local installation</p>
+      <h1 id="installation-status-title">Installation status</h1>
+      <p className="summary">Administrator bootstrap is complete.</p>
+      <button className="secondary" onClick={onBack} type="button">{session ? "Back to projects" : "Back to sign in"}</button>
+    </div>
+  );
+  if (!session) return <section aria-labelledby="installation-status-title" className="bootstrap-panel">{content}</section>;
+  return (
+    <section aria-labelledby="installation-status-title" className="workspace">
+      <header className="workspace-header">
+        <div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div>
+        <AdministratorMenu onInstallationStatus={() => undefined} onSignOut={onSignOut} />
+      </header>
+      <nav aria-label="Project navigation"><a href="/">Overview</a><a href="/audit">Audit</a></nav>
+      {content}
     </section>
   );
 }

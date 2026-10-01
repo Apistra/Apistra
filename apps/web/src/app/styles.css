@@ -89,6 +89,11 @@ button:disabled { cursor: wait; opacity: .65; }
 .secondary { border: 1px solid #365c4e; background: transparent; color: #bfe6d5; }
 .secondary:hover { background: #10251e; }
 .compact { margin: 0; padding: .65rem .9rem; }
+.administrator-menu { position: relative; }
+.administrator-menu summary { cursor: pointer; color: #bfe6d5; font-weight: 750; list-style: none; }
+.administrator-menu summary::-webkit-details-marker { display: none; }
+.administrator-actions { position: absolute; z-index: 2; right: 0; display: grid; gap: .35rem; min-width: 12rem; margin-top: .5rem; border: 1px solid #365c4e; border-radius: .7rem; background: #07100d; padding: .5rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .4); }
+.administrator-actions button { width: 100%; text-align: left; }
 .security-note { margin: 1.35rem 0 0; padding-top: 1rem; border-top: 1px solid #203b31; }
 .success-panel { text-align: left; }
 

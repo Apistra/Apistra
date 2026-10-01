@@ -613,6 +613,51 @@ Releases from the transition commit are source available under PolyForm Noncomme
 
 Apistra must not be described as OSI Open Source under this model. Existing AGPL grants remain valid for versions already published. `LICENSE-TRANSITION.md` identifies the last AGPL commit and the first source-available commit; `NOTICE` supplies the Required Notice; `COMMERCIAL-LICENSE.md` contains the standard commercial terms. External contributions remain closed until an explicit compatible rights grant is introduced. No mandatory online activation is introduced.
 
+## ADR-023 — Multiple local principals and guarded acceptance fixtures
+
+Status: DECIDED
+
+Decision date: 2026-10-01
+
+### Context and decision
+
+Project isolation must be proven against an existing foreign project, but a
+single-row identity schema cannot represent that state and would prevent later
+role assignment. One installation may therefore persist multiple local
+principals. This is a persistence capability, not an early user-management
+feature: release 0.1 still exposes only the bootstrap Administrator role.
+
+Bootstrap no longer relies on a unique installation column. The PostgreSQL
+adapter takes a transaction-scoped advisory lock, checks for an existing
+login-enabled local principal, and creates the first Administrator, session,
+and audit event atomically. Concurrent attempts therefore produce one success
+and one safe closed-bootstrap result. Usernames remain unique.
+
+CAP-01 acceptance uses a separate process entrypoint to reset an ephemeral
+local-staging database and create deterministic Atlas and Orion ownership. Its
+foreign owner is explicitly non-login-enabled and receives no usable
+credential. The process is absent from the HTTP API and requires all of these
+conditions before connecting to PostgreSQL:
+
+- exact `local-staging-<run-id>` environment identity;
+- matching `apply-cap01-<run-id>` fixture gate;
+- exact named-fixture reset confirmation;
+- explicit Compose `fixtures` profile;
+- protected password injection for login-enabled fixtures.
+
+### Consequences and verification
+
+- Project queries remain owner-scoped and foreign/unknown responses remain
+  indistinguishable.
+- A disabled fixture principal cannot authenticate even if its username is
+  known.
+- Migration, competing-bootstrap, reset idempotency, disabled-login,
+  Atlas-listing, and Orion-denial tests are mandatory.
+- Fixture execution emits a secret-free candidate/run/revision/checksum/count
+  receipt and is never a production deployment action.
+- Additional roles, invitations, recovery, and user administration remain
+  separately gated capabilities.
+
 ## Pattern-to-module summary
 
 Cross-cutting backend:
@@ -655,12 +700,13 @@ Deliberately not selected globally:
 
 ## Decision gate
 
-ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-022 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED globally until qualified architecture review.
+ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-023 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED globally until qualified architecture review.
 
 The CAP-01 slice is approved by the readiness review dated 2026-09-30:
 ADR-001 through ADR-004 where explicitly mapped, ADR-013, ADR-014 for mutable
 project administration, ADR-017, and ADR-018. ADR-002 covers identity/session
 and Softwaretest.it boundaries; ADR-010 applies only to the Softwaretest.it
 adapter. ADR-005 is explicitly not applicable to CAP-01. ADR-019 and ADR-021
-remain the decided layout and authentication constraints. This scoped decision
+and ADR-023 remain the decided layout, authentication, principal, and guarded
+acceptance-fixture constraints. This scoped decision
 does not approve those proposed ADRs for unrelated capabilities.

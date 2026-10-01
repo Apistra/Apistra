@@ -208,6 +208,119 @@ def verify_identity_round_trip(web_base: str) -> None:
             raise RuntimeError("cleanup session revocation did not return 204")
 
 
+def apply_cap01_fixture(
+    compose: list[str], env: dict[str, str], run_id: str, fixture_id: str
+) -> dict[str, object]:
+    """Run the packaged, guarded fixture entrypoint and parse its secret-free receipt."""
+
+    output = run(
+        [
+            *compose,
+            "--profile",
+            "fixtures",
+            "run",
+            "--rm",
+            "fixture",
+            fixture_id,
+            "--run-id",
+            run_id,
+            "--confirm-reset",
+            fixture_id,
+        ],
+        env,
+        capture=True,
+    )
+    for line in reversed(output.splitlines()):
+        try:
+            receipt = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if receipt.get("status") == "APPLIED":
+            return receipt
+    raise RuntimeError("guarded CAP-01 fixture did not emit an application receipt")
+
+
+def verify_fixture_isolation(web_base: str, password: str) -> None:
+    """Prove the packaged Atlas/Orion fixture through the public HTTP boundary."""
+
+    sign_in = urllib.request.Request(
+        f"{web_base}/api/v1/sessions",
+        data=json.dumps({"username": "admin.alpha", "password": password}).encode(
+            "utf-8"
+        ),
+        headers={
+            "content-type": "application/json",
+            "x-correlation-id": "staging-fixture-sign-in",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(sign_in, timeout=5) as response:
+        receipt = json.load(response)
+        session_cookie = response.headers.get("set-cookie", "").split(";", 1)[0]
+
+    listed = json.load(
+        urllib.request.urlopen(
+            urllib.request.Request(
+                f"{web_base}/api/v1/projects",
+                headers={"cookie": session_cookie},
+            ),
+            timeout=3,
+        )
+    )
+    if [
+        (item.get("id"), item.get("name"), item.get("key"))
+        for item in listed.get("items", [])
+    ] != [
+        (
+            "11111111-1111-4111-8111-111111111111",
+            "Atlas Research",
+            "ATLAS",
+        )
+    ]:
+        raise RuntimeError(
+            "fixture project listing did not preserve the owner boundary"
+        )
+
+    problems: list[dict[str, object]] = []
+    for project_id in (
+        "22222222-2222-4222-8222-222222222222",
+        "99999999-9999-4999-8999-999999999999",
+    ):
+        try:
+            urllib.request.urlopen(
+                urllib.request.Request(
+                    f"{web_base}/api/v1/projects/{project_id}",
+                    headers={"cookie": session_cookie},
+                ),
+                timeout=3,
+            )
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise
+            body = error.read().decode("utf-8")
+            if "Orion Restricted" in body or "ORION" in body:
+                raise RuntimeError("foreign project metadata was disclosed")
+            problem = json.loads(body)
+            problem.pop("correlation_id", None)
+            problems.append(problem)
+        else:
+            raise RuntimeError("foreign or unknown fixture project was readable")
+    if problems[0] != problems[1]:
+        raise RuntimeError("foreign and unknown project responses were distinguishable")
+
+    revoke = urllib.request.Request(
+        f"{web_base}/api/v1/session",
+        headers={
+            "cookie": session_cookie,
+            "x-csrf-token": receipt["csrf_token"],
+        },
+        method="DELETE",
+    )
+    with urllib.request.urlopen(revoke, timeout=3) as response:
+        if response.status != 204:
+            raise RuntimeError("fixture session revocation did not return 204")
+
+
 def wait_for(url: str, expected_status: str, timeout: float = 60) -> dict[str, object]:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -276,7 +389,21 @@ def main() -> int:
             or web["deployment"]["commit"] != commit
         ):
             raise RuntimeError("deployment marker does not match candidate commit")
-        verify_identity_round_trip(f"http://127.0.0.1:{args.web_port}")
+        web_base = f"http://127.0.0.1:{args.web_port}"
+        verify_identity_round_trip(web_base)
+        fixture_password = secrets.token_urlsafe(24)
+        env["APISTRA_FIXTURE_GATE"] = f"apply-cap01-{args.run_id}"
+        env["STAGING_ADMIN_PASSWORD"] = fixture_password
+        fixture_receipt = apply_cap01_fixture(
+            compose, env, args.run_id, "FX-PRC-01-ISOLATION"
+        )
+        if fixture_receipt.get("counts") != {
+            "administrators": 2,
+            "projects": 2,
+        }:
+            raise RuntimeError("fixture application receipt counts did not match")
+        verify_fixture_isolation(web_base, fixture_password)
+        env.pop("STAGING_ADMIN_PASSWORD", None)
         env["APISTRA_WORKER_FORCE_NOT_READY"] = "true"
         run([*compose, "up", "--detach", "--force-recreate", "worker"], env)
         container = f"{env['APISTRA_COMPOSE_PROJECT']}-worker-1"
@@ -307,6 +434,7 @@ def main() -> int:
                     "run_id": args.run_id,
                     "commit": commit,
                     "image_ids": after,
+                    "fixture_receipt": fixture_receipt,
                 },
                 sort_keys=True,
             )
