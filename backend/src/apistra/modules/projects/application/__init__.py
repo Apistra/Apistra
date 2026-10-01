@@ -19,6 +19,8 @@ from apistra.modules.projects.ports import ProjectClock, ProjectStore
 PROJECT_KEY_PATTERN = re.compile(r"^[A-Z0-9][A-Z0-9-]{1,31}$")
 MAXIMUM_NAME_LENGTH = 128
 MAXIMUM_IDEMPOTENCY_KEY_LENGTH = 128
+type ProjectList = list[Project]
+type ProjectAuditEventList = list[ProjectAuditEvent]
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,7 +72,7 @@ class ProjectService:
             return ProjectResult(value=stored)
         return ProjectResult(error=self._store_error(conflict))
 
-    def list(self, owner_id: UUID) -> ProjectResult[list[Project]]:
+    def list(self, owner_id: UUID) -> ProjectResult[ProjectList]:
         return ProjectResult(value=self._store.list_for_owner(owner_id))
 
     def get(self, owner_id: UUID, project_id: UUID) -> ProjectResult[Project]:
@@ -79,7 +81,7 @@ class ProjectService:
             return self._not_found()
         return ProjectResult(value=project)
 
-    def audit_events(self, owner_id: UUID) -> ProjectResult[list[ProjectAuditEvent]]:
+    def audit_events(self, owner_id: UUID) -> ProjectResult[ProjectAuditEventList]:
         return ProjectResult(value=self._store.list_audit_for_owner(owner_id))
 
     def update(
@@ -165,7 +167,7 @@ class ProjectService:
         project: Project,
         actor_username: str,
         correlation_id: str,
-        details: dict | None = None,
+        details: dict[str, object] | None = None,
     ) -> ProjectAuditEvent:
         return ProjectAuditEvent(
             id=uuid4(),
@@ -180,11 +182,11 @@ class ProjectService:
         )
 
     @staticmethod
-    def _invalid(message: str) -> ProjectResult:
+    def _invalid(message: str) -> ProjectResult[Project]:
         return ProjectResult(error=ProjectError(ProjectErrorCode.INVALID_INPUT, message))
 
     @staticmethod
-    def _not_found() -> ProjectResult:
+    def _not_found() -> ProjectResult[Project]:
         return ProjectResult(
             error=ProjectError(
                 ProjectErrorCode.NOT_FOUND,
@@ -206,4 +208,7 @@ class ProjectService:
                 ProjectErrorCode.IDEMPOTENCY_CONFLICT,
                 "Idempotency-Key was already used for a different request.",
             )
-        return cls._not_found().error
+        return ProjectError(
+            ProjectErrorCode.NOT_FOUND,
+            "The project does not exist or you do not have access.",
+        )

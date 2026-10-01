@@ -37,6 +37,8 @@ The authoritative development version is stored in [VERSION](VERSION). Version m
 
 The initial monorepo layout, dependency rules, retained positive and negative fixtures, and CI integration are documented in [docs/architecture/testing.md](docs/architecture/testing.md).
 
+The binding Python implementation profile and its fail-closed CI enforcement are documented in [docs/engineering/python-code-conventions.md](docs/engineering/python-code-conventions.md).
+
 ## CAP-00 operator entry point
 
 Build, staging, recovery, evidence, and cleanup commands are documented in [docs/operations/cap00-bootstrap.md](docs/operations/cap00-bootstrap.md). The complete test map is in [docs/testing/cap00-test-matrix.md](docs/testing/cap00-test-matrix.md).

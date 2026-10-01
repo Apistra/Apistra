@@ -7,6 +7,13 @@ import json
 import re
 from pathlib import Path, PurePosixPath
 
+UTF8 = "utf-8"
+DELIVERY_CAPABILITY_ACCEPTANCE = "capability-acceptance"
+DELIVERY_TEST_PUBLICATION = "test-definition-and-publication"
+INITIAL_VERSION = "0.1.0"
+EXPECTED_CANONICAL_BDD_COUNT = 47
+EXPECTED_MANUAL_TEST_PROCESS_COUNT = 14
+
 EXPECTED_FLOW = ["feature/*", "test", "staging", "main"]
 EXPECTED_REQUIRED_CHECKS = [
     "Contract and static checks",
@@ -85,14 +92,14 @@ WORKORDER_REQUIRED_SECTIONS = {
 }
 WORKORDER_DELIVERY_CLASSES = {
     "architecture-decision",
-    "capability-acceptance",
+    DELIVERY_CAPABILITY_ACCEPTANCE,
     "contract-definition",
     "design-decision",
     "implementation",
     "legal-governance",
     "operational-governance",
     "repository-governance",
-    "test-definition-and-publication",
+    DELIVERY_TEST_PUBLICATION,
 }
 WORKORDER_FORBIDDEN_BOILERPLATE = {
     "Implement or specify exactly:",
@@ -209,7 +216,7 @@ def validate_branch_policy(policy: dict[str, object]) -> list[str]:
 
 def repository_contract(root: Path) -> dict[str, object]:
     policy = json.loads((root / ".github/branch-protection.expected.json").read_text())
-    contributing = (root / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    contributing = (root / "CONTRIBUTING.md").read_text(encoding=UTF8)
     return {
         "flow": policy["flow"],
         "automatic_deployment": policy["deployment"]["automatic"],
@@ -221,7 +228,7 @@ def repository_contract(root: Path) -> dict[str, object]:
 def validate_workflows(root: Path) -> list[str]:
     errors: list[str] = []
     for path in sorted((root / ".github/workflows").glob("*.yml")):
-        text = path.read_text(encoding="utf-8")
+        text = path.read_text(encoding=UTF8)
         for line_number, line in enumerate(text.splitlines(), 1):
             if (
                 AUTOMATIC_DEPLOYMENT_PATTERN.search(line)
@@ -248,16 +255,14 @@ def validate_version_values(
 
 def validate_version_policy(root: Path) -> list[str]:
     errors: list[str] = []
-    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+    version = (root / "VERSION").read_text(encoding=UTF8).strip()
 
-    backend_text = (root / "backend/pyproject.toml").read_text(encoding="utf-8")
+    backend_text = (root / "backend/pyproject.toml").read_text(encoding=UTF8)
     backend_match = re.search(r'^version\s*=\s*"([^"]+)"', backend_text, re.MULTILINE)
     if backend_match is None:
         errors.append("backend/pyproject.toml must declare a project version")
 
-    web_package = json.loads(
-        (root / "apps/web/package.json").read_text(encoding="utf-8")
-    )
+    web_package = json.loads((root / "apps/web/package.json").read_text(encoding=UTF8))
     errors.extend(
         validate_version_values(
             version,
@@ -266,7 +271,7 @@ def validate_version_policy(root: Path) -> list[str]:
         )
     )
 
-    changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+    changelog = (root / "CHANGELOG.md").read_text(encoding=UTF8)
     if "## [Unreleased]" not in changelog:
         errors.append("CHANGELOG.md must contain an Unreleased section")
     if not (root / "VERSIONING.md").is_file():
@@ -276,7 +281,7 @@ def validate_version_policy(root: Path) -> list[str]:
 
 def validate_test_concept(root: Path) -> list[str]:
     path = root / "docs/testing/test-concept.md"
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding=UTF8)
     missing = _missing_sections(text, TEST_CONCEPT_REQUIRED_SECTIONS)
     if missing:
         return [f"{path}: missing sections: {', '.join(missing)}"]
@@ -649,7 +654,7 @@ def validate_manual_test_definitions(root: Path, test_catalog: str) -> list[str]
     for test_id in sorted(file_ids - catalogue_ids):
         errors.append(f"{manual_root}: manual case file {test_id} is not allocated")
     for path in case_files:
-        errors.extend(validate_manual_test_case(path, path.read_text(encoding="utf-8")))
+        errors.extend(validate_manual_test_case(path, path.read_text(encoding=UTF8)))
     return errors
 
 
@@ -663,11 +668,14 @@ def _validate_test_catalogue(
     errors: list[str] = []
     if "Version: 0.7-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
         errors.append(f"{test_catalog_path}: must declare the 0.7 draft authority")
-    if len(canonical_bdd_ids) != 47:
+    if len(canonical_bdd_ids) != EXPECTED_CANONICAL_BDD_COUNT:
         errors.append(
             f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
         )
-    if canonical_mtp_ids != {f"MTP-PRC-{number:02d}" for number in range(1, 15)}:
+    if canonical_mtp_ids != {
+        f"MTP-PRC-{number:02d}"
+        for number in range(1, EXPECTED_MANUAL_TEST_PROCESS_COUNT + 1)
+    }:
         errors.append(
             f"{test_catalog_path}: manual package catalogue must be PRC-01 through PRC-14"
         )
@@ -679,7 +687,7 @@ def _validate_capability_document(
     path: Path, capability_id: str, capability_index: str
 ) -> tuple[list[str], str]:
     errors: list[str] = []
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding=UTF8)
     if not text.startswith(f"# {capability_id} — "):
         errors.append(f"{path}: heading must start with {capability_id}")
     missing = _missing_sections(text, CAPABILITY_REQUIRED_SECTIONS)
@@ -699,7 +707,7 @@ def _validate_workorder_document(
     defined_sec_ids: set[str],
 ) -> tuple[list[str], str | None, set[str]]:
     errors: list[str] = []
-    text = workorder_path.read_text(encoding="utf-8")
+    text = workorder_path.read_text(encoding=UTF8)
     if not text.startswith(f"# {workorder_id} — "):
         errors.append(f"{workorder_path}: heading must start with {workorder_id}")
     missing = _missing_sections(text, WORKORDER_REQUIRED_SECTIONS)
@@ -720,8 +728,8 @@ def _validate_workorder_document(
 def _validate_delivery_classes(directory: Path, classes: list[str]) -> list[str]:
     errors: list[str] = []
     expected = (
-        ("test-definition-and-publication", "test-definition-and-publication"),
-        ("capability-acceptance", "capability-acceptance"),
+        (DELIVERY_TEST_PUBLICATION, DELIVERY_TEST_PUBLICATION),
+        (DELIVERY_CAPABILITY_ACCEPTANCE, DELIVERY_CAPABILITY_ACCEPTANCE),
     )
     for delivery_class, label in expected:
         if classes.count(delivery_class) != 1:
@@ -766,8 +774,8 @@ def _validate_capability_dependencies(
 ) -> list[str]:
     errors: list[str] = []
     known_workorders = set(dependencies_by_workorder)
-    publication_ids = _ids_for_class(classes, "test-definition-and-publication")
-    acceptance_ids = _ids_for_class(classes, "capability-acceptance")
+    publication_ids = _ids_for_class(classes, DELIVERY_TEST_PUBLICATION)
+    acceptance_ids = _ids_for_class(classes, DELIVERY_CAPABILITY_ACCEPTANCE)
     if len(publication_ids) == 1 and capability_id != "CAP-00":
         publication_id = next(iter(publication_ids))
         errors.extend(
@@ -880,18 +888,14 @@ def _validate_capability(
 def validate_planning_catalogues(root: Path) -> list[str]:
     capabilities = root / "docs/capabilities"
     workorders = root / "docs/workorders"
-    capability_index = (capabilities / "README.md").read_text(encoding="utf-8")
-    workorder_index = (workorders / "README.md").read_text(encoding="utf-8")
+    capability_index = (capabilities / "README.md").read_text(encoding=UTF8)
+    workorder_index = (workorders / "README.md").read_text(encoding=UTF8)
     test_catalog_path = root / "docs/testing/test-id-catalog.md"
-    test_catalog = test_catalog_path.read_text(encoding="utf-8")
+    test_catalog = test_catalog_path.read_text(encoding=UTF8)
     canonical_bdd_ids = set(BDD_ID_PATTERN.findall(test_catalog))
     canonical_mtp_ids = set(MTP_ID_PATTERN.findall(test_catalog))
-    architecture = (root / "docs/planning/03-architecture.md").read_text(
-        encoding="utf-8"
-    )
-    security = (root / "docs/planning/04-security-concept.md").read_text(
-        encoding="utf-8"
-    )
+    architecture = (root / "docs/planning/03-architecture.md").read_text(encoding=UTF8)
+    security = (root / "docs/planning/04-security-concept.md").read_text(encoding=UTF8)
     defined_arch_ids = set(re.findall(r"^(ARCH-\d{3}) —", architecture, re.MULTILINE))
     defined_sec_ids = set(re.findall(r"^(SEC-\d{3}) —", security, re.MULTILINE))
     errors = _validate_test_catalogue(
@@ -944,7 +948,7 @@ def validate_local_planning_links(root: Path) -> list[str]:
         *(root / "docs/workorders").glob("**/*.md"),
     ]
     for path in sorted(paths):
-        text = path.read_text(encoding="utf-8")
+        text = path.read_text(encoding=UTF8)
         for target in MARKDOWN_LINK_PATTERN.findall(text):
             if target.startswith(("http://", "https://", "#")):
                 continue
@@ -977,11 +981,13 @@ def _contract_fixture_errors(root: Path) -> list[str]:
         (not validate_contract(positive), "positive contract fixture must pass"),
         (bool(validate_contract(negative)), "negative contract fixture must fail"),
         (
-            not validate_version_values("0.1.0", "0.1.0", "0.1.0"),
+            not validate_version_values(
+                INITIAL_VERSION, INITIAL_VERSION, INITIAL_VERSION
+            ),
             "positive version fixture must pass",
         ),
         (
-            bool(validate_version_values("0.1.0+local", "0.1.0", "0.2.0")),
+            bool(validate_version_values("0.1.0+local", INITIAL_VERSION, "0.2.0")),
             "negative version fixture must fail",
         ),
     )
@@ -989,17 +995,15 @@ def _contract_fixture_errors(root: Path) -> list[str]:
 
 
 def _workorder_fixture_context(root: Path) -> tuple[Path, str, tuple[object, ...]]:
-    catalogue_text = (root / "docs/testing/test-id-catalog.md").read_text(
-        encoding="utf-8"
-    )
+    catalogue_text = (root / "docs/testing/test-id-catalog.md").read_text(encoding=UTF8)
     architecture_text = (root / "docs/planning/03-architecture.md").read_text(
-        encoding="utf-8"
+        encoding=UTF8
     )
     security_text = (root / "docs/planning/04-security-concept.md").read_text(
-        encoding="utf-8"
+        encoding=UTF8
     )
     fixture_path = root / "docs/workorders/CAP-01/WO-CAP-01-01.md"
-    fixture_text = fixture_path.read_text(encoding="utf-8")
+    fixture_text = fixture_path.read_text(encoding=UTF8)
     arguments: tuple[object, ...] = (
         set(BDD_ID_PATTERN.findall(catalogue_text)),
         set(MTP_ID_PATTERN.findall(catalogue_text)),
@@ -1048,7 +1052,7 @@ def _workorder_fixture_errors(root: Path) -> list[str]:
 def _manual_fixture_errors(root: Path) -> list[str]:
     errors: list[str] = []
     manual_path = root / "docs/testing/manual/PRC-01/MT-PRC-01-001.md"
-    manual_text = manual_path.read_text(encoding="utf-8")
+    manual_text = manual_path.read_text(encoding=UTF8)
     if validate_manual_test_case(manual_path, manual_text):
         errors.append("positive manual test definition fixture must pass")
     invalid_manual = manual_text.replace("**Expected result:**", "**Result:**", 1)

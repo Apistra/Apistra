@@ -10,17 +10,24 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 from argon2.low_level import Type
 
+ARGON2_TIME_COST = 3
+ARGON2_MEMORY_COST_KIB = 65_536
+ARGON2_PARALLELISM = 4
+ARGON2_HASH_LENGTH = 32
+ARGON2_SALT_LENGTH = 16
+TOKEN_ENTROPY_BYTES = 32
+
 
 class Argon2PasswordHasher:
     """Pinned Argon2id policy; parameters are explicit and centrally reviewable."""
 
     def __init__(self) -> None:
         self._hasher = PasswordHasher(
-            time_cost=3,
-            memory_cost=65536,
-            parallelism=4,
-            hash_len=32,
-            salt_len=16,
+            time_cost=ARGON2_TIME_COST,
+            memory_cost=ARGON2_MEMORY_COST_KIB,
+            parallelism=ARGON2_PARALLELISM,
+            hash_len=ARGON2_HASH_LENGTH,
+            salt_len=ARGON2_SALT_LENGTH,
             type=Type.ID,
         )
 
@@ -36,7 +43,7 @@ class Argon2PasswordHasher:
 
 class SecureTokenService:
     def issue(self) -> tuple[str, str]:
-        raw_token = secrets.token_urlsafe(32)
+        raw_token = secrets.token_urlsafe(TOKEN_ENTROPY_BYTES)
         return raw_token, self.digest(raw_token)
 
     def digest(self, raw_token: str) -> str:

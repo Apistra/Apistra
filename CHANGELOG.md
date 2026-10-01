@@ -12,9 +12,11 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 ### Changed
 
 - Refactored API route composition, Softwaretest.it parsing/reporting, architecture analysis, repository-contract validation, and immutable-candidate verification into smaller single-purpose functions without changing their external contracts.
+- Adopted the Google/PEP-based Apistra Python convention profile and refactored existing product and engineering code to use typed boundaries and named domain, protocol, security, timeout, and limit constants.
 
 ### Added
 
+- A fail-closed CI-TS-18 Python convention gate with strict product-code type checking, expanded Ruff checks, selected repeated-string and magic-number rules, blanket-suppression detection, and retained positive and negative proof fixtures.
 - A fail-closed CI-TS-17 cyclomatic-complexity gate with a hard maximum of 10 for Python and TypeScript/TSX/JavaScript, including retained positive and negative analyser fixtures.
 - Guarded CAP-01 local-staging fixture application with deterministic Atlas and
   Orion ownership, disabled foreign login, secret-free application receipts,

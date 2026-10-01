@@ -175,6 +175,14 @@ CI-TS-17 — Cyclomatic complexity
 - Fail-closed controls: the complete configured source scope must pass; retained positive Python and TypeScript fixtures must pass; retained functions with complexity 11 must be rejected by their respective analyser
 - Current CI job: `Contract and static checks`, with the pinned Ruff, ESLint, TypeScript parser, and repository lockfiles
 
+CI-TS-18 — Python code conventions
+- Trigger: every Python, Python-tooling, dependency-lock, convention-document, or CI change
+- Scope: Python product code plus repository-owned engineering and release tools; tests retain readable scenario literals but remain subject to Ruff and formatting
+- Tools: Ruff for the common rule set and annotations, mypy in strict mode for product code, and the pinned wemake-python-styleguide checks `WPS226` and `WPS432` for repeated strings and magic numbers
+- Oracle: all applicable source passes without blanket suppressions; public and internal product functions are fully typed; repeated domain/protocol strings and non-trivial numeric policy values are named constants
+- Fail-closed controls: a retained conforming fixture passes, retained overused-string and magic-number fixtures fail with their exact expected rule identifiers, and an explicit scan rejects blanket `noqa`, `type: ignore`, Ruff, or Pylint disable-all directives
+- Current CI job: `Contract and static checks`, using only dependencies pinned in `backend/uv.lock`
+
 Pipeline mapping rule:
 - Each executable stage has its own named workflow step or job and an explicit command. A combined test command must not be presented as evidence for stages for which it discovered no applicable tests.
 - Focused Python stage commands disable the global coverage plugin because a single slice cannot cover the complete backend. A subsequent aggregate `pytest backend/tests` run is the only repository-wide coverage oracle and remains blocking.

@@ -151,10 +151,11 @@ Production testing is NOT DEFINED. It requires an approved environment, data, ac
 - Security and privacy: actual enforcement points with valid positive and negative identity/project controls.
 - Performance and resource: deterministic resource declarations and enforceable at/below/above input, batch, retry, token, cost, and fail-closed overload boundaries that do not depend on shared-runner speed. This is the only load-like coverage currently permitted in CI. CI does not claim latency, throughput, concurrent or sustained load, scalability, or capacity evidence while no representative running candidate and controlled measurement environment exist.
 - Maintainability: CI-TS-17 measures classic McCabe cyclomatic complexity across Python product/engineering/tool code and TypeScript/TSX/JavaScript web/tool code. The maximum is 10 per function with no grandfathering or local suppression; retained complexity-3 controls pass and complexity-11 controls must fail.
+- Python maintainability: CI-TS-18 combines the repository Ruff profile, complete product-code annotations, strict mypy, selected repeated-literal and magic-number checks, and a blanket-suppression scan. A conforming fixture must pass and both deliberately non-conforming fixtures must fail with the expected rule identifiers.
 - Resilience and recovery: restart, worker loss, timeout, cancellation, uncertain response, backup restore, rollback, and roll-forward.
 - Packaging and staging: clean build, immutable images, manifest, SBOM, migration, health, smoke, offline profile, and exact-candidate recovery.
 
-The CI-stage identifiers CI-TS-01 through CI-TS-17 and their canonical scopes remain defined in `docs/planning/05-delivery-ci-contract.md`.
+The CI-stage identifiers CI-TS-01 through CI-TS-18 and their canonical scopes remain defined in `docs/planning/05-delivery-ci-contract.md`.
 
 ## 8. Test design techniques
 

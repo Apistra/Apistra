@@ -6,7 +6,7 @@ from datetime import timedelta
 import psycopg
 import pytest
 
-from apistra.entrypoints.cap01_fixture import (
+from apistra.entrypoints.fixture.cap01 import (
     ADMIN_NO_PROJECT,
     FRESH,
     ISOLATION,

@@ -1,5 +1,6 @@
 import json
 import sys
+from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -66,8 +67,6 @@ def test_worker_run_writes_before_sleep(tmp_path: Path, monkeypatch) -> None:
         raise StopIteration
 
     monkeypatch.setattr(worker.time, "sleep", stop)
-    try:
+    with suppress(StopIteration):
         worker.run(interval_seconds=0)
-    except StopIteration:
-        pass
     assert path.exists()

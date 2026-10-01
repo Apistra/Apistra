@@ -14,6 +14,29 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPOSE = ROOT / "deploy/compose/compose.staging.yml"
+UTF8 = "utf-8"
+FIELD_USERNAME = "username"
+FIELD_KEY = "key"
+FIELD_STATUS = "status"
+FIELD_ID = "id"
+FIELD_ITEMS = "items"
+FIELD_EVENT_TYPE = "event_type"
+FIELD_IMAGES = "images"
+FIELD_REFERENCE = "reference"
+HEADER_CONTENT_TYPE = "content-type"
+HEADER_CORRELATION_ID = "x-correlation-id"
+HEADER_COOKIE = "cookie"
+HEADER_CSRF_TOKEN = "x-csrf-token"
+JSON_MEDIA_TYPE = "application/json"
+HTTP_POST = "POST"
+ATLAS_KEY = "ATLAS"
+HTTP_CREATED = 201
+HTTP_NO_CONTENT = 204
+HTTP_UNAUTHORIZED = 401
+HTTP_NOT_FOUND = 404
+DEFAULT_API_PORT = 18_080
+DEFAULT_WEB_PORT = 13_000
+DATABASE_PASSWORD_BYTES = 32
 
 
 def run(
@@ -35,15 +58,15 @@ def _bootstrap_administrator(web_base: str) -> tuple[str, str, dict[str, object]
     password = secrets.token_urlsafe(24)
     request = urllib.request.Request(
         f"{web_base}/api/v1/administrators:bootstrap",
-        data=json.dumps({"username": username, "password": password}).encode("utf-8"),
+        data=json.dumps({FIELD_USERNAME: username, "password": password}).encode(UTF8),
         headers={
-            "content-type": "application/json",
-            "x-correlation-id": "staging-bootstrap",
+            HEADER_CONTENT_TYPE: JSON_MEDIA_TYPE,
+            HEADER_CORRELATION_ID: "staging-bootstrap",
         },
-        method="POST",
+        method=HTTP_POST,
     )
     with urllib.request.urlopen(request, timeout=5) as response:
-        if response.status != 201:
+        if response.status != HTTP_CREATED:
             raise RuntimeError("administrator bootstrap did not return 201")
         receipt = json.load(response)
         set_cookie = response.headers.get("set-cookie", "")
@@ -55,7 +78,7 @@ def _bootstrap_administrator(web_base: str) -> tuple[str, str, dict[str, object]
             "administrator session cookie is missing required security attributes"
         )
     session_cookie = set_cookie.split(";", 1)[0]
-    if receipt.get("administrator", {}).get("username") != username:
+    if receipt.get("administrator", {}).get(FIELD_USERNAME) != username:
         raise RuntimeError("administrator bootstrap receipt did not match")
     return username, password, receipt, session_cookie
 
@@ -65,21 +88,21 @@ def _create_project(
 ) -> dict[str, object]:
     project_request = urllib.request.Request(
         f"{web_base}/api/v1/projects",
-        data=json.dumps({"name": "Atlas Research", "key": "ATLAS"}).encode("utf-8"),
+        data=json.dumps({"name": "Atlas Research", FIELD_KEY: ATLAS_KEY}).encode(UTF8),
         headers={
-            "content-type": "application/json",
-            "cookie": session_cookie,
+            HEADER_CONTENT_TYPE: JSON_MEDIA_TYPE,
+            HEADER_COOKIE: session_cookie,
             "idempotency-key": "staging-create-atlas",
-            "x-correlation-id": "staging-project-create",
-            "x-csrf-token": csrf_token,
+            HEADER_CORRELATION_ID: "staging-project-create",
+            HEADER_CSRF_TOKEN: csrf_token,
         },
-        method="POST",
+        method=HTTP_POST,
     )
     with urllib.request.urlopen(project_request, timeout=5) as response:
-        if response.status != 201 or response.headers.get("etag") != '"1"':
+        if response.status != HTTP_CREATED or response.headers.get("etag") != '"1"':
             raise RuntimeError("project creation did not return its initial version")
         project = json.load(response)
-    if project.get("key") != "ATLAS" or project.get("status") != "ACTIVE":
+    if project.get(FIELD_KEY) != ATLAS_KEY or project.get(FIELD_STATUS) != "ACTIVE":
         raise RuntimeError("project creation receipt did not match")
     return project
 
@@ -88,10 +111,10 @@ def _verify_project_list(
     web_base: str, session_cookie: str, project_id: object
 ) -> None:
     listed_request = urllib.request.Request(
-        f"{web_base}/api/v1/projects", headers={"cookie": session_cookie}
+        f"{web_base}/api/v1/projects", headers={HEADER_COOKIE: session_cookie}
     )
     listed = json.load(urllib.request.urlopen(listed_request, timeout=3))
-    if [item.get("id") for item in listed.get("items", [])] != [project_id]:
+    if [item.get(FIELD_ID) for item in listed.get(FIELD_ITEMS, [])] != [project_id]:
         raise RuntimeError("authorised project list did not match")
 
 
@@ -100,31 +123,31 @@ def _update_and_archive_project(
 ) -> None:
     update_request = urllib.request.Request(
         f"{web_base}/api/v1/projects/{project_id}",
-        data=json.dumps({"name": "Atlas Platform", "key": "ATLAS-2"}).encode("utf-8"),
+        data=json.dumps({"name": "Atlas Platform", FIELD_KEY: "ATLAS-2"}).encode(UTF8),
         headers={
-            "content-type": "application/json",
-            "cookie": session_cookie,
+            HEADER_CONTENT_TYPE: JSON_MEDIA_TYPE,
+            HEADER_COOKIE: session_cookie,
             "if-match": '"1"',
-            "x-csrf-token": csrf_token,
+            HEADER_CSRF_TOKEN: csrf_token,
         },
         method="PATCH",
     )
     with urllib.request.urlopen(update_request, timeout=5) as response:
         updated = json.load(response)
-    if updated.get("version") != 2 or updated.get("key") != "ATLAS-2":
+    if updated.get("version") != 2 or updated.get(FIELD_KEY) != "ATLAS-2":
         raise RuntimeError("version-checked project update did not match")
     archive_request = urllib.request.Request(
         f"{web_base}/api/v1/projects/{project_id}:archive",
         data=b"",
         headers={
-            "cookie": session_cookie,
+            HEADER_COOKIE: session_cookie,
             "if-match": '"2"',
-            "x-csrf-token": csrf_token,
+            HEADER_CSRF_TOKEN: csrf_token,
         },
-        method="POST",
+        method=HTTP_POST,
     )
     archived = json.load(urllib.request.urlopen(archive_request, timeout=5))
-    if archived.get("status") != "ARCHIVED" or archived.get("version") != 3:
+    if archived.get(FIELD_STATUS) != "ARCHIVED" or archived.get("version") != 3:
         raise RuntimeError("version-checked project archive did not match")
 
 
@@ -132,18 +155,18 @@ def _verify_audit(
     web_base: str, session_cookie: str, username: str, project_id: object
 ) -> None:
     audit_request = urllib.request.Request(
-        f"{web_base}/api/v1/audit-events", headers={"cookie": session_cookie}
+        f"{web_base}/api/v1/audit-events", headers={HEADER_COOKIE: session_cookie}
     )
     audit = json.load(urllib.request.urlopen(audit_request, timeout=3))
-    events = audit.get("items", [])
-    event_types = {event.get("event_type") for event in events}
+    events = audit.get(FIELD_ITEMS, [])
+    event_types = {event.get(FIELD_EVENT_TYPE) for event in events}
     if not {
         "administrator.bootstrap.completed",
         "project.created",
     }.issubset(event_types):
         raise RuntimeError("authenticated audit did not contain required CAP-01 events")
     project_events = [
-        event for event in events if event.get("event_type") == "project.created"
+        event for event in events if event.get(FIELD_EVENT_TYPE) == "project.created"
     ]
     if len(project_events) != 1:
         raise RuntimeError(
@@ -151,14 +174,14 @@ def _verify_audit(
         )
     if project_events != [
         {
-            "id": project_events[0].get("id"),
-            "event_type": "project.created",
+            FIELD_ID: project_events[0].get(FIELD_ID),
+            FIELD_EVENT_TYPE: "project.created",
             "created_at": project_events[0].get("created_at"),
             "correlation_id": "staging-project-create",
             "actor": username,
             "subject_id": project_id,
             "project_id": project_id,
-            "project_key": "ATLAS",
+            "project_key": ATLAS_KEY,
         }
     ]:
         raise RuntimeError(
@@ -170,23 +193,23 @@ def _verify_revocation(
     web_base: str, session_cookie: str, csrf_token: str, username: str
 ) -> None:
     current_request = urllib.request.Request(
-        f"{web_base}/api/v1/session", headers={"cookie": session_cookie}
+        f"{web_base}/api/v1/session", headers={HEADER_COOKIE: session_cookie}
     )
     current = json.load(urllib.request.urlopen(current_request, timeout=3))
-    if current.get("administrator", {}).get("username") != username:
+    if current.get("administrator", {}).get(FIELD_USERNAME) != username:
         raise RuntimeError("issued session was not readable")
     revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
-        headers={"cookie": session_cookie, "x-csrf-token": csrf_token},
+        headers={HEADER_COOKIE: session_cookie, HEADER_CSRF_TOKEN: csrf_token},
         method="DELETE",
     )
     with urllib.request.urlopen(revoke, timeout=3) as response:
-        if response.status != 204:
+        if response.status != HTTP_NO_CONTENT:
             raise RuntimeError("session revocation did not return 204")
     try:
         urllib.request.urlopen(current_request, timeout=3)
     except urllib.error.HTTPError as error:
-        if error.code != 401:
+        if error.code != HTTP_UNAUTHORIZED:
             raise
     else:
         raise RuntimeError("revoked session remained usable")
@@ -197,15 +220,15 @@ def _sign_in_after_revocation(
 ) -> tuple[dict[str, object], str]:
     sign_in_request = urllib.request.Request(
         f"{web_base}/api/v1/sessions",
-        data=json.dumps({"username": username, "password": password}).encode("utf-8"),
+        data=json.dumps({FIELD_USERNAME: username, "password": password}).encode(UTF8),
         headers={
-            "content-type": "application/json",
-            "x-correlation-id": "staging-sign-in-after-revoke",
+            HEADER_CONTENT_TYPE: JSON_MEDIA_TYPE,
+            HEADER_CORRELATION_ID: "staging-sign-in-after-revoke",
         },
-        method="POST",
+        method=HTTP_POST,
     )
     with urllib.request.urlopen(sign_in_request, timeout=5) as response:
-        if response.status != 201:
+        if response.status != HTTP_CREATED:
             raise RuntimeError("sign-in after revocation did not return 201")
         new_receipt = json.load(response)
         new_cookie = response.headers.get("set-cookie", "").split(";", 1)[0]
@@ -216,13 +239,14 @@ def _verify_revocation_audit(web_base: str, session_cookie: str) -> None:
     post_revoke_audit = json.load(
         urllib.request.urlopen(
             urllib.request.Request(
-                f"{web_base}/api/v1/audit-events", headers={"cookie": session_cookie}
+                f"{web_base}/api/v1/audit-events",
+                headers={HEADER_COOKIE: session_cookie},
             ),
             timeout=3,
         )
     )
     if "session.revoked" not in {
-        event.get("event_type") for event in post_revoke_audit.get("items", [])
+        event.get(FIELD_EVENT_TYPE) for event in post_revoke_audit.get(FIELD_ITEMS, [])
     }:
         raise RuntimeError("session revocation was not attributable in the audit log")
 
@@ -233,13 +257,13 @@ def _revoke_cleanup_session(
     cleanup_revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
         headers={
-            "cookie": session_cookie,
-            "x-csrf-token": str(csrf_token),
+            HEADER_COOKIE: session_cookie,
+            HEADER_CSRF_TOKEN: str(csrf_token),
         },
         method="DELETE",
     )
     with urllib.request.urlopen(cleanup_revoke, timeout=3) as response:
-        if response.status != 204:
+        if response.status != HTTP_NO_CONTENT:
             raise RuntimeError("cleanup session revocation did not return 204")
 
 
@@ -252,7 +276,7 @@ def verify_identity_round_trip(web_base: str) -> None:
     username, password, receipt, session_cookie = _bootstrap_administrator(web_base)
     csrf_token = str(receipt["csrf_token"])
     project = _create_project(web_base, session_cookie, csrf_token)
-    project_id = project.get("id")
+    project_id = project.get(FIELD_ID)
     _verify_project_list(web_base, session_cookie, project_id)
     _update_and_archive_project(web_base, session_cookie, csrf_token, project_id)
     _verify_audit(web_base, session_cookie, username, project_id)
@@ -289,7 +313,7 @@ def apply_cap01_fixture(
             receipt = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if receipt.get("status") == "APPLIED":
+        if receipt.get(FIELD_STATUS) == "APPLIED":
             return receipt
     raise RuntimeError("guarded CAP-01 fixture did not emit an application receipt")
 
@@ -299,14 +323,14 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
 
     sign_in = urllib.request.Request(
         f"{web_base}/api/v1/sessions",
-        data=json.dumps({"username": "admin.alpha", "password": password}).encode(
-            "utf-8"
+        data=json.dumps({FIELD_USERNAME: "admin.alpha", "password": password}).encode(
+            UTF8
         ),
         headers={
-            "content-type": "application/json",
-            "x-correlation-id": "staging-fixture-sign-in",
+            HEADER_CONTENT_TYPE: JSON_MEDIA_TYPE,
+            HEADER_CORRELATION_ID: "staging-fixture-sign-in",
         },
-        method="POST",
+        method=HTTP_POST,
     )
     with urllib.request.urlopen(sign_in, timeout=5) as response:
         receipt = json.load(response)
@@ -316,19 +340,19 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
         urllib.request.urlopen(
             urllib.request.Request(
                 f"{web_base}/api/v1/projects",
-                headers={"cookie": session_cookie},
+                headers={HEADER_COOKIE: session_cookie},
             ),
             timeout=3,
         )
     )
     if [
-        (item.get("id"), item.get("name"), item.get("key"))
-        for item in listed.get("items", [])
+        (item.get(FIELD_ID), item.get("name"), item.get(FIELD_KEY))
+        for item in listed.get(FIELD_ITEMS, [])
     ] != [
         (
             "11111111-1111-4111-8111-111111111111",
             "Atlas Research",
-            "ATLAS",
+            ATLAS_KEY,
         )
     ]:
         raise RuntimeError(
@@ -344,14 +368,14 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
             urllib.request.urlopen(
                 urllib.request.Request(
                     f"{web_base}/api/v1/projects/{project_id}",
-                    headers={"cookie": session_cookie},
+                    headers={HEADER_COOKIE: session_cookie},
                 ),
                 timeout=3,
             )
         except urllib.error.HTTPError as error:
-            if error.code != 404:
+            if error.code != HTTP_NOT_FOUND:
                 raise
-            body = error.read().decode("utf-8")
+            body = error.read().decode(UTF8)
             if "Orion Restricted" in body or "ORION" in body:
                 raise RuntimeError("foreign project metadata was disclosed")
             problem = json.loads(body)
@@ -365,13 +389,13 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
     revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
         headers={
-            "cookie": session_cookie,
-            "x-csrf-token": receipt["csrf_token"],
+            HEADER_COOKIE: session_cookie,
+            HEADER_CSRF_TOKEN: receipt["csrf_token"],
         },
         method="DELETE",
     )
     with urllib.request.urlopen(revoke, timeout=3) as response:
-        if response.status != 204:
+        if response.status != HTTP_NO_CONTENT:
             raise RuntimeError("fixture session revocation did not return 204")
 
 
@@ -380,7 +404,7 @@ def wait_for(url: str, expected_status: str, timeout: float = 60) -> dict[str, o
     while time.monotonic() < deadline:
         try:
             body = get_json(url)
-            if body.get("status") == expected_status:
+            if body.get(FIELD_STATUS) == expected_status:
                 return body
         except (OSError, urllib.error.URLError, json.JSONDecodeError):
             pass
@@ -405,29 +429,31 @@ def wait_for_container_health(
 
 
 def image_ids(manifest: dict[str, object]) -> dict[str, str]:
-    return {service: image["image_id"] for service, image in manifest["images"].items()}
+    return {
+        service: image["image_id"] for service, image in manifest[FIELD_IMAGES].items()
+    }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--api-port", type=int, default=18080)
-    parser.add_argument("--web-port", type=int, default=13000)
+    parser.add_argument("--api-port", type=int, default=DEFAULT_API_PORT)
+    parser.add_argument("--web-port", type=int, default=DEFAULT_WEB_PORT)
     parser.add_argument("--keep", action="store_true")
     args = parser.parse_args()
-    manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+    manifest = json.loads(args.manifest.read_text(encoding=UTF8))
     commit = manifest["source_commit"]
     env = os.environ.copy()
     env.update(
         {
             "APISTRA_COMPOSE_PROJECT": f"apistra-cap00-{args.run_id}",
-            "APISTRA_API_IMAGE": manifest["images"]["api"]["reference"],
-            "APISTRA_WORKER_IMAGE": manifest["images"]["worker"]["reference"],
-            "APISTRA_WEB_IMAGE": manifest["images"]["web"]["reference"],
+            "APISTRA_API_IMAGE": manifest[FIELD_IMAGES]["api"][FIELD_REFERENCE],
+            "APISTRA_WORKER_IMAGE": manifest[FIELD_IMAGES]["worker"][FIELD_REFERENCE],
+            "APISTRA_WEB_IMAGE": manifest[FIELD_IMAGES]["web"][FIELD_REFERENCE],
             "APISTRA_API_PORT": str(args.api_port),
             "APISTRA_COMMIT": commit,
-            "APISTRA_DB_PASSWORD": secrets.token_urlsafe(32),
+            "APISTRA_DB_PASSWORD": secrets.token_urlsafe(DATABASE_PASSWORD_BYTES),
             "APISTRA_WEB_PORT": str(args.web_port),
             "APISTRA_ENVIRONMENT": f"local-staging-{args.run_id}",
         }
@@ -472,19 +498,19 @@ def main() -> int:
                     "inspect",
                     "--format",
                     "{{.Id}}",
-                    data["reference"],
+                    data[FIELD_REFERENCE],
                 ],
                 env,
                 capture=True,
             )
-            for service, data in manifest["images"].items()
+            for service, data in manifest[FIELD_IMAGES].items()
         }
         if before != after:
             raise RuntimeError("image identity changed during deployment or recovery")
         print(
             json.dumps(
                 {
-                    "status": "PASSED",
+                    FIELD_STATUS: "PASSED",
                     "run_id": args.run_id,
                     "commit": commit,
                     "image_ids": after,

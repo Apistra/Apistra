@@ -25,14 +25,34 @@ DEFAULT_OUTBOX = ROOT / "artifacts/softwaretest-cap01-definition-outbox.json"
 DEFAULT_RECEIPT = ROOT / "artifacts/softwaretest-cap01-definition-receipt.json"
 CASE_PATTERN = re.compile(r"MT-PRC-01-\d{3}")
 STEP_PATTERN = re.compile(r"^(\d+)\. \*\*(Action|Observation) \(([^)]+)\):\*\* (.+)$")
+FIELD_NAME = "name"
+FIELD_BUILD = "build"
+FIELD_ENVIRONMENT = "environment"
+FIELD_ACTION = "action"
+FIELD_TEST_DATA = "test_data"
+FIELD_EXPECTED = "expected"
+FIELD_STABLE_ID = "stable_id"
+FIELD_TITLE = "title"
+FIELD_PRECONDITIONS = "preconditions"
+FIELD_STEPS = "steps"
+FIELD_DESCRIPTION = "description"
+FIELD_PRIORITY = "priority"
+FIELD_ESTIMATED_MINUTES = "estimated_minutes"
+FIELD_PAYLOAD = "payload"
+FIELD_DEFINITIONS = "definitions"
+FIELD_MANIFEST_SHA256 = "manifest_sha256"
+FIELD_STATUS = "status"
+FIELD_ID = "id"
+FIELD_VERIFIED = "verified"
+HTTP_POST = "POST"
 CYCLE = {
-    "name": "Apistra CAP-01 Acceptance",
+    FIELD_NAME: "Apistra CAP-01 Acceptance",
     "objective": (
         "Publish and later execute the approved CAP-01 administration and "
         "project-isolation acceptance package."
     ),
-    "build": "CAP-01",
-    "environment": "isolated-local-staging",
+    FIELD_BUILD: "CAP-01",
+    FIELD_ENVIRONMENT: "isolated-local-staging",
 }
 
 Requester = Callable[..., dict[str, Any]]
@@ -84,17 +104,17 @@ def _new_step(line: str) -> dict[str, str] | None:
     number, kind, role, action = match.groups()
     return {
         "number": number,
-        "action": f"{role}: {action}",
-        "test_data": "",
-        "expected": "",
+        FIELD_ACTION: f"{role}: {action}",
+        FIELD_TEST_DATA: "",
+        FIELD_EXPECTED: "",
         "kind": kind,
     }
 
 
 def _step_field(line: str) -> tuple[str, str] | None:
     fields = {
-        "**Test data:**": "test_data",
-        "**Expected result:**": "expected",
+        "**Test data:**": FIELD_TEST_DATA,
+        "**Expected result:**": FIELD_EXPECTED,
     }
     for prefix, field in fields.items():
         if line.startswith(prefix):
@@ -109,7 +129,7 @@ def _validate_steps(steps: list[dict[str, str]]) -> None:
         if int(step.pop("number")) != index:
             raise ValueError("manual steps must be consecutively numbered")
         step.pop("kind")
-        if not step["action"] or not step["expected"]:
+        if not step[FIELD_ACTION] or not step[FIELD_EXPECTED]:
             raise ValueError(f"step {index} has no action or expected result")
 
 
@@ -127,7 +147,7 @@ def _parse_steps(text: str) -> list[dict[str, str]]:
             if current:
                 steps.append(current)
             current = new_step
-            active_field = "action"
+            active_field = FIELD_ACTION
             continue
         if current is None:
             raise ValueError("content found before the first procedure step")
@@ -163,12 +183,12 @@ def parse_case(path: Path) -> dict[str, Any]:
     steps = _parse_steps(text)
     source_sha256 = payload_sha256(
         {
-            "stable_id": stable_id,
-            "title": title,
+            FIELD_STABLE_ID: stable_id,
+            FIELD_TITLE: title,
             "objective": objective,
-            "preconditions": preconditions,
+            FIELD_PRECONDITIONS: preconditions,
             "traceability": traceability,
-            "steps": steps,
+            FIELD_STEPS: steps,
         }
     )
     description_lines = [
@@ -186,19 +206,19 @@ def parse_case(path: Path) -> dict[str, Any]:
     if traceability["design"]:
         description_lines.append(f"Design: {traceability['design']}")
     payload = {
-        "title": f"[{stable_id}] {title}",
-        "description": "\n".join(description_lines),
-        "preconditions": preconditions,
-        "priority": "HIGH",
-        "estimated_minutes": 20,
-        "steps": steps,
+        FIELD_TITLE: f"[{stable_id}] {title}",
+        FIELD_DESCRIPTION: "\n".join(description_lines),
+        FIELD_PRECONDITIONS: preconditions,
+        FIELD_PRIORITY: "HIGH",
+        FIELD_ESTIMATED_MINUTES: 20,
+        FIELD_STEPS: steps,
     }
     return {
-        "stable_id": stable_id,
+        FIELD_STABLE_ID: stable_id,
         "source_path": path.relative_to(ROOT).as_posix(),
         "source_sha256": source_sha256,
         "payload_sha256": payload_sha256(payload),
-        "payload": payload,
+        FIELD_PAYLOAD: payload,
         "traceability": traceability,
     }
 
@@ -211,49 +231,49 @@ def build_manifest(manual_dir: Path = DEFAULT_MANUAL_DIR) -> dict[str, Any]:
         "process": "PRC-01",
         "workorder": "WO-CAP-01-04",
         "cycle": CYCLE,
-        "definitions": definitions,
+        FIELD_DEFINITIONS: definitions,
     }
     validate_manifest(manifest)
-    manifest["manifest_sha256"] = payload_sha256(manifest)
+    manifest[FIELD_MANIFEST_SHA256] = payload_sha256(manifest)
     return manifest
 
 
 def validate_manifest(manifest: dict[str, Any]) -> None:
-    definitions = manifest.get("definitions", [])
+    definitions = manifest.get(FIELD_DEFINITIONS, [])
     if len(definitions) != 6:
         raise ValueError("CAP-01 package must contain exactly six manual definitions")
-    stable_ids = [definition["stable_id"] for definition in definitions]
+    stable_ids = [definition[FIELD_STABLE_ID] for definition in definitions]
     if len(set(stable_ids)) != len(stable_ids):
         raise ValueError("manual definition IDs must be unique")
     for definition in definitions:
-        stable_id = definition["stable_id"]
+        stable_id = definition[FIELD_STABLE_ID]
         if not CASE_PATTERN.fullmatch(stable_id):
             raise ValueError(f"invalid stable ID: {stable_id}")
-        payload = definition["payload"]
-        if not payload["title"].startswith(f"[{stable_id}]"):
+        payload = definition[FIELD_PAYLOAD]
+        if not payload[FIELD_TITLE].startswith(f"[{stable_id}]"):
             raise ValueError(f"title does not preserve stable ID: {stable_id}")
-        for index, step in enumerate(payload["steps"], 1):
-            role, separator, action = step["action"].partition(": ")
+        for index, step in enumerate(payload[FIELD_STEPS], 1):
+            role, separator, action = step[FIELD_ACTION].partition(": ")
             if not separator or not role or not action:
                 raise ValueError(f"{stable_id} step {index} is not role-prefixed")
-            if not step["expected"]:
+            if not step[FIELD_EXPECTED]:
                 raise ValueError(f"{stable_id} step {index} has no oracle")
 
 
 def _requested_view(document: dict[str, Any]) -> dict[str, Any]:
     return {
-        "title": document.get("title"),
-        "description": document.get("description"),
-        "preconditions": document.get("preconditions"),
-        "priority": document.get("priority"),
-        "estimated_minutes": document.get("estimated_minutes"),
-        "steps": [
+        FIELD_TITLE: document.get(FIELD_TITLE),
+        FIELD_DESCRIPTION: document.get(FIELD_DESCRIPTION),
+        FIELD_PRECONDITIONS: document.get(FIELD_PRECONDITIONS),
+        FIELD_PRIORITY: document.get(FIELD_PRIORITY),
+        FIELD_ESTIMATED_MINUTES: document.get(FIELD_ESTIMATED_MINUTES),
+        FIELD_STEPS: [
             {
-                "action": step.get("action"),
-                "test_data": step.get("test_data", ""),
-                "expected": step.get("expected"),
+                FIELD_ACTION: step.get(FIELD_ACTION),
+                FIELD_TEST_DATA: step.get(FIELD_TEST_DATA, ""),
+                FIELD_EXPECTED: step.get(FIELD_EXPECTED),
             }
-            for step in document.get("steps", [])
+            for step in document.get(FIELD_STEPS, [])
         ],
     }
 
@@ -262,17 +282,17 @@ def verify_definition(expected: dict[str, Any], actual: dict[str, Any]) -> list[
     mismatches: list[str] = []
     actual_view = _requested_view(actual)
     for field in (
-        "title",
-        "description",
-        "preconditions",
-        "priority",
-        "estimated_minutes",
-        "steps",
+        FIELD_TITLE,
+        FIELD_DESCRIPTION,
+        FIELD_PRECONDITIONS,
+        FIELD_PRIORITY,
+        FIELD_ESTIMATED_MINUTES,
+        FIELD_STEPS,
     ):
         if expected[field] != actual_view[field]:
             mismatches.append(field)
-    if actual.get("status") != "RELEASED":
-        mismatches.append("status")
+    if actual.get(FIELD_STATUS) != "RELEASED":
+        mismatches.append(FIELD_STATUS)
     return mismatches
 
 
@@ -282,8 +302,8 @@ def ensure_cycle(
     root = f"{base_url}/api/v1/projects/{project_id}/cycles"
     query = urlencode(
         {
-            "build": CYCLE["build"],
-            "environment": CYCLE["environment"],
+            FIELD_BUILD: CYCLE[FIELD_BUILD],
+            FIELD_ENVIRONMENT: CYCLE[FIELD_ENVIRONMENT],
             "page_size": 100,
         }
     )
@@ -291,9 +311,9 @@ def ensure_cycle(
     matches = [
         cycle
         for cycle in listed.get("results", [])
-        if cycle.get("name") == CYCLE["name"]
-        and cycle.get("build") == CYCLE["build"]
-        and cycle.get("environment") == CYCLE["environment"]
+        if cycle.get(FIELD_NAME) == CYCLE[FIELD_NAME]
+        and cycle.get(FIELD_BUILD) == CYCLE[FIELD_BUILD]
+        and cycle.get(FIELD_ENVIRONMENT) == CYCLE[FIELD_ENVIRONMENT]
     ]
     if len(matches) > 1:
         raise ValueError("multiple CAP-01 publication cycles exist")
@@ -302,7 +322,7 @@ def ensure_cycle(
     return requester(
         root,
         token,
-        method="POST",
+        method=HTTP_POST,
         key=stable_key("cycle-create", payload_sha256(CYCLE)),
         payload=CYCLE,
     )
@@ -315,11 +335,11 @@ def _find_definition(
         f"{root}?{urlencode({'q': definition['stable_id'], 'page_size': 100})}",
         token,
     )
-    title = definition["payload"]["title"]
+    title = definition[FIELD_PAYLOAD][FIELD_TITLE]
     matches = [
         item
         for item in listed.get("results", [])
-        if (item.get("latest_version") or {}).get("title") == title
+        if (item.get("latest_version") or {}).get(FIELD_TITLE) == title
     ]
     if len(matches) > 1:
         raise ValueError(f"duplicate remote definition: {definition['stable_id']}")
@@ -339,30 +359,30 @@ def publish_definition(
     command_revision: str,
     requester: Requester,
 ) -> dict[str, Any]:
-    expected = definition["payload"]
+    expected = definition[FIELD_PAYLOAD]
     item = _find_definition(root, token, definition, requester)
     changed = False
     if item is None:
         document = requester(
             f"{root}:guided",
             token,
-            method="POST",
+            method=HTTP_POST,
             key=stable_key(
                 "guided-create",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
             ),
             payload={
                 "cycle_id": cycle_id,
-                "name": expected["title"],
-                "description": expected["description"],
-                "priority": expected["priority"],
+                FIELD_NAME: expected[FIELD_TITLE],
+                FIELD_DESCRIPTION: expected[FIELD_DESCRIPTION],
+                FIELD_PRIORITY: expected[FIELD_PRIORITY],
             },
         )
         changed = True
     else:
         latest = item.get("latest_version") or {}
-        testcase_id = str(item.get("id", ""))
-        version_id = str(latest.get("id", ""))
+        testcase_id = str(item.get(FIELD_ID, ""))
+        version_id = str(latest.get(FIELD_ID, ""))
         if not testcase_id or not version_id:
             raise ValueError(
                 f"remote definition has no current version: {definition['stable_id']}"
@@ -370,19 +390,19 @@ def publish_definition(
         document = requester(_version_url(root, testcase_id, version_id), token)
 
     testcase = document.get("testcase") or {}
-    testcase_id = str(testcase.get("id", ""))
-    version_id = str(document.get("id", ""))
+    testcase_id = str(testcase.get(FIELD_ID, ""))
+    version_id = str(document.get(FIELD_ID, ""))
     if not testcase_id or not version_id:
         raise ValueError(
             f"definition response has no identity: {definition['stable_id']}"
         )
 
     mismatches = verify_definition(expected, document)
-    if document.get("status") == "RELEASED" and mismatches:
+    if document.get(FIELD_STATUS) == "RELEASED" and mismatches:
         document = requester(
             f"{root}/{testcase_id}:open-for-edit",
             token,
-            method="POST",
+            method=HTTP_POST,
             key=stable_key(
                 "open-edit",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
@@ -390,10 +410,10 @@ def publish_definition(
             if_match=f'"{testcase.get("revision")}"',
             payload={"source_version_id": version_id},
         )
-        version_id = str(document.get("id", ""))
+        version_id = str(document.get(FIELD_ID, ""))
         changed = True
 
-    if document.get("status") != "RELEASED":
+    if document.get(FIELD_STATUS) != "RELEASED":
         if _requested_view(document) != expected:
             document = requester(
                 _version_url(root, testcase_id, version_id),
@@ -406,7 +426,7 @@ def publish_definition(
         document = requester(
             f"{_version_url(root, testcase_id, version_id)}:release",
             token,
-            method="POST",
+            method=HTTP_POST,
             key=stable_key(
                 "release",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
@@ -423,16 +443,16 @@ def publish_definition(
             f"readback mismatch for {definition['stable_id']}: {', '.join(mismatches)}"
         )
     return {
-        "stable_id": definition["stable_id"],
+        FIELD_STABLE_ID: definition[FIELD_STABLE_ID],
         "testcase_id": testcase_id,
         "testcase_key": (readback.get("testcase") or {}).get("key"),
         "version_id": version_id,
         "version_number": readback.get("number"),
         "source_sha256": definition["source_sha256"],
         "payload_sha256": definition["payload_sha256"],
-        "status": readback.get("status"),
+        FIELD_STATUS: readback.get(FIELD_STATUS),
         "changed": changed,
-        "verified": True,
+        FIELD_VERIFIED: True,
     }
 
 
@@ -451,7 +471,7 @@ def publish_manifest(
         token=token,
         requester=requester,
     )
-    cycle_id = str(cycle.get("id", ""))
+    cycle_id = str(cycle.get(FIELD_ID, ""))
     if not cycle_id:
         raise ValueError("CAP-01 cycle response has no id")
     root = f"{base_url}/api/v1/projects/{project_id}/testcases"
@@ -464,7 +484,7 @@ def publish_manifest(
             command_revision=command_revision,
             requester=requester,
         )
-        for definition in manifest["definitions"]
+        for definition in manifest[FIELD_DEFINITIONS]
     ]
     return {
         "schema_version": "1.0",
@@ -472,18 +492,18 @@ def publish_manifest(
         "project_id": project_id,
         "capability": manifest["capability"],
         "workorder": manifest["workorder"],
-        "manifest_sha256": manifest["manifest_sha256"],
+        FIELD_MANIFEST_SHA256: manifest[FIELD_MANIFEST_SHA256],
         "command_revision": command_revision,
         "cycle": {
-            "id": cycle_id,
-            "name": cycle.get("name"),
-            "status": cycle.get("status"),
-            "build": cycle.get("build"),
-            "environment": cycle.get("environment"),
+            FIELD_ID: cycle_id,
+            FIELD_NAME: cycle.get(FIELD_NAME),
+            FIELD_STATUS: cycle.get(FIELD_STATUS),
+            FIELD_BUILD: cycle.get(FIELD_BUILD),
+            FIELD_ENVIRONMENT: cycle.get(FIELD_ENVIRONMENT),
         },
-        "definitions": definitions,
+        FIELD_DEFINITIONS: definitions,
         "execution_results_created": 0,
-        "verified": all(definition["verified"] for definition in definitions),
+        FIELD_VERIFIED: all(definition[FIELD_VERIFIED] for definition in definitions),
     }
 
 
@@ -503,10 +523,10 @@ def _failure_receipt(
     }
     if isinstance(error, ApiError):
         failure["problem"] = {
-            "status": error.status,
+            FIELD_STATUS: error.status,
             "code": error.code,
             "type": error.problem_type,
-            "title": error.title,
+            FIELD_TITLE: error.title,
             "request_id": error.request_id,
             "errors": error.errors,
         }
@@ -516,9 +536,9 @@ def _failure_receipt(
             "generated_at": datetime.now(UTC).isoformat(),
             "project_id": project_id,
             "base_url": base_url,
-            "manifest_sha256": manifest["manifest_sha256"],
+            FIELD_MANIFEST_SHA256: manifest[FIELD_MANIFEST_SHA256],
             "command_revision": command_revision,
-            "verified": False,
+            FIELD_VERIFIED: False,
             "failure": failure,
         },
         (token,),
@@ -561,7 +581,7 @@ def main() -> int:
             command_revision=args.command_revision,
         )
         write_json_atomic(args.receipt, redact(receipt, (token,)))
-        if not receipt["verified"]:
+        if not receipt[FIELD_VERIFIED]:
             print("CAP-01 definition publication failed readback verification.")
             return 1
         print("CAP-01 definitions published and verified without executing tests.")

@@ -658,6 +658,41 @@ conditions before connecting to PostgreSQL:
 - Additional roles, invitations, recovery, and user administration remain
   separately gated capabilities.
 
+## ADR-024 — Google/PEP-based executable Python convention profile
+
+Status: DECIDED
+
+Decision date: 2026-10-01
+
+### Context and decision
+
+Apistra needs one readable Python contract before more product code is added. The
+repository adopts the Google Python Style Guide and PEP 8/257 as its baseline,
+then narrows them through the binding Apistra profile in
+`docs/engineering/python-code-conventions.md`. The repository profile wins where
+the upstream guides allow alternatives.
+
+The contract is executable. Ruff owns formatting, imports, common correctness,
+modernisation, security-oriented static checks, annotations, and complexity.
+Mypy checks product code in strict mode. The pinned wemake-python-styleguide
+rules `WPS226` and `WPS432` reject overused string literals and unexplained
+non-trivial numbers in product and repository-owned engineering code. CI also
+rejects blanket suppression directives.
+
+Constants are required for stable domain vocabulary, protocol and persistence
+discriminators, security parameters, thresholds, timeouts, limits, and strings
+used more than three times in one module. This is not a rule that every literal
+must become a constant: obvious local values, one-use diagnostics, test data,
+docstrings, comments, and typed configuration stay close to their use.
+
+### Consequences and verification
+
+- Python tooling versions are lockfile-pinned and updated through reviewed dependency changes.
+- Test scenarios favour visible values, while product and repository-owned engineering code use named policy vocabulary.
+- New violations fail CI-TS-18; there is no grandfathering and no blanket local bypass.
+- Retained positive and negative fixtures prove that the convention gate can both accept and reject.
+- Architecture and code review remain responsible for semantics that static analysis cannot infer.
+
 ## Pattern-to-module summary
 
 Cross-cutting backend:

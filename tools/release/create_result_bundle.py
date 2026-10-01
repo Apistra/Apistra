@@ -47,6 +47,7 @@ def main() -> int:
         ("CAP00-PACKAGE-015", "CI-TS-15 immutable packaging"),
         ("CAP00-REPORT-016", "CI-TS-16 public contract and lossless outbox"),
         ("CAP00-COMPLEXITY-017", "CI-TS-17 cyclomatic complexity"),
+        ("CAP00-CONVENTIONS-018", "CI-TS-18 Python code conventions"),
     ]
     bundle = {
         "schema_version": "1.0",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 import psycopg
@@ -11,6 +12,10 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from apistra.modules.identity.domain import Administrator, AuditEvent, Session, SessionContext
+
+type TupleCursor = psycopg.Cursor[tuple[Any, ...]]
+type MappingRow = dict[str, Any]
+type MappingCursor = psycopg.Cursor[MappingRow]
 
 
 class PostgresIdentityStore:
@@ -40,7 +45,8 @@ class PostgresIdentityStore:
                     )
                     """
                 )
-                if cursor.fetchone()[0]:
+                row = cursor.fetchone()
+                if row is not None and row[0]:
                     return False
                 cursor.execute(
                     """
@@ -186,7 +192,7 @@ class PostgresIdentityStore:
             ]
 
     @staticmethod
-    def _administrator(row: dict) -> Administrator:
+    def _administrator(row: MappingRow) -> Administrator:
         return Administrator(
             id=row["id"],
             username=row["username"],
@@ -195,7 +201,7 @@ class PostgresIdentityStore:
         )
 
     @staticmethod
-    def _insert_session(cursor, session: Session) -> None:
+    def _insert_session(cursor: TupleCursor, session: Session) -> None:
         cursor.execute(
             """
             INSERT INTO identity_sessions
@@ -214,7 +220,7 @@ class PostgresIdentityStore:
         )
 
     @staticmethod
-    def _insert_audit_event(cursor, event: AuditEvent) -> None:
+    def _insert_audit_event(cursor: TupleCursor, event: AuditEvent) -> None:
         cursor.execute(
             """
             INSERT INTO identity_audit_events

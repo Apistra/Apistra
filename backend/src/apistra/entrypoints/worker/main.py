@@ -11,6 +11,8 @@ from pathlib import Path
 from apistra.platform.observability.logging import configure_logging, log_event
 from apistra.platform.runtime import RuntimeSettings
 
+DEFAULT_HEARTBEAT_MAX_AGE_SECONDS = 15.0
+
 
 def write_heartbeat(path: Path, settings: RuntimeSettings) -> None:
     payload = {
@@ -21,7 +23,9 @@ def write_heartbeat(path: Path, settings: RuntimeSettings) -> None:
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
-def heartbeat_is_healthy(path: Path, max_age_seconds: float = 15.0) -> bool:
+def heartbeat_is_healthy(
+    path: Path, max_age_seconds: float = DEFAULT_HEARTBEAT_MAX_AGE_SECONDS
+) -> bool:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
         observed = datetime.fromisoformat(payload["observed_at"])
@@ -44,7 +48,11 @@ def run(interval_seconds: float = 5.0) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--healthcheck", action="store_true")
-    parser.add_argument("--max-age-seconds", type=float, default=15.0)
+    parser.add_argument(
+        "--max-age-seconds",
+        type=float,
+        default=DEFAULT_HEARTBEAT_MAX_AGE_SECONDS,
+    )
     args = parser.parse_args()
     settings = RuntimeSettings.from_environment("worker")
     if args.healthcheck:

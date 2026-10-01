@@ -14,6 +14,31 @@ from typing import Any
 from urllib.parse import urlencode
 
 ALLOWED_STATUSES = {"PASSED", "FAILED", "SKIPPED", "ERROR", "CANCELLED"}
+PROBLEM_FIELD_LIMIT = 200
+PROBLEM_DETAIL_LIMIT = 500
+DEFAULT_API_TIMEOUT_SECONDS = 30
+UTC_SUFFIX = "Z"
+UTC_OFFSET = "+00:00"
+FIELD_RESULTS = "results"
+FIELD_STATUS = "status"
+FIELD_STARTED_AT = "started_at"
+FIELD_FINISHED_AT = "finished_at"
+FIELD_JOB_ID = "job_id"
+FIELD_NAME = "name"
+FIELD_ENTRIES = "entries"
+FIELD_REPORT_ID = "report_id"
+FIELD_ID = "id"
+LOCAL_PIPELINE_ID = "local"
+DEFAULT_JOB_ID = "cap00-candidate"
+CAP00_STAGE_ID = "cap00"
+HTTP_GET = "GET"
+HTTP_POST = "POST"
+RESOURCE_CYCLE = "cycle"
+COMMAND_CREATE = "create"
+COMMAND_FINALIZE = "finalize"
+COMMAND_START = "start"
+STATUS_DRAFT = "DRAFT"
+DRAFT_CYCLE_LABEL = "draft cycle"
 
 
 class ApiError(RuntimeError):
@@ -22,10 +47,10 @@ class ApiError(RuntimeError):
     def __init__(self, status: int, problem: dict[str, Any]) -> None:
         self.status = status
         self.code = str(problem.get("code", ""))[:100]
-        self.problem_type = str(problem.get("type", ""))[:200]
-        self.title = str(problem.get("title", ""))[:200]
-        self.detail = str(problem.get("detail", ""))[:500]
-        self.request_id = str(problem.get("request_id", ""))[:200]
+        self.problem_type = str(problem.get("type", ""))[:PROBLEM_FIELD_LIMIT]
+        self.title = str(problem.get("title", ""))[:PROBLEM_FIELD_LIMIT]
+        self.detail = str(problem.get("detail", ""))[:PROBLEM_DETAIL_LIMIT]
+        self.request_id = str(problem.get("request_id", ""))[:PROBLEM_FIELD_LIMIT]
         raw_errors = problem.get("errors", {})
         self.errors = raw_errors if isinstance(raw_errors, dict) else {}
         summary = self.code or self.title or self.problem_type or "API request failed"
@@ -76,11 +101,13 @@ def redact(value: Any, secrets: tuple[str, ...]) -> Any:
 
 def canonical_datetime(value: str) -> str:
     """Return an RFC 3339 UTC timestamp at the API's millisecond precision."""
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    parsed = datetime.fromisoformat(value.replace(UTC_SUFFIX, UTC_OFFSET))
     if parsed.tzinfo is None:
         raise ValueError("report timestamps must include a timezone")
     return (
-        parsed.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        parsed.astimezone(UTC)
+        .isoformat(timespec="milliseconds")
+        .replace(UTC_OFFSET, UTC_SUFFIX)
     )
 
 
@@ -101,29 +128,29 @@ def build_payloads(
 ) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, str]]:
     now = canonical_datetime(datetime.now(UTC).isoformat())
     candidate = bundle["candidate"]
-    results = bundle["results"]
-    statuses = {result["status"] for result in results}
+    results = bundle[FIELD_RESULTS]
+    statuses = {result[FIELD_STATUS] for result in results}
     unsupported = statuses - ALLOWED_STATUSES
     if unsupported:
         raise ValueError(f"unsupported result statuses: {sorted(unsupported)}")
-    started_at = canonical_datetime(bundle.get("started_at", now))
-    finished_at = canonical_datetime(bundle.get("finished_at", now))
+    started_at = canonical_datetime(bundle.get(FIELD_STARTED_AT, now))
+    finished_at = canonical_datetime(bundle.get(FIELD_FINISHED_AT, now))
     report = {
         "cycle_id": cycle_id,
         "external_key": f"cap00-{candidate['commit']}",
-        "pipeline_id": bundle.get("pipeline_id", "local"),
-        "job_id": bundle.get("job_id", "cap00-candidate"),
+        "pipeline_id": bundle.get("pipeline_id", LOCAL_PIPELINE_ID),
+        FIELD_JOB_ID: bundle.get(FIELD_JOB_ID, DEFAULT_JOB_ID),
         "commit_sha": candidate["commit"],
         "artifact_digest": candidate["manifest_sha256"],
-        "started_at": started_at,
+        FIELD_STARTED_AT: started_at,
         "contract_version": "1.0",
         "source_repository": "Apistra/Apistra",
         "capability_ids": ["CAP-00"],
         "workorder_ids": [f"WO-CAP-00-{index:02d}" for index in range(1, 8)],
         "required_stages": [
             {
-                "stage_id": "cap00",
-                "job_id": "cap00-candidate",
+                "stage_id": CAP00_STAGE_ID,
+                FIELD_JOB_ID: DEFAULT_JOB_ID,
                 "expected_tests": len(results),
                 "required": True,
             }
@@ -132,15 +159,15 @@ def build_payloads(
     test_entries = [
         {
             "kind": "test",
-            "stage_id": "cap00",
-            "job_id": "cap00-candidate",
-            "suite": result.get("suite", "cap00"),
+            "stage_id": CAP00_STAGE_ID,
+            FIELD_JOB_ID: DEFAULT_JOB_ID,
+            "suite": result.get("suite", CAP00_STAGE_ID),
             "test_id": result["test_id"],
-            "name": result.get("name", result["test_id"]),
+            FIELD_NAME: result.get(FIELD_NAME, result["test_id"]),
             "attempt_no": result.get("attempt_no", 1),
-            "status": result["status"],
-            "started_at": canonical_datetime(result.get("started_at", now)),
-            "finished_at": canonical_datetime(result.get("finished_at", now)),
+            FIELD_STATUS: result[FIELD_STATUS],
+            FIELD_STARTED_AT: canonical_datetime(result.get(FIELD_STARTED_AT, now)),
+            FIELD_FINISHED_AT: canonical_datetime(result.get(FIELD_FINISHED_AT, now)),
             "duration_ms": int(result.get("duration_ms", 0)),
             "error_details": result.get("error_details", ""),
             "metrics": result.get("metrics", []),
@@ -151,28 +178,28 @@ def build_payloads(
     ]
     stage_entry = {
         "kind": "stage",
-        "stage_id": "cap00",
-        "job_id": "cap00-candidate",
+        "stage_id": CAP00_STAGE_ID,
+        FIELD_JOB_ID: DEFAULT_JOB_ID,
         "suite": "CAP-00",
-        "name": "CAP-00 required CI stage",
+        FIELD_NAME: "CAP-00 required CI stage",
         "attempt_no": 1,
-        "status": aggregate_stage_status(statuses),
-        "started_at": started_at,
-        "finished_at": finished_at,
+        FIELD_STATUS: aggregate_stage_status(statuses),
+        FIELD_STARTED_AT: started_at,
+        FIELD_FINISHED_AT: finished_at,
         "duration_ms": 0,
         "error_details": "",
         "metrics": [],
         "findings": [],
         "attachments": [],
     }
-    return report, [stage_entry, *test_entries], {"finished_at": finished_at}
+    return report, [stage_entry, *test_entries], {FIELD_FINISHED_AT: finished_at}
 
 
 def request_json(
     url: str,
     token: str,
     *,
-    method: str = "GET",
+    method: str = HTTP_GET,
     key: str = "",
     if_match: str = "",
     payload: dict[str, Any] | None = None,
@@ -196,7 +223,9 @@ def request_json(
         headers=headers,
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(
+            request, timeout=DEFAULT_API_TIMEOUT_SECONDS
+        ) as response:
             return json.load(response)
     except urllib.error.HTTPError as error:
         try:
@@ -238,12 +267,12 @@ def _equivalent_timestamp(expected: Any, actual: Any, path: str) -> bool:
     if not (
         isinstance(expected, str)
         and isinstance(actual, str)
-        and path.endswith(("started_at", "finished_at"))
+        and path.endswith((FIELD_STARTED_AT, FIELD_FINISHED_AT))
     ):
         return False
     try:
-        expected_time = datetime.fromisoformat(expected.replace("Z", "+00:00"))
-        actual_time = datetime.fromisoformat(actual.replace("Z", "+00:00"))
+        expected_time = datetime.fromisoformat(expected.replace(UTC_SUFFIX, UTC_OFFSET))
+        actual_time = datetime.fromisoformat(actual.replace(UTC_SUFFIX, UTC_OFFSET))
     except ValueError:
         return False
     return expected_time == actual_time
@@ -270,8 +299,8 @@ def verify_readback(
     """Compare every submitted field while allowing server-owned response fields."""
     mismatches: list[str] = []
     _compare_requested(report, document.get("manifest"), "manifest", mismatches)
-    _compare_requested(entries, document.get("entries"), "entries", mismatches)
-    if str(document.get("status", "")).upper() not in {"FINALIZED", "COMPLETE"}:
+    _compare_requested(entries, document.get(FIELD_ENTRIES), FIELD_ENTRIES, mismatches)
+    if str(document.get(FIELD_STATUS, "")).upper() not in {"FINALIZED", "COMPLETE"}:
         mismatches.append("status: report is not finalised")
     if str(document.get("completeness", "")).upper() != "COMPLETE":
         mismatches.append("completeness: required stages or tests are missing")
@@ -305,7 +334,7 @@ def write_failure_receipt(
         "generated_at": datetime.now(UTC).isoformat(),
         "project_id": project_id,
         "base_url": base_url,
-        "cycle": cycle or {},
+        RESOURCE_CYCLE: cycle or {},
         "command_revision": command_revision,
         "verified": False,
         "failure": {
@@ -318,7 +347,7 @@ def write_failure_receipt(
         evidence["request_sha256"] = request_sha256
     if isinstance(error, ApiError):
         evidence["failure"]["problem"] = {
-            "status": error.status,
+            FIELD_STATUS: error.status,
             "code": error.code,
             "type": error.problem_type,
             "title": error.title,
@@ -342,9 +371,9 @@ def execute_roundtrip(
     root = f"{base_url}/api/v1/projects/{project_id}/ci-reports"
     external_key = report["external_key"]
     commands = (
-        ("create", root, report),
-        ("entries", "", {"entries": entries}),
-        ("finalize", "", final),
+        (COMMAND_CREATE, root, report),
+        (FIELD_ENTRIES, "", {FIELD_ENTRIES: entries}),
+        (COMMAND_FINALIZE, "", final),
     )
     receipts: dict[str, Any] = {}
     report_id = ""
@@ -353,20 +382,20 @@ def execute_roundtrip(
         response = requester(
             url,
             token,
-            method="POST",
+            method=HTTP_POST,
             key=stable_key(command, f"{external_key}:{command_revision}"),
             payload=payload,
         )
-        if command == "create":
-            report_id = response.get("report_id", "")
+        if command == COMMAND_CREATE:
+            report_id = response.get(FIELD_REPORT_ID, "")
             if not report_id:
                 raise ValueError("create response has no report_id")
-        if response.get("report_id") != report_id:
+        if response.get(FIELD_REPORT_ID) != report_id:
             raise ValueError(f"{command} receipt references another report")
         receipts[command] = response
 
-    document = requester(f"{root}/{report_id}", token, method="GET")
-    if document.get("report_id") != report_id:
+    document = requester(f"{root}/{report_id}", token, method=HTTP_GET)
+    if document.get(FIELD_REPORT_ID) != report_id:
         raise ValueError("readback references another report")
     mismatches = verify_readback(report, entries, document)
 
@@ -376,17 +405,17 @@ def execute_roundtrip(
         receipt_id = receipt.get("receipt_id")
         if receipt_id:
             receipt_documents[command] = requester(
-                f"{receipt_root}/{receipt_id}", token, method="GET"
+                f"{receipt_root}/{receipt_id}", token, method=HTTP_GET
             )
 
     return {
-        "report_id": report_id,
+        FIELD_REPORT_ID: report_id,
         "verified": not mismatches,
         "mismatches": mismatches,
         "request_sha256": {
-            "create": payload_sha256(report),
-            "entries": payload_sha256({"entries": entries}),
-            "finalize": payload_sha256(final),
+            COMMAND_CREATE: payload_sha256(report),
+            FIELD_ENTRIES: payload_sha256({FIELD_ENTRIES: entries}),
+            COMMAND_FINALIZE: payload_sha256(final),
         },
         "server_receipts": receipts,
         "receipt_readbacks": receipt_documents,
@@ -405,15 +434,15 @@ def _find_cycle(page: dict[str, Any], cycle_id: str) -> dict[str, Any] | None:
     return next(
         (
             cycle
-            for cycle in page.get("results", [])
-            if isinstance(cycle, dict) and cycle.get("id") == cycle_id
+            for cycle in page.get(FIELD_RESULTS, [])
+            if isinstance(cycle, dict) and cycle.get(FIELD_ID) == cycle_id
         ),
         None,
     )
 
 
 def _refresh_cycle(url: str, token: str, cycle_id: str, requester) -> dict[str, Any]:
-    selected = _find_cycle(requester(url, token, method="GET"), cycle_id)
+    selected = _find_cycle(requester(url, token, method=HTTP_GET), cycle_id)
     if selected is None:
         raise ValueError("cycle disappeared from project listing")
     return selected
@@ -435,13 +464,13 @@ def _problem_context(error: ApiError) -> str:
 def _read_cycle_runs(
     *, base_url: str, project_id: str, cycle_id: str, token: str, requester
 ) -> list[dict[str, Any]]:
-    query = urlencode({"cycle": cycle_id, "page_size": 100})
+    query = urlencode({RESOURCE_CYCLE: cycle_id, "page_size": 100})
     page = requester(
         f"{base_url}/api/v1/projects/{project_id}/runs?{query}",
         token,
-        method="GET",
+        method=HTTP_GET,
     )
-    results = page.get("results", [])
+    results = page.get(FIELD_RESULTS, [])
     if not isinstance(results, list):
         raise TypeError("run listing has an unexpected shape")
     return [
@@ -467,14 +496,14 @@ def _start_cycle_run(
         token=token,
         requester=requester,
     )
-    in_progress = [run for run in runs if run.get("status") == "IN_PROGRESS"]
+    in_progress = [run for run in runs if run.get(FIELD_STATUS) == "IN_PROGRESS"]
     if in_progress:
         return in_progress[0]
-    startable = [run for run in runs if run.get("status") == "NOT_STARTED"]
+    startable = [run for run in runs if run.get(FIELD_STATUS) == "NOT_STARTED"]
     if not startable:
         raise ValueError("active cycle has no NOT_STARTED or IN_PROGRESS run")
     selected = startable[0]
-    run_id = str(selected.get("id", ""))
+    run_id = str(selected.get(FIELD_ID, ""))
     if not run_id:
         raise ValueError("planned run has no id")
     revision = _revision(selected, "planned run")
@@ -483,8 +512,8 @@ def _start_cycle_run(
         started = requester(
             url,
             token,
-            method="POST",
-            key=command_key(pipeline_run_id, "run", run_id, "start", revision, 1),
+            method=HTTP_POST,
+            key=command_key(pipeline_run_id, "run", run_id, COMMAND_START, revision, 1),
             if_match=f'"{revision}"',
         )
     except ApiError as error:
@@ -498,21 +527,21 @@ def _start_cycle_run(
             requester=requester,
         )
         refreshed = next(
-            (run for run in refreshed_runs if run.get("id") == run_id), None
+            (run for run in refreshed_runs if run.get(FIELD_ID) == run_id), None
         )
         if refreshed is None:
             raise ValueError("run disappeared after revision conflict") from None
-        if refreshed.get("status") == "IN_PROGRESS":
+        if refreshed.get(FIELD_STATUS) == "IN_PROGRESS":
             return refreshed
         revision = _revision(refreshed, "planned run")
         started = requester(
             url,
             token,
-            method="POST",
-            key=command_key(pipeline_run_id, "run", run_id, "start", revision, 2),
+            method=HTTP_POST,
+            key=command_key(pipeline_run_id, "run", run_id, COMMAND_START, revision, 2),
             if_match=f'"{revision}"',
         )
-    if started.get("status") != "IN_PROGRESS":
+    if started.get(FIELD_STATUS) != "IN_PROGRESS":
         raise ValueError("run start did not return an IN_PROGRESS run")
     return started
 
@@ -522,7 +551,7 @@ def _select_cycle(
 ) -> dict[str, Any] | None:
     if configured_id:
         selected = next(
-            (cycle for cycle in cycles if cycle.get("id") == configured_id), None
+            (cycle for cycle in cycles if cycle.get(FIELD_ID) == configured_id), None
         )
         if selected is None:
             raise ValueError("configured cycle is not visible in the project")
@@ -530,10 +559,10 @@ def _select_cycle(
     reusable = [
         cycle
         for cycle in cycles
-        if cycle.get("name") == cycle_name
-        and cycle.get("status") in {"DRAFT", "ACTIVE"}
+        if cycle.get(FIELD_NAME) == cycle_name
+        and cycle.get(FIELD_STATUS) in {STATUS_DRAFT, "ACTIVE"}
     ]
-    reusable.sort(key=lambda cycle: cycle.get("status") != "ACTIVE")
+    reusable.sort(key=lambda cycle: cycle.get(FIELD_STATUS) != "ACTIVE")
     return reusable[0] if reusable else None
 
 
@@ -541,24 +570,29 @@ def _create_cycle(
     url: str, token: str, pipeline_run_id: str, requester
 ) -> dict[str, Any]:
     payload = {
-        "name": "Apistra CAP-00 Reporting",
+        FIELD_NAME: "Apistra CAP-00 Reporting",
         "objective": (
             "Authenticated CI report write/read round-trips and receipt evidence "
             "for the CAP-00 delivery gate."
         ),
         "build": "CAP-00",
-        "environment": "local",
+        "environment": LOCAL_PIPELINE_ID,
     }
     selected = requester(
         url,
         token,
-        method="POST",
+        method=HTTP_POST,
         key=command_key(
-            pipeline_run_id, "cycle", "cap00-integration", "create", "none", 1
+            pipeline_run_id,
+            RESOURCE_CYCLE,
+            "cap00-integration",
+            COMMAND_CREATE,
+            "none",
+            1,
         ),
         payload=payload,
     )
-    if not selected.get("id"):
+    if not selected.get(FIELD_ID):
         raise ValueError("cycle create response has no id")
     return selected
 
@@ -571,16 +605,16 @@ def _add_cycle_item(
     pipeline_run_id: str,
     requester,
 ) -> dict[str, Any]:
-    cycle_id = str(selected["id"])
-    revision = _revision(selected, "draft cycle")
+    cycle_id = str(selected[FIELD_ID])
+    revision = _revision(selected, DRAFT_CYCLE_LABEL)
     item_url = f"{url}/{cycle_id}/items"
     try:
         requester(
             item_url,
             token,
-            method="POST",
+            method=HTTP_POST,
             key=command_key(
-                pipeline_run_id, "cycle", cycle_id, "add-item", revision, 1
+                pipeline_run_id, RESOURCE_CYCLE, cycle_id, "add-item", revision, 1
             ),
             if_match=f'"{revision}"',
             payload={"version_id": anchor_version_id},
@@ -592,13 +626,13 @@ def _add_cycle_item(
             ) from None
         selected = _refresh_cycle(url, token, cycle_id, requester)
         if selected.get("run_count", 0) < 1:
-            revision = _revision(selected, "draft cycle")
+            revision = _revision(selected, DRAFT_CYCLE_LABEL)
             requester(
                 item_url,
                 token,
-                method="POST",
+                method=HTTP_POST,
                 key=command_key(
-                    pipeline_run_id, "cycle", cycle_id, "add-item", revision, 2
+                    pipeline_run_id, RESOURCE_CYCLE, cycle_id, "add-item", revision, 2
                 ),
                 if_match=f'"{revision}"',
                 payload={"version_id": anchor_version_id},
@@ -614,7 +648,9 @@ def _ensure_cycle_item(
     pipeline_run_id: str,
     requester,
 ) -> dict[str, Any]:
-    needs_item = selected.get("status") == "DRAFT" and selected.get("run_count", 0) < 1
+    needs_item = (
+        selected.get(FIELD_STATUS) == STATUS_DRAFT and selected.get("run_count", 0) < 1
+    )
     if not needs_item:
         return selected
     if not anchor_version_id:
@@ -638,19 +674,21 @@ def _start_cycle(
     pipeline_run_id: str,
     requester,
 ) -> dict[str, Any]:
-    if selected.get("status") != "DRAFT":
+    if selected.get(FIELD_STATUS) != STATUS_DRAFT:
         return selected
     if selected.get("run_count", 0) < 1:
         raise ValueError("draft cycle still has no executable planned run")
-    cycle_id = str(selected["id"])
-    revision = _revision(selected, "draft cycle")
+    cycle_id = str(selected[FIELD_ID])
+    revision = _revision(selected, DRAFT_CYCLE_LABEL)
     start_url = f"{url}/{cycle_id}:start"
     try:
         return requester(
             start_url,
             token,
-            method="POST",
-            key=command_key(pipeline_run_id, "cycle", cycle_id, "start", revision, 1),
+            method=HTTP_POST,
+            key=command_key(
+                pipeline_run_id, RESOURCE_CYCLE, cycle_id, COMMAND_START, revision, 1
+            ),
             if_match=f'"{revision}"',
         )
     except ApiError as error:
@@ -661,14 +699,16 @@ def _start_cycle(
         if error.code != "REVISION_CONFLICT":
             raise ValueError(f"cycle start failed: {_problem_context(error)}") from None
     refreshed = _refresh_cycle(url, token, cycle_id, requester)
-    if refreshed.get("status") != "DRAFT":
+    if refreshed.get(FIELD_STATUS) != STATUS_DRAFT:
         return refreshed
-    revision = _revision(refreshed, "draft cycle")
+    revision = _revision(refreshed, DRAFT_CYCLE_LABEL)
     return requester(
         start_url,
         token,
-        method="POST",
-        key=command_key(pipeline_run_id, "cycle", cycle_id, "start", revision, 2),
+        method=HTTP_POST,
+        key=command_key(
+            pipeline_run_id, RESOURCE_CYCLE, cycle_id, COMMAND_START, revision, 2
+        ),
         if_match=f'"{revision}"',
     )
 
@@ -680,14 +720,14 @@ def ensure_cycle(
     token: str,
     configured_id: str = "",
     anchor_version_id: str = "",
-    pipeline_run_id: str = "local",
+    pipeline_run_id: str = LOCAL_PIPELINE_ID,
     requester=request_json,
 ) -> tuple[dict[str, Any], bool, dict[str, Any]]:
     """Return an active CAP-00 cycle and its started execution run."""
     url = f"{base_url}/api/v1/projects/{project_id}/cycles"
-    page = requester(url, token, method="GET")
+    page = requester(url, token, method=HTTP_GET)
     selected = _select_cycle(
-        page.get("results", []), configured_id, "Apistra CAP-00 Reporting"
+        page.get(FIELD_RESULTS, []), configured_id, "Apistra CAP-00 Reporting"
     )
     created_cycle = selected is None
     if selected is None:
@@ -697,12 +737,12 @@ def ensure_cycle(
         url, token, selected, anchor_version_id, pipeline_run_id, requester
     )
     selected = _start_cycle(url, token, selected, pipeline_run_id, requester)
-    if selected.get("status") != "ACTIVE":
+    if selected.get(FIELD_STATUS) != "ACTIVE":
         raise ValueError("CAP-00 cycle is not active")
     run = _start_cycle_run(
         base_url=base_url,
         project_id=project_id,
-        cycle_id=str(selected["id"]),
+        cycle_id=str(selected[FIELD_ID]),
         token=token,
         pipeline_run_id=pipeline_run_id,
         requester=requester,
@@ -750,9 +790,9 @@ def main() -> int:
                 token=token,
                 configured_id=cycle_id,
                 anchor_version_id=anchor_version_id,
-                pipeline_run_id=str(bundle.get("pipeline_id", "local")),
+                pipeline_run_id=str(bundle.get("pipeline_id", LOCAL_PIPELINE_ID)),
             )
-            cycle_id = cycle["id"]
+            cycle_id = cycle[FIELD_ID]
             cycle_evidence = {"created": created, "document": cycle, "run": run}
         except (
             ApiError,
@@ -768,7 +808,7 @@ def main() -> int:
                 base_url=base_url,
                 token=token,
                 command_revision=args.command_revision,
-                stage="cycle",
+                stage=RESOURCE_CYCLE,
                 error=error,
             )
             detail = str(error) or type(error).__name__
@@ -779,7 +819,11 @@ def main() -> int:
             return 1
     effective_cycle_id = cycle_id or "BLOCKED-AUTHORISED-CYCLE-REQUIRED"
     report, entries, final = build_payloads(bundle, effective_cycle_id)
-    outbox = {"report": report, "entries": {"entries": entries}, "finalize": final}
+    outbox = {
+        "report": report,
+        FIELD_ENTRIES: {FIELD_ENTRIES: entries},
+        COMMAND_FINALIZE: final,
+    }
     write_json_atomic(args.outbox, redact(outbox, (token,)))
     if not args.apply:
         print(f"Dry run: lossless redacted outbox written to {args.outbox}")
@@ -804,7 +848,7 @@ def main() -> int:
             "generated_at": datetime.now(UTC).isoformat(),
             "project_id": project_id,
             "base_url": base_url,
-            "cycle": cycle_evidence,
+            RESOURCE_CYCLE: cycle_evidence,
             "command_revision": args.command_revision,
             **result,
         }
@@ -835,9 +879,9 @@ def main() -> int:
             error=error,
             cycle=cycle_evidence,
             request_sha256={
-                "create": payload_sha256(report),
-                "entries": payload_sha256({"entries": entries}),
-                "finalize": payload_sha256(final),
+                COMMAND_CREATE: payload_sha256(report),
+                FIELD_ENTRIES: payload_sha256({FIELD_ENTRIES: entries}),
+                COMMAND_FINALIZE: payload_sha256(final),
             },
         )
         detail = str(error) or type(error).__name__

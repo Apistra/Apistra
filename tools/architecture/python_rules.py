@@ -12,11 +12,15 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+LAYER_DOMAIN = "domain"
+LAYER_PORTS = "ports"
+PACKAGE_ROOT = "apistra"
+
 LAYER_ALLOWED_DEPENDENCIES = {
-    "domain": {"domain"},
-    "ports": {"domain", "ports"},
-    "application": {"domain", "ports", "application"},
-    "adapters": {"domain", "ports", "application", "adapters"},
+    LAYER_DOMAIN: {LAYER_DOMAIN},
+    LAYER_PORTS: {LAYER_DOMAIN, LAYER_PORTS},
+    "application": {LAYER_DOMAIN, LAYER_PORTS, "application"},
+    "adapters": {LAYER_DOMAIN, LAYER_PORTS, "application", "adapters"},
 }
 
 DOMAIN_FORBIDDEN_PREFIXES = (
@@ -66,7 +70,7 @@ def _imports(
 def _source_location(path: Path, source_root: Path) -> tuple[str | None, str | None]:
     relative = path.relative_to(source_root).with_suffix("")
     parts = relative.parts
-    if len(parts) < 4 or parts[0:2] != ("apistra", "modules"):
+    if len(parts) < 4 or parts[0:2] != (PACKAGE_ROOT, "modules"):
         return None, None
     module_name = parts[2]
     layer = (
@@ -114,7 +118,7 @@ def _is_composition_root(path: Path, source_root: Path) -> bool:
     relative = path.relative_to(source_root)
     return (
         len(relative.parts) >= 4
-        and relative.parts[0:2] == ("apistra", "entrypoints")
+        and relative.parts[0:2] == (PACKAGE_ROOT, "entrypoints")
         and path.name == "composition.py"
     )
 
@@ -131,7 +135,7 @@ def _check_module_import(
     module_graph: dict[str, set[str]],
 ) -> list[Violation]:
     target_parts = imported.split(".")
-    if len(target_parts) < 3 or target_parts[0:2] != ["apistra", "modules"]:
+    if len(target_parts) < 3 or target_parts[0:2] != [PACKAGE_ROOT, "modules"]:
         return []
     violations: list[Violation] = []
     target_module = target_parts[2]
@@ -188,7 +192,7 @@ def _check_import(
     module_graph: dict[str, set[str]],
 ) -> list[Violation]:
     violations: list[Violation] = []
-    if source_layer == "domain" and imported.startswith(DOMAIN_FORBIDDEN_PREFIXES):
+    if source_layer == LAYER_DOMAIN and imported.startswith(DOMAIN_FORBIDDEN_PREFIXES):
         violations.append(
             Violation(
                 "ARCH-001", path, line, f"domain imports outer dependency {imported!r}"
@@ -289,7 +293,7 @@ def analyse_source_root(source_root: Path) -> list[Violation]:
                 "architecture scope contains no Python files",
             )
         ]
-    modules_root = source_root / "apistra" / "modules"
+    modules_root = source_root / PACKAGE_ROOT / "modules"
     module_directories = _module_directories(modules_root)
     if not module_directories:
         return [

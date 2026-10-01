@@ -438,6 +438,13 @@ ARCH-015 — Explicit versioned policy decisions
 - Violation: a route, model response, adapter, or global bypass flag deciding a protected action without a pinned policy and attributable decision record.
 - Verification: decision-table tests, policy-version binding tests, deny-by-default counterexamples, audit assertions, and dependency review against ADR-011.
 
+ARCH-016 — Executable Python code conventions
+- Status: DECIDED
+- Rule: Python 3.12 code follows the repository's Google/PEP-based Apistra profile. Product functions are fully typed, control flow stays within the complexity contract, and repeated domain/protocol strings plus non-trivial numeric policy values use named constants.
+- Allowed: obvious local values, one-use diagnostic text, readable test data and assertions, docstrings, comments, and values supplied through typed configuration.
+- Violation: an untyped product function, a repeated policy/status/protocol literal, an unexplained non-trivial number, or a blanket static-analysis suppression.
+- Verification: CI-TS-18, its positive and negative fixtures, strict mypy, Ruff annotations, selected wemake-python-styleguide rules, and the suppression scan described in the Python convention document.
+
 ## 11. Risks and technical debt
 
 - Durable engine choice could shape deployment and data ownership. Mitigation: ADR before runtime implementation.

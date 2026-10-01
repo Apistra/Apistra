@@ -8,6 +8,7 @@ import json
 import os
 import secrets
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 import psycopg
@@ -25,6 +26,8 @@ FOREIGN_OWNER_ID = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 ATLAS_ID = UUID("11111111-1111-4111-8111-111111111111")
 ORION_ID = UUID("22222222-2222-4222-8222-222222222222")
 FIXTURE_LOCK_ID = 2_029_100_100_002
+FOREIGN_PASSWORD_BYTES = 48
+type DatabaseCursor = psycopg.Cursor[tuple[Any, ...]]
 
 
 class FixtureGuardError(RuntimeError):
@@ -43,7 +46,7 @@ def _guard(environment: str, gate: str, run_id: str, confirmation: str) -> None:
 
 
 def _insert_administrator(
-    cursor,
+    cursor: DatabaseCursor,
     *,
     administrator_id: UUID,
     username: str,
@@ -62,7 +65,7 @@ def _insert_administrator(
 
 
 def _insert_project(
-    cursor,
+    cursor: DatabaseCursor,
     *,
     project_id: UUID,
     owner_id: UUID,
@@ -123,7 +126,7 @@ def apply_fixture(
                 cursor,
                 administrator_id=FOREIGN_OWNER_ID,
                 username="fixture.orion.owner",
-                password_hash=hasher.hash(secrets.token_urlsafe(48)),
+                password_hash=hasher.hash(secrets.token_urlsafe(FOREIGN_PASSWORD_BYTES)),
                 created_at=applied_at,
                 login_enabled=False,
             )
@@ -144,9 +147,15 @@ def apply_fixture(
                 created_at=applied_at,
             )
         cursor.execute("SELECT COUNT(*) FROM identity_administrators")
-        administrator_count = cursor.fetchone()[0]
+        administrator_row = cursor.fetchone()
+        if administrator_row is None:
+            raise RuntimeError("Administrator count query returned no row.")
+        administrator_count = administrator_row[0]
         cursor.execute("SELECT COUNT(*) FROM projects")
-        project_count = cursor.fetchone()[0]
+        project_row = cursor.fetchone()
+        if project_row is None:
+            raise RuntimeError("Project count query returned no row.")
+        project_count = project_row[0]
 
     identity = f"{FIXTURE_REVISION}:{fixture_id}:{run_id}"
     return {

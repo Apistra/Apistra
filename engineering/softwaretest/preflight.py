@@ -10,6 +10,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+PUBLIC_GUIDE_TIMEOUT_SECONDS = 15
 
 
 def validate_openapi(
@@ -160,7 +161,8 @@ def get_json(url: str, token: str | None = None) -> dict[str, object]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     with urllib.request.urlopen(
-        urllib.request.Request(url, headers=headers), timeout=15
+        urllib.request.Request(url, headers=headers),
+        timeout=PUBLIC_GUIDE_TIMEOUT_SECONDS,
     ) as response:
         return json.load(response)
 

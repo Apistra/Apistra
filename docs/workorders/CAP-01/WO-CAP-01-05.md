@@ -1,10 +1,10 @@
 # WO-CAP-01-05 — Accept CAP-01 on local staging
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
-Status reason: CAP-01 implementation and authenticated Softwaretest.it evidence do not yet exist
-Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
+Status reason: prerequisite workorders are DONE, but the current convention and fixture-layout change is not integrated into protected `test` and no immutable acceptance candidate is frozen
+Implementation state: ACCEPTANCE EXECUTION NOT STARTED
+Evidence state: PREREQUISITE EVIDENCE COMPLETE; CANDIDATE-BOUND ACCEPTANCE NOT EXECUTED
 Approval state: ACCEPTANCE PLAN APPROVED; CAPABILITY NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-05
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: DEFINITIONS PUBLISHED AND VERIFIED BY WO-CAP-01-04; candidate-bound execution receipts remain required
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-01-05
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,12 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish a CAP-01 candidate or acceptance result. The planning review is approved in ../../planning/13-cap01-readiness-review.md, but product implementation, unchanged-candidate staging evidence, authenticated Softwaretest.it receipts, manual execution, and capability acceptance do not yet exist.
+WO-CAP-01-01 through WO-CAP-01-04 are DONE, including authenticated
+Softwaretest.it definition publication and read-back. The current Python
+convention and fixture-layout change still has to enter protected `test` before
+the acceptance candidate can be frozen. Unchanged-candidate staging evidence,
+manual execution results, candidate-bound Softwaretest.it receipts, independent
+implementation review, and human capability acceptance do not yet exist.
 
 ## Target result
 
@@ -137,7 +142,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
