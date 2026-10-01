@@ -1,6 +1,13 @@
 import type { NextRequest } from "next/server";
 
-const REQUEST_HEADERS = ["content-type", "cookie", "x-correlation-id", "x-csrf-token"];
+const REQUEST_HEADERS = [
+  "content-type",
+  "cookie",
+  "idempotency-key",
+  "if-match",
+  "x-correlation-id",
+  "x-csrf-token"
+];
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
   const { path } = await context.params;
@@ -38,4 +45,5 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
 export const dynamic = "force-dynamic";
 export const GET = proxy;
 export const POST = proxy;
+export const PATCH = proxy;
 export const DELETE = proxy;

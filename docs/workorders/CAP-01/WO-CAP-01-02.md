@@ -1,11 +1,11 @@
 # WO-CAP-01-02 — Implement installation and isolated project lifecycle
 
-Version: 0.6-draft
-Status: DRAFT
-Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
-Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Version: 0.8-done
+Status: DONE
+Status reason: owned implementation, conformance review, local immutable staging, and hosted CI matrix complete; capability acceptance remains with WO-CAP-01-05
+Implementation state: COMPLETE AT `796a326af48f22d46c7b21141a8802c10b93321a`
+Evidence state: LOCAL AND HOSTED OWNED MATRIX VERIFIED
+Approval state: CAP-01 PLANNING APPROVED; WO-CAP-01-02 IMPLEMENTATION CONFORMANCE APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-02
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-01-04; APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-02
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-done; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md; the authenticated Softwaretest.it publication/read-back receipt remains the only READY blocker.
+The isolated project lifecycle is implemented at `a8197bbac5704b726c8767dde983ea0d9dad48c5` through framework-independent domain/application layers, owner-scoped persistence, optimistic concurrency, idempotent creation, versioned HTTP contracts, and the approved DSN-001 through DSN-004 administration flow. The local full backend matrix and immutable candidate staging/recovery roundtrip passed; hosted feature-branch CI and final capability acceptance remain separate gates.
 
 ## Target result
 
@@ -67,7 +67,7 @@ The capability exposes installation and isolated project lifecycle as one integr
 
 Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
 
-Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence. The implementation evidence below separately records the later `a8197bb` snapshot.
 
 Observed existing paths within the bounded change area:
 
@@ -85,6 +85,9 @@ Observed existing paths within the bounded change area:
 - EXISTING: `backend/src/apistra/modules/projects/`
 - EXISTING: `contracts/openapi/`
 - EXISTING: `contracts/events/`
+- EXISTING: `apps/web/src/app/`
+- EXISTING: `contracts/openapi/cap01-administration.openapi.json`
+- EXISTING: `tools/staging/verify_candidate.py`
 
 Planned additions to the bounded change area after READY:
 
@@ -168,7 +171,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-WO-CAP-01-04 must define and publish the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-01-05 unless a case is explicitly assigned here.
+WO-CAP-01-04 defined and published the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) and six `MT-PRC-01-NNN` cases. This workorder used those definitions as implementation oracles without claiming manual execution; execution remains with WO-CAP-01-05.
 
 ## Softwaretest.it and CI reporting
 
@@ -188,6 +191,20 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+
+Observed evidence for implementation snapshot `a8197bbac5704b726c8767dde983ea0d9dad48c5`:
+
+- 67 backend tests passed against PostgreSQL 17.6 with 91.41% aggregate coverage.
+- 10 web tests passed with 100% imported line/function coverage; TypeScript typecheck, production build, and architecture rules passed.
+- Python architecture, Import Linter, contract, migration, ownership, stale-version, CSRF, idempotency, and concurrent-redelivery checks passed.
+- Local immutable staging run `local-wo02-complete` passed bootstrap, project create/list/update/archive, session revocation, health, controlled worker failure, recovery, and unchanged image identity.
+- Candidate image IDs: API `sha256:c65a450388888731d0f05ff0346f6ef75d9834894ac34fbe6bc7b7336f7bbab0`; web `sha256:e489b234ac45faae8a574ce4c5415a071545f95dfdee11b8aa1a651fe0745776`; worker `sha256:96fe7ed8f7bebcecf454675d7386a1ba5a8b2480f130065a39805de65790e37c`.
+- Hosted CI run `36895692691` passed contract/static, architecture, security/supply-chain,
+  full PostgreSQL-backed tests, deterministic resource limits, package/SBOM, isolated staging,
+  controlled failure, recovery, and evidence-bundle stages on commit `796a326`.
+- The implementation conformance review found no unresolved scope, architecture, security,
+  data-isolation, or safe-error discrepancy. This documentation-only closure records that result
+  and does not alter the reviewed candidate behavior.
 
 ## Definition of Done
 

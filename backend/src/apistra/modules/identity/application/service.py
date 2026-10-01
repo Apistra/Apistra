@@ -125,6 +125,25 @@ class IdentityService:
             return self._invalid_session()
         return OperationResult(value=context)
 
+    def authorize_mutation(
+        self, raw_token: str | None, csrf_token: str | None
+    ) -> OperationResult[SessionContext]:
+        """Verify a session and its double-submit CSRF value without changing state."""
+
+        result = self.verify_session(raw_token)
+        if result.error:
+            return result
+        context = result.value
+        supplied_csrf_hash = self._tokens.digest(csrf_token or "")
+        if not csrf_token or not hmac.compare_digest(context.session.csrf_hash, supplied_csrf_hash):
+            return OperationResult(
+                error=IdentityError(
+                    IdentityErrorCode.CSRF_INVALID,
+                    "The request could not be verified.",
+                )
+            )
+        return result
+
     def revoke_session(
         self,
         raw_token: str | None,
