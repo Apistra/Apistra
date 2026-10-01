@@ -1,6 +1,6 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 0.6
+Version: 0.7
 Status: SEQUENTIAL IMPLEMENTATION IN PROGRESS; NOT ACCEPTED
 Release: 0.1
 Assurance: EXTENDED
@@ -8,9 +8,9 @@ Assurance: EXTENDED
 ## Control summary
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
-**Evidence:** WO-CAP-01-01 is DONE and merged into protected `test`; run `36891739397` passed the full matrix and authenticated Softwaretest.it roundtrip. WO-CAP-01-02 is implemented at `a8197bb`, with 67 backend and 10 web tests plus local immutable staging/recovery passing; hosted branch CI review is pending. No complete capability result, manual execution, or human capability acceptance is claimed yet.
+**Evidence:** WO-CAP-01-01 is DONE and merged into protected `test`; run `36891739397` passed the full matrix and authenticated Softwaretest.it roundtrip. WO-CAP-01-02 is DONE at `796a326`; hosted run `36895692691` passed its complete owned matrix after 67 backend and 10 web tests plus immutable staging/recovery. No complete capability result, manual execution, or human capability acceptance is claimed yet.
 **Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
-**Next step:** Close hosted review for WO-CAP-01-02, integrate it into `test`, then execute WO-CAP-01-03 on its own feature branch.
+**Next step:** Integrate WO-CAP-01-02 into `test`, then execute WO-CAP-01-03 on its own feature branch.
 
 ## Goal and value
 

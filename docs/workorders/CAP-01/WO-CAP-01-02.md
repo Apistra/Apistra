@@ -1,11 +1,11 @@
 # WO-CAP-01-02 — Implement installation and isolated project lifecycle
 
-Version: 0.7-ready
-Status: READY
-Status reason: implementation and local unchanged-candidate evidence complete; hosted branch CI review pending
-Implementation state: COMPLETE AT `a8197bbac5704b726c8767dde983ea0d9dad48c5`
-Evidence state: LOCAL MATRIX AND IMMUTABLE STAGING VERIFIED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION CONFORMANCE REVIEW PENDING
+Version: 0.8-done
+Status: DONE
+Status reason: owned implementation, conformance review, local immutable staging, and hosted CI matrix complete; capability acceptance remains with WO-CAP-01-05
+Implementation state: COMPLETE AT `796a326af48f22d46c7b21141a8802c10b93321a`
+Evidence state: LOCAL AND HOSTED OWNED MATRIX VERIFIED
+Approval state: CAP-01 PLANNING APPROVED; WO-CAP-01-02 IMPLEMENTATION CONFORMANCE APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-01-04; APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-02
-- Specification revision: 0.7-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-done; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -199,7 +199,12 @@ Observed evidence for implementation snapshot `a8197bbac5704b726c8767dde983ea0d9
 - Python architecture, Import Linter, contract, migration, ownership, stale-version, CSRF, idempotency, and concurrent-redelivery checks passed.
 - Local immutable staging run `local-wo02-complete` passed bootstrap, project create/list/update/archive, session revocation, health, controlled worker failure, recovery, and unchanged image identity.
 - Candidate image IDs: API `sha256:c65a450388888731d0f05ff0346f6ef75d9834894ac34fbe6bc7b7336f7bbab0`; web `sha256:e489b234ac45faae8a574ce4c5415a071545f95dfdee11b8aa1a651fe0745776`; worker `sha256:96fe7ed8f7bebcecf454675d7386a1ba5a8b2480f130065a39805de65790e37c`.
-- Hosted branch CI and implementation conformance closure are intentionally not claimed by this READY revision.
+- Hosted CI run `36895692691` passed contract/static, architecture, security/supply-chain,
+  full PostgreSQL-backed tests, deterministic resource limits, package/SBOM, isolated staging,
+  controlled failure, recovery, and evidence-bundle stages on commit `796a326`.
+- The implementation conformance review found no unresolved scope, architecture, security,
+  data-isolation, or safe-error discrepancy. This documentation-only closure records that result
+  and does not alter the reviewed candidate behavior.
 
 ## Definition of Done
 
