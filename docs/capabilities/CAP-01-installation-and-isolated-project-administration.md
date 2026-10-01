@@ -1,6 +1,6 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 0.8
+Version: 0.9
 Status: SEQUENTIAL IMPLEMENTATION IN PROGRESS; NOT ACCEPTED
 Release: 0.1
 Assurance: EXTENDED
@@ -8,9 +8,9 @@ Assurance: EXTENDED
 ## Control summary
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
-**Evidence:** WO-CAP-01-01 and WO-CAP-01-02 are DONE and merged into protected `test`; protected run `36896858679` passed the complete matrix and authenticated Softwaretest.it roundtrip. WO-CAP-01-03 is locally complete at `0e4b867` after 76 CI-style backend tests with 91.38% coverage, 11 web tests, architecture/security/contracts, and immutable audit/staging/recovery. No complete capability result, manual execution, or human capability acceptance is claimed yet.
+**Evidence:** WO-CAP-01-01 and WO-CAP-01-02 are DONE and merged into protected `test`; protected run `36896858679` passed the complete matrix and authenticated Softwaretest.it roundtrip. WO-CAP-01-03 is DONE at `478146c`; hosted run `36900029244` passed the complete matrix after 76 CI-style backend tests with 91.38% coverage, 11 web tests, architecture/security/contracts, and immutable audit/staging/recovery. No complete capability result, manual execution, or human capability acceptance is claimed yet.
 **Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
-**Next step:** Complete hosted verification for WO-CAP-01-03, integrate it into protected `test`, then execute final acceptance workorder WO-CAP-01-05 on a separate feature branch.
+**Next step:** Integrate WO-CAP-01-03 into protected `test`, verify the protected Softwaretest.it roundtrip, then execute final acceptance workorder WO-CAP-01-05 on a separate feature branch.
 
 ## Goal and value
 
