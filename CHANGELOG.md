@@ -33,6 +33,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Deterministic, checksummed CAP-01 fixture descriptors and fail-closed integration/contract tests without product-state mutation or embedded credentials.
 - Versioned Softwaretest.it CI-guide validation, structured precondition diagnostics, revision-bound command keys, explicit run start, and an opt-in protected round-trip trigger.
 - Softwaretest.it CI guide 1.1 contract validation, direct cycle-bound report publication, and structured missing-cycle remediation evidence without an inferred automation-resource prerequisite.
+- Complete Softwaretest.it report batches with an explicit required-stage result and canonical UTC-millisecond timestamps for exact field-level readback.
 
 ### Changed
 

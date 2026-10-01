@@ -207,7 +207,7 @@ jobs:
           artifacts/cap00-result-bundle.json
           --apply
           --ensure-cycle
-          --command-revision ci-guide-1.1
+          --command-revision ci-guide-1.1-stage-v2
       - name: Retain Softwaretest.it round-trip receipt
         if: always()
         continue-on-error: true
