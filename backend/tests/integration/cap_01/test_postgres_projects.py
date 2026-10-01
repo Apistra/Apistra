@@ -84,3 +84,17 @@ def test_postgres_owner_and_version_checks_do_not_change_state(owner_and_service
     stale = projects.update(owner, "admin.alpha", created.id, 9, "Stale", "STALE", "corr")
     assert stale.error.code is ProjectErrorCode.VERSION_CONFLICT
     assert projects.get(owner, created.id).value.name == "Atlas Research"
+
+
+def test_postgres_audit_read_is_owner_scoped(owner_and_service) -> None:
+    _dsn, owner, projects = owner_and_service
+    owned = projects.create(
+        owner, "admin.alpha", "Atlas Research", "ATLAS", "owned", "corr-owned"
+    ).value
+
+    events = projects.audit_events(owner).value
+
+    assert [(event.project_id, event.project_key, event.correlation_id) for event in events] == [
+        (owned.id, "ATLAS", "corr-owned")
+    ]
+    assert projects.audit_events(uuid4()).value == []

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createProject, listProjects } from "./project-client";
+import { createProject, listAuditEvents, listProjects } from "./project-client";
 
 const project = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -36,5 +36,25 @@ describe("project administration client", () => {
     }), { status: 409 }));
     await expect(createProject({ name: project.name, key: project.key }, "csrf", "idem", request))
       .rejects.toThrow("Project key is already in use.");
+  });
+
+  it("reads the authenticated audit contract without mutation headers", async () => {
+    const event = {
+      id: "22222222-2222-4222-8222-222222222222",
+      event_type: "project.created",
+      created_at: "2026-10-01T12:00:00Z",
+      correlation_id: "corr-owned-project",
+      actor: "administrator",
+      subject_id: project.id,
+      project_id: project.id,
+      project_key: project.key
+    };
+    const request = vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [event] })));
+
+    expect(await listAuditEvents(request)).toEqual([event]);
+    expect(request).toHaveBeenCalledWith(
+      "/api/v1/audit-events",
+      expect.objectContaining({ credentials: "same-origin", cache: "no-store" })
+    );
   });
 });

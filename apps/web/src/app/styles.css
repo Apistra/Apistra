@@ -111,7 +111,11 @@ nav span { color: #61766d; }
 .project-card { border: 1px solid #29493e; border-radius: .8rem; background: #091611; padding: 1.2rem; }
 .project-card span { color: #72dbae; font-size: .7rem; letter-spacing: .08em; }
 .project-card h2 { margin: .5rem 0; }
+.project-card h2 a { color: #eef8f3; text-decoration: none; }
 .project-card p { color: #8fa99e; }
+.audit-list { display: grid; gap: .75rem; padding: 0; list-style: none; }
+.audit-list li { display: grid; gap: .35rem; border: 1px solid #29493e; border-radius: .75rem; background: #091611; padding: 1rem; }
+.audit-list span, .audit-list code { color: #8fa99e; font-size: .82rem; }
 
 @media (max-width: 48rem) {
   .workspace-header { align-items: stretch; flex-direction: column; }

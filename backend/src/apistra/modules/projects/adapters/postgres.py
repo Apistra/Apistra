@@ -190,6 +190,41 @@ class PostgresProjectStore:
             self._insert_event(cursor, event, created_at=updated_at)
             return self._project(row), None
 
+    def list_audit_for_owner(self, owner_id: UUID) -> list[ProjectAuditEvent]:
+        """Read audit rows only through an owner-scoped project join."""
+
+        with (
+            psycopg.connect(self._dsn, row_factory=dict_row) as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(
+                """
+                SELECT e.id, e.event_type, e.created_at, e.correlation_id,
+                       e.actor_id, e.actor_username, e.project_id,
+                       e.project_key, e.details
+                FROM project_audit_events AS e
+                JOIN projects AS p
+                  ON p.id = e.project_id
+                 AND p.owner_administrator_id = %s
+                ORDER BY e.created_at DESC, e.id DESC
+                """,
+                (owner_id,),
+            )
+            return [
+                ProjectAuditEvent(
+                    id=row["id"],
+                    event_type=row["event_type"],
+                    created_at=row["created_at"],
+                    correlation_id=row["correlation_id"],
+                    actor_id=row["actor_id"],
+                    actor_username=row["actor_username"],
+                    project_id=row["project_id"],
+                    project_key=row["project_key"],
+                    details=row["details"],
+                )
+                for row in cursor.fetchall()
+            ]
+
     def _replay_after_race(
         self, owner_id: UUID, idempotency_key: str, fingerprint: str
     ) -> tuple[Project | None, str | None]:

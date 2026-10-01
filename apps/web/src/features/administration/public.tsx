@@ -13,25 +13,44 @@ import {
   type SessionView,
   validateCredentials
 } from "./internal/identity-client";
-import { createProject, listProjects, type ProjectView } from "./internal/project-client";
+import {
+  createProject,
+  listAuditEvents,
+  listProjects,
+  type AuditEventView,
+  type ProjectView
+} from "./internal/project-client";
 
-type Screen = "loading" | "sign-in" | "bootstrap" | "overview" | "create-project";
+type Screen = "loading" | "sign-in" | "bootstrap" | "overview" | "create-project" | "audit" | "not-found";
 const CSRF_STORAGE_KEY = "apistra.csrf";
 
-export function AdministrationApp() {
+export function AdministrationApp({ requestedProjectId, initialView = "overview" }: {
+  requestedProjectId?: string;
+  initialView?: "overview" | "audit";
+}) {
   const [screen, setScreen] = useState<Screen>("loading");
   const [bootstrapAvailable, setBootstrapAvailable] = useState(false);
   const [session, setSession] = useState<SessionView | null>(null);
   const [projects, setProjects] = useState<ProjectView[]>([]);
   const [currentProject, setCurrentProject] = useState("");
+  const [auditEvents, setAuditEvents] = useState<AuditEventView[]>([]);
   const [message, setMessage] = useState<string | null>(null);
 
   async function openOverview(activeSession: SessionView) {
     const availableProjects = await listProjects();
     setSession(activeSession);
     setProjects(availableProjects);
-    setCurrentProject(availableProjects.find((item) => item.status === "ACTIVE")?.id ?? "");
-    setScreen("overview");
+    if (requestedProjectId && !availableProjects.some((item) => item.id === requestedProjectId)) {
+      setScreen("not-found");
+      return;
+    }
+    setCurrentProject(requestedProjectId ?? availableProjects.find((item) => item.status === "ACTIVE")?.id ?? "");
+    if (initialView === "audit") {
+      setAuditEvents(await listAuditEvents());
+      setScreen("audit");
+    } else {
+      setScreen("overview");
+    }
   }
 
   useEffect(() => {
@@ -91,6 +110,12 @@ export function AdministrationApp() {
         }}
       />
     );
+  }
+  if (screen === "not-found") {
+    return <ProjectNotFound onSignOut={doSignOut} session={session!} />;
+  }
+  if (screen === "audit") {
+    return <AuditLog events={auditEvents} onSignOut={doSignOut} session={session!} />;
   }
   return (
     <ProjectOverview
@@ -209,13 +234,37 @@ function ProjectOverview({ currentProject, onCreate, onProjectChange, onSignOut,
         <label>Current project<select aria-label="Current project" value={currentProject} onChange={(event) => onProjectChange(event.target.value)}><option value="">No project selected</option>{projects.filter((item) => item.status === "ACTIVE").map((project) => <option key={project.id} value={project.id}>{project.key} · {project.name}</option>)}</select></label>
         <button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button>
       </header>
-      <nav aria-label="Project navigation"><a aria-current="page" href="#overview">Overview</a><span aria-disabled="true">Audit</span></nav>
+      <nav aria-label="Project navigation"><a aria-current="page" href="/">Overview</a><a href="/audit">Audit</a></nav>
       <div className="workspace-content">
         <p className="eyebrow">Installation secured</p>
         <h1 id="project-overview-title">Project overview</h1>
-        {projects.length === 0 ? <p className="summary">No project exists yet. Create the first isolated project.</p> : <div className="project-grid">{projects.map((project) => <article className="project-card" key={project.id}><span>{project.status}</span><h2>{project.name}</h2><p>{project.key} · Version {project.version}</p></article>)}</div>}
+        {projects.length === 0 ? <p className="summary">No project exists yet. Create the first isolated project.</p> : <div className="project-grid">{projects.map((project) => <article className="project-card" key={project.id}><span>{project.status}</span><h2><a href={`/projects/${project.id}`}>{project.name}</a></h2><p>{project.key} · Version {project.version}</p></article>)}</div>}
         <button onClick={onCreate} type="button">Create project</button>
       </div>
+    </section>
+  );
+}
+
+function AuditLog({ events, onSignOut, session }: {
+  events: AuditEventView[];
+  onSignOut: () => void;
+  session: SessionView;
+}) {
+  return (
+    <section className="workspace" aria-labelledby="audit-title">
+      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button></header>
+      <nav aria-label="Project navigation"><a href="/">Overview</a><a aria-current="page" href="/audit">Audit</a></nav>
+      <div className="workspace-content"><p className="eyebrow">Attributable evidence</p><h1 id="audit-title">Audit log</h1>{events.length === 0 ? <p className="summary">No audit events are available.</p> : <ol className="audit-list">{events.map((event) => <li key={event.id}><strong>{event.event_type}</strong><span>{event.actor ?? "System"} · {new Date(event.created_at).toISOString()}</span><code>{event.correlation_id}</code></li>)}</ol>}</div>
+    </section>
+  );
+}
+
+function ProjectNotFound({ onSignOut, session }: { onSignOut: () => void; session: SessionView }) {
+  return (
+    <section className="workspace" aria-labelledby="not-found-title">
+      <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div><button aria-label="Administrator menu" className="secondary compact" onClick={onSignOut} type="button">Sign out</button></header>
+      <nav aria-label="Project navigation"><a href="/">Overview</a><a href="/audit">Audit</a></nav>
+      <div className="workspace-content"><p className="eyebrow">Safe project boundary</p><h1 id="not-found-title">Project not found</h1><p className="summary">The project does not exist or you do not have access.</p></div>
     </section>
   );
 }

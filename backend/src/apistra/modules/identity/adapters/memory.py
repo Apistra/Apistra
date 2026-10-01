@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 from threading import RLock
+from uuid import UUID
 
 from apistra.modules.identity.domain import Administrator, AuditEvent, Session, SessionContext
 
@@ -66,3 +67,11 @@ class InMemoryIdentityStore:
             self._sessions[token_hash] = replace(session, revoked_at=revoked_at)
             self.audit_events.append(audit_event)
             return True
+
+    def list_audit_events(self, actor_id: UUID) -> list[AuditEvent]:
+        with self._lock:
+            return sorted(
+                (event for event in self.audit_events if event.actor_id == actor_id),
+                key=lambda event: (event.created_at, str(event.id)),
+                reverse=True,
+            )

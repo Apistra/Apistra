@@ -10,6 +10,7 @@
     "/api/v1/administrators:bootstrap": { "post": {} },
     "/api/v1/sessions": { "post": {} },
     "/api/v1/session": { "get": {}, "delete": {} },
+    "/api/v1/audit-events": { "get": {} },
     "/api/v1/projects": { "get": {}, "post": {} },
     "/api/v1/projects/{project_id}": { "get": {}, "patch": {} },
     "/api/v1/projects/{project_id}:archive": { "post": {} }
@@ -37,6 +38,30 @@
           "version": { "type": "integer", "minimum": 1 },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AuditEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "event_type",
+          "created_at",
+          "correlation_id",
+          "actor",
+          "subject_id",
+          "project_id",
+          "project_key"
+        ],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "event_type": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "correlation_id": { "type": "string" },
+          "actor": { "type": ["string", "null"] },
+          "subject_id": { "type": ["string", "null"], "format": "uuid" },
+          "project_id": { "type": ["string", "null"], "format": "uuid" },
+          "project_key": { "type": ["string", "null"] }
         }
       },
       "Problem": {

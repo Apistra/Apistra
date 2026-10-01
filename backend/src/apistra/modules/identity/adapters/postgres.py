@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from uuid import UUID
 
 import psycopg
 from psycopg import errors
@@ -134,6 +135,35 @@ class PostgresIdentityStore:
                 return False
             self._insert_audit_event(cursor, audit_event)
             return True
+
+    def list_audit_events(self, actor_id: UUID) -> list[AuditEvent]:
+        with (
+            psycopg.connect(self._dsn, row_factory=dict_row) as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(
+                """
+                SELECT id, event_type, created_at, correlation_id, actor_id,
+                       actor_username, subject_id, details
+                FROM identity_audit_events
+                WHERE actor_id = %s
+                ORDER BY created_at DESC, id DESC
+                """,
+                (actor_id,),
+            )
+            return [
+                AuditEvent(
+                    id=row["id"],
+                    event_type=row["event_type"],
+                    created_at=row["created_at"],
+                    correlation_id=row["correlation_id"],
+                    actor_id=row["actor_id"],
+                    actor_username=row["actor_username"],
+                    subject_id=row["subject_id"],
+                    details=row["details"],
+                )
+                for row in cursor.fetchall()
+            ]
 
     @staticmethod
     def _administrator(row: dict) -> Administrator:

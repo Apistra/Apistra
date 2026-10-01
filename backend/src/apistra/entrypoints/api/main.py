@@ -311,6 +311,48 @@ def create_app(
         result = projects.list(context.session.administrator_id)
         return {"items": [_project(item) for item in result.value]}
 
+    @application.get("/api/v1/audit-events", tags=["audit"])
+    def list_audit_events(
+        request: Request,
+        session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
+    ):
+        context, problem = authenticated(request, session_token)
+        if problem:
+            return problem
+        administrator_id = context.session.administrator_id
+        identity_events = [
+            {
+                "id": str(event.id),
+                "event_type": event.event_type,
+                "created_at": event.created_at.isoformat(),
+                "correlation_id": event.correlation_id,
+                "actor": event.actor_username,
+                "subject_id": str(event.subject_id) if event.subject_id else None,
+                "project_id": None,
+                "project_key": None,
+            }
+            for event in identity.audit_events(administrator_id)
+        ]
+        project_events = [
+            {
+                "id": str(event.id),
+                "event_type": event.event_type,
+                "created_at": event.created_at.isoformat(),
+                "correlation_id": event.correlation_id,
+                "actor": event.actor_username,
+                "subject_id": str(event.project_id),
+                "project_id": str(event.project_id),
+                "project_key": event.project_key,
+            }
+            for event in projects.audit_events(administrator_id).value
+        ]
+        events = sorted(
+            [*identity_events, *project_events],
+            key=lambda event: (event["created_at"], event["id"]),
+            reverse=True,
+        )
+        return {"items": events}
+
     @application.get("/api/v1/projects/{project_id}", tags=["projects"])
     def get_project(
         project_id: uuid.UUID,

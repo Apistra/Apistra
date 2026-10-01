@@ -79,6 +79,9 @@ class ProjectService:
             return self._not_found()
         return ProjectResult(value=project)
 
+    def audit_events(self, owner_id: UUID) -> ProjectResult[list[ProjectAuditEvent]]:
+        return ProjectResult(value=self._store.list_audit_for_owner(owner_id))
+
     def update(
         self,
         owner_id: UUID,
