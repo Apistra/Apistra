@@ -78,7 +78,7 @@ services:
     <<: *security
     profiles: ["fixtures"]
     image: ${APISTRA_API_IMAGE:?set APISTRA_API_IMAGE}
-    entrypoint: ["python", "-m", "apistra.entrypoints.cap01_fixture"]
+    entrypoint: ["python", "-m", "apistra.entrypoints.fixture.cap01"]
     command: ["--help"]
     environment:
       APISTRA_DATABASE_URL: postgresql://apistra:${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}@postgres:5432/apistra

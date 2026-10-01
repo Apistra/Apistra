@@ -43,7 +43,7 @@ Fixture requirements:
 
 Fixture implementation state: `IMPLEMENTED; CANDIDATE EXECUTION PENDING`.
 `tools/fixtures/cap_01/` creates deterministic, checksummed descriptors. The
-separate `apistra.entrypoints.cap01_fixture` entrypoint performs the database
+separate `apistra.entrypoints.fixture.cap01` entrypoint performs the database
 reset and seed only when all of these fail-closed conditions match:
 
 - the runtime environment equals `local-staging-<run-id>`;
