@@ -138,10 +138,13 @@ CI-TS-11 — Migration tests
 - Scope: upgrade from supported previous state, failed migration recovery, forward compatibility
 - Oracle: deterministic success or safe documented recovery
 
-CI-TS-12 — Performance and resource limits
-- Trigger: runtime, query, ingestion, retrieval, and release candidates
-- Scope: agreed synthetic profiles and configured limits
-- Oracle: limits enforce safely; release thresholds are defined before execution
+CI-TS-12 — Deterministic resource and complexity limits
+- Trigger: resource declarations, input/batch limits, budget policies, runtime configuration, or release candidates
+- Scope: declared CPU, memory, PID, temporary-storage and loopback-exposure limits plus deterministic input, batch, retry, token, cost, and complexity bounds as those contracts are introduced
+- Oracle: every applicable bound is explicit, fail-closed, and exercised at/below/above its boundary; an empty applicable suite fails
+- Current command: `uv run --project backend pytest --no-cov backend/tests/resource`; the separate aggregate backend run enforces the repository-wide coverage threshold.
+- Explicit limitation: this stage does not measure latency, throughput, or concurrent load. There is currently no running representative candidate with controlled hardware, data scale, warm-up, and measurement windows from which a defensible performance threshold could be derived.
+- Activation rule for future performance gates: add a separately identified stage only after a representative running candidate and reproducible environment exist; record workload, hardware, data scale, warm-up, duration, thresholds, variance, and abort limits before execution.
 
 CI-TS-13 — Resilience and recovery
 - Trigger: durable runtime, data, deployment, and final candidate
@@ -162,6 +165,11 @@ CI-TS-16 — Softwaretest.it reporting
 - Trigger: after all other stages, and independently for retry
 - Scope: all actual results including passed, failed, skipped, error, and cancelled
 - Oracle: idempotent upload and round-trip receipt count and status match the immutable result bundle
+
+Pipeline mapping rule:
+- Each executable stage has its own named workflow step or job and an explicit command. A combined test command must not be presented as evidence for stages for which it discovered no applicable tests.
+- Focused Python stage commands disable the global coverage plugin because a single slice cannot cover the complete backend. A subsequent aggregate `pytest backend/tests` run is the only repository-wide coverage oracle and remains blocking.
+- Candidate packaging depends on contract/static, architecture, test, and security jobs. It cannot create a green result bundle while a prerequisite quality job is failed or incomplete.
 
 ## 6. Stage execution and retries
 
