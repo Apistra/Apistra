@@ -509,8 +509,15 @@ def validate_manual_test_case(path: Path, text: str) -> list[str]:
     test_id = path.stem
     if not text.startswith(f"# {test_id} — "):
         errors.append(f"{path}: heading must start with {test_id}")
-    if "Status: DRAFT; NOT PUBLISHED; NOT EXECUTED" not in text:
-        errors.append(f"{path}: manual case must declare separate draft states")
+    status_match = re.search(r"^Status: (.+)$", text, re.MULTILINE)
+    status = status_match.group(1) if status_match else ""
+    if status not in {
+        "DRAFT; NOT PUBLISHED; NOT EXECUTED",
+        "PUBLISHED; NOT EXECUTED",
+    }:
+        errors.append(
+            f"{path}: manual case must declare a supported publication/execution state"
+        )
     for section in _missing_sections(text, MANUAL_CASE_REQUIRED_SECTIONS):
         errors.append(f"{path}: missing section {section}")
 

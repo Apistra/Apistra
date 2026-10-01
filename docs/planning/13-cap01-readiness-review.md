@@ -1,8 +1,8 @@
 # CAP-01 Readiness Review
 
-Version: 0.1
-Date: 2026-09-30
-Status: APPROVED WITH EXTERNAL PUBLISHING BLOCKER
+Version: 0.2
+Date: 2026-10-01
+Status: APPROVED; EXTERNAL PUBLISHING GATE CLOSED
 Profile: EXTENDED (`authorization`, `tenant_isolation`, `secrets`, `architecture_boundary`)
 Scope: CAP-01 planning, architecture, security, design, BDD, manual-test, and fixture-definition readiness
 
@@ -18,12 +18,17 @@ for DSN-001 through DSN-004; and reviewed the six MT-PRC-01 cases without a
 requested correction.
 
 **Evidence state:** Local definitions, BDD scenarios, deterministic fixture
-descriptors, tests, and repository contracts can be verified in CI. The
-authenticated Softwaretest.it write/read receipt is still unavailable.
+descriptors, tests, and repository contracts are verified. Softwaretest.it
+released all six manual definitions and exact field-/ordered-step read-back
+matched manifest SHA-256
+`b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`.
 
-**Only external blocker:** Softwaretest.it definition publication and
-field-/step-order read-back. Dependent implementation workorders remain DRAFT
-until that receipt closes the publishing gate.
+**External publishing conclusion:** cycle
+`2f5b1800-d187-474f-94ae-5686aefc2d0e` contains released testcase keys
+`APISTRA-TC-000002` through `APISTRA-TC-000007`. An immediate unchanged replay
+changed zero definitions and created zero execution results. The first
+dependency-satisfied implementation workorder may transition to READY after
+this workorder is integrated into `test`.
 
 ## 2. Independent expectation derivation
 
@@ -128,10 +133,10 @@ a deployed fixture or passed manual test.
 
 ## 6. Gate conclusion
 
-Product, architecture, security, design, path, BDD, manual-definition, and
-local fixture-definition decisions for CAP-01 are closed. The workorders stay
-DRAFT because the authenticated Softwaretest.it publication/read-back receipt
-is mandatory and external. Once that receipt is bound to the unchanged
-definitions, an independently executable first implementation workorder may
-be moved to READY without another product decision, unless change-impact
-analysis identifies a material delta.
+Product, architecture, security, design, path, BDD, manual-definition, local
+fixture-definition, and authenticated publication decisions for CAP-01 are
+closed. WO-CAP-01-04 is DONE. WO-CAP-01-01 may be moved to READY after this
+result is integrated into `test`; later workorders still follow their explicit
+dependency chain. No staging execution, behavioral pass, capability
+acceptance, or production approval is inferred. A material source change
+invalidates the affected receipt and requires explicit change-impact analysis.

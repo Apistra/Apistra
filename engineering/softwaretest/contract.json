@@ -28,6 +28,12 @@
   "operations": {
     "integration_guide": ["GET", "/api/v1/integration-guides/ci.json"],
     "project_read": ["GET", "/api/v1/projects/{project_id}"],
+    "testcase_search": ["GET", "/api/v1/projects/{project_id}/testcases"],
+    "guided_testcase_create": ["POST", "/api/v1/projects/{project_id}/testcases:guided"],
+    "testcase_version_readback": ["GET", "/api/v1/projects/{project_id}/testcases/{testcase_id}/versions/{version_id}"],
+    "testcase_draft_update": ["PATCH", "/api/v1/projects/{project_id}/testcases/{testcase_id}/versions/{version_id}"],
+    "testcase_version_release": ["POST", "/api/v1/projects/{project_id}/testcases/{testcase_id}/versions/{version_id}:release"],
+    "testcase_open_for_edit": ["POST", "/api/v1/projects/{project_id}/testcases/{testcase_id}:open-for-edit"],
     "definition_register": ["POST", "/api/v1/projects/{project_id}/automated-definitions"],
     "execution_create": ["POST", "/api/v1/projects/{project_id}/automated-executions"],
     "results_batch": ["POST", "/api/v1/projects/{project_id}/automated-executions/{execution_id}/results:batch"],

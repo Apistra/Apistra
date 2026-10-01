@@ -1,11 +1,11 @@
 # WO-CAP-01-04 — Publish and verify PRC-01 test definitions
 
 Version: 0.6-draft
-Status: DRAFT
-Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
-Implementation state: LOCAL DEFINITIONS, BDD, AND FIXTURE DESCRIPTORS COMPLETE; PUBLICATION PENDING
-Evidence state: LOCAL VALIDATION PASSED; NOT PUBLISHED OR EXECUTED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Status: DONE
+Status reason: all six reviewed definitions are released and exact field-/step-level read-back plus idempotent replay are verified
+Implementation state: DEFINITION PUBLISHER AND PROTECTED CI HANDOFF COMPLETE
+Evidence state: LOCAL TESTS PASSED; SIX DEFINITIONS PUBLISHED AND VERIFIED; NOT EXECUTED
+Approval state: IMPLEMENTATION AUTHORISED 2026-10-01; WORKORDER RESULT VERIFIED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-04
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: cycle `2f5b1800-d187-474f-94ae-5686aefc2d0e`; testcases `APISTRA-TC-000002` through `APISTRA-TC-000007`
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-01-04
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.6-draft; published manifest SHA-256 `b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Six reviewed `MTP-PRC-01` definitions, BDD-AUTH-001, BDD-PROJ-001, and deterministic CAP-01 fixture descriptors exist locally. Design revision 0.3 and the CAP-01 expectation, architecture, security, and path review are approved. No definition has been published or executed; the authenticated Softwaretest.it write/read receipt remains the only workorder blocker.
+Six reviewed `MTP-PRC-01` definitions, BDD-AUTH-001, BDD-PROJ-001, and deterministic CAP-01 fixture descriptors exist locally. Design revision 0.3 and the CAP-01 expectation, architecture, security, and path review are approved. On 2026-10-01 the publisher released all six definitions, verified every submitted field and ordered step, then repeated unchanged with zero mutations, duplicates, executions, or results.
 
 ## Target result
 
@@ -164,11 +164,11 @@ This workorder owns definition and publication of the catalog-listed scenarios (
 - `MT-PRC-01-005` — isolated project creation and attributable audit
 - `MT-PRC-01-006` — foreign-project denial without disclosure
 
-The package manifest is `../../testing/manual/PRC-01/README.md`; each case has one file in the same directory. The reviewed definitions remain `DRAFT`, `NOT PUBLISHED`, and `NOT EXECUTED`. Local design, review, BDD, and fixture-descriptor gates are complete. Publication now waits only for the authenticated Softwaretest.it write/read path. Actual fixture application and execution remain with WO-CAP-01-05 against the unchanged staging candidate.
+The package manifest is `../../testing/manual/PRC-01/README.md`; each case has one file in the same directory. The reviewed definitions are `PUBLISHED` and `NOT EXECUTED`. Local design, review, BDD, fixture-descriptor, publication, and read-back gates are complete. Actual fixture application and execution remain with WO-CAP-01-05 against the unchanged staging candidate.
 
 ## Softwaretest.it and CI reporting
 
-Definitions must be idempotently published and field-level round-tripped before execution. All CI stage and individual results are reported with candidate identity and all statuses. A reporting-only failure retries the reporting stage and never reruns successful tests.
+Definitions are idempotently published and field-level round-tripped before execution. The trusted-branch job regenerates the local manifest, publishes through the protected environment, verifies read-back, records an explicit zero-result invariant, and then performs the independent CI-result reporting round-trip. A reporting-only failure retries the reporting stage and never reruns successful tests.
 
 ## CI retry and evidence reuse
 

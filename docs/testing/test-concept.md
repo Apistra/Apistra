@@ -10,9 +10,9 @@ Assurance profile: EXTENDED
 
 **Relationship to the test architecture:** The system-centred test architecture defines what must be tested and how risks map to system structures and processes. This test concept defines who performs which testing activities, when they occur, which gates apply, and what evidence is required.
 
-**Current position:** CAP-00 automated suites, candidate verification, staging/recovery, human acceptance, and authenticated Softwaretest.it reporting are hosted-verified. Business-capability tests, their definition publication, complete manual process execution, and browser/screen-reader measurement remain pending.
+**Current position:** CAP-00 automated suites, candidate verification, staging/recovery, human acceptance, and authenticated Softwaretest.it reporting are hosted-verified. The six CAP-01 manual definitions are also published with exact read-back. CAP-01 behavioral implementation, complete manual process execution, and browser/screen-reader measurement remain pending.
 
-**Next responsible step:** Complete CAP-00 external acceptance, then apply this concept to CAP-01 expectation review and test-definition workorders before implementation READY.
+**Next responsible step:** Integrate the completed CAP-01 definition-publication workorder, then execute the dependency-satisfied implementation workorders sequentially before unchanged-candidate staging acceptance.
 
 ## 2. Purpose, scope, and non-goals
 
@@ -149,7 +149,7 @@ Production testing is NOT DEFINED. It requires an approved environment, data, ac
 - Automated BDD E2E: stable, externally observable critical journeys expressed as Given/When/Then.
 - Manual process and UI/UX: independent atomic cases covering complete user journeys, states, roles, errors, accessibility, and recovery.
 - Security and privacy: actual enforcement points with valid positive and negative identity/project controls.
-- Performance and resource: deterministic resource declarations and enforceable input, batch, retry, token, cost, and complexity boundaries that do not depend on shared-runner speed. CI does not claim latency, throughput, or load evidence while no representative running candidate and controlled measurement environment exist.
+- Performance and resource: deterministic resource declarations and enforceable at/below/above input, batch, retry, token, cost, complexity, and fail-closed overload boundaries that do not depend on shared-runner speed. This is the only load-like coverage currently permitted in CI. CI does not claim latency, throughput, concurrent or sustained load, scalability, or capacity evidence while no representative running candidate and controlled measurement environment exist.
 - Resilience and recovery: restart, worker loss, timeout, cancellation, uncertain response, backup restore, rollback, and roll-forward.
 - Packaging and staging: clean build, immutable images, manifest, SBOM, migration, health, smoke, offline profile, and exact-candidate recovery.
 
@@ -341,6 +341,7 @@ Exploratory sessions have a charter, scope, risk, time box, environment, tester,
 - Use minimum project-scoped credentials and never place tokens or passwords in definitions or evidence.
 - Publish requirements, capabilities, processes, BDD scenarios, manual cases, ordered steps, and CI mappings idempotently.
 - Read back fields and step order; creation success alone is insufficient.
+- Keep definition publication distinct from execution: a definition publisher must not create runs or results, and its receipt records this zero-result invariant.
 - Report every CI result/status and bind it to commit, candidate, suite, stage, test, attempt, environment, and evidence.
 - Preserve a lossless local outbox when publishing is unavailable.
 - A reporting failure blocks acceptance but does not invalidate a valid completed test attempt.
@@ -380,13 +381,16 @@ Implemented and hosted-verified:
 - Python and web tests with configured coverage thresholds;
 - health/component, schema, fixture, secret-scan, dependency-audit, packaging, Compose staging, marker, controlled failure, and recovery checks;
 - public Softwaretest.it OpenAPI preflight, adapter tests, result bundle, and dry-run outbox.
+- protected-branch configuration and authenticated Softwaretest.it CI-result reporting;
+- independent CAP-00 review, manual CAP00-MAN-001 execution, and human bootstrap acceptance;
+- CAP-01 definition publisher, six released manual definitions, exact field-/ordered-step read-back, and unchanged idempotent replay with zero execution results.
 
-Still pending for CAP-00 acceptance:
+Still pending for CAP-01 acceptance:
 
-- live protected-branch configuration;
-- authenticated Softwaretest.it project/test-plan write and field-level read-back;
-- independent implementation review;
-- manual CAP00-MAN-001 execution and human bootstrap acceptance.
+- product implementation through WO-CAP-01-01, WO-CAP-01-02, and WO-CAP-01-03;
+- the full unchanged-candidate quality matrix and isolated local-staging deployment;
+- actual fixture application and all automated and manual behavioral executions;
+- Softwaretest.it result reporting for the CAP-01 candidate and explicit human capability acceptance.
 
 ## 24. Review and maintenance
 

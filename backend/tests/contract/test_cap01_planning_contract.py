@@ -14,12 +14,14 @@ def test_cap01_bdd_definitions_are_present_and_stably_tagged() -> None:
     assert "Then " in text
 
 
-def test_cap01_readiness_review_preserves_softwaretest_blocker() -> None:
+def test_cap01_readiness_review_records_verified_publication_gate() -> None:
     review = ROOT / "docs/planning/13-cap01-readiness-review.md"
     text = review.read_text(encoding="utf-8")
-    assert "APPROVED WITH EXTERNAL PUBLISHING BLOCKER" in text
-    assert "Softwaretest.it" in text
-    assert "No CAP-01 product implementation" in text
+    assert "APPROVED; EXTERNAL PUBLISHING GATE CLOSED" in text
+    assert "APISTRA-TC-000002" in text
+    assert "APISTRA-TC-000007" in text
+    assert "created zero execution results" in text
+    assert "No staging execution" in text
 
 
 def test_cap01_workorders_have_specific_pattern_mappings() -> None:
