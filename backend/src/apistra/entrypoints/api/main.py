@@ -328,6 +328,7 @@ def create_app(
                 "correlation_id": event.correlation_id,
                 "actor": event.actor_username,
                 "subject_id": str(event.subject_id) if event.subject_id else None,
+                "installation_id": event.details.get("installation_id"),
                 "project_id": None,
                 "project_key": None,
             }

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "1.0"
-FIXTURE_REVISION = "CAP-01-FX-0.1"
+FIXTURE_REVISION = "CAP-01-FX-0.2"
 FIXTURE_IDS = (
     "FX-PRC-01-FRESH",
     "FX-PRC-01-ADMIN-NO-PROJECT",
@@ -28,7 +28,7 @@ def _base(run_id: str, fixture_id: str) -> dict[str, Any]:
         "run_id": run_id,
         "synthetic": True,
         "target": "isolated-local-staging",
-        "application_mode": "descriptor-only",
+        "application_mode": "guarded-database-reset",
         "credential_references": ["env:STAGING_ADMIN_PASSWORD"],
         "cleanup": {"method": "restore-named-snapshot", "destructive_ui": False},
     }
@@ -108,7 +108,7 @@ def expected_manifest(run_id: str) -> dict[str, object]:
         "fixture_revision": FIXTURE_REVISION,
         "run_id": run_id,
         "synthetic": True,
-        "application_mode": "descriptor-only",
+        "application_mode": "guarded-database-reset",
         "fixtures": [
             {
                 "id": fixture_id,
@@ -169,7 +169,9 @@ def main() -> int:
     elif args.action == "verify":
         if not verify(args.root, args.run_id):
             return 1
-        print("CAP-01 fixture descriptors verified; staging application not claimed.")
+        print(
+            "CAP-01 fixture descriptors verified; database application requires guarded entrypoint."
+        )
     elif args.action == "reset":
         cleanup(args.root, args.run_id)
         print(setup(args.root, args.run_id))

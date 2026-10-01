@@ -77,6 +77,7 @@ class IdentityService:
             actor_id=administrator.id,
             actor_username=administrator.username,
             subject_id=administrator.id,
+            details={"installation_id": "local"},
         )
         if not self._store.bootstrap(administrator, session, event):
             return OperationResult(

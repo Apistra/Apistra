@@ -14,6 +14,8 @@ from apistra.modules.identity.domain import Administrator, AuditEvent, Session, 
 
 
 class PostgresIdentityStore:
+    _BOOTSTRAP_LOCK_ID = 2_029_100_100_001
+
     def __init__(self, dsn: str) -> None:
         self._dsn = dsn
 
@@ -26,10 +28,26 @@ class PostgresIdentityStore:
         try:
             with psycopg.connect(self._dsn) as connection, connection.cursor() as cursor:
                 cursor.execute(
+                    "SELECT pg_advisory_xact_lock(%s)",
+                    (self._BOOTSTRAP_LOCK_ID,),
+                )
+                cursor.execute(
+                    """
+                    SELECT EXISTS(
+                        SELECT 1
+                        FROM identity_administrators
+                        WHERE installation_id = 'local' AND login_enabled
+                    )
+                    """
+                )
+                if cursor.fetchone()[0]:
+                    return False
+                cursor.execute(
                     """
                     INSERT INTO identity_administrators
-                        (id, installation_id, username, password_hash, created_at)
-                    VALUES (%s, 'local', %s, %s, %s)
+                        (id, installation_id, username, password_hash, created_at,
+                         login_enabled)
+                    VALUES (%s, 'local', %s, %s, %s, TRUE)
                     """,
                     (
                         administrator.id,
@@ -49,7 +67,9 @@ class PostgresIdentityStore:
             cursor.execute(
                 """
                 SELECT EXISTS(
-                    SELECT 1 FROM identity_administrators WHERE installation_id = 'local'
+                    SELECT 1
+                    FROM identity_administrators
+                    WHERE installation_id = 'local' AND login_enabled
                 )
                 """
             )
@@ -65,7 +85,7 @@ class PostgresIdentityStore:
                 """
                 SELECT id, username, password_hash, created_at
                 FROM identity_administrators
-                WHERE username = %s
+                WHERE username = %s AND login_enabled
                 """,
                 (username,),
             )

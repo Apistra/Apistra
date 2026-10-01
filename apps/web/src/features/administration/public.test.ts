@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
   bootstrapAdministrator,
   currentSession,
+  focusErrorAlert,
   installationStatus,
   signIn,
   signOut,
@@ -80,5 +83,27 @@ describe("administrator bootstrap contract", () => {
       { username: "administrator", password: "incorrect credential" }, request
     )).rejects.toThrow("The username or password is invalid.");
     await expect(signOut("wrong", request)).rejects.toThrow("The request could not be verified.");
+  });
+
+  it("moves focus to a newly rendered error alert", () => {
+    const focus = vi.fn();
+    focusErrorAlert({ focus });
+    expect(focus).toHaveBeenCalledOnce();
+  });
+
+  it("retains the approved CAP-01 view labels and administrator actions", () => {
+    const source = readFileSync(new URL("./public.tsx", import.meta.url), "utf8");
+    for (const required of [
+      "Bootstrap Administrator",
+      "Administrator menu",
+      "Installation status",
+      "Administrator bootstrap is complete.",
+      "Project creation",
+      "Your session has expired. Sign in again.",
+      "Installation: {event.installation_id}",
+      "Project: {event.project_key}"
+    ]) {
+      expect(source).toContain(required);
+    }
   });
 });

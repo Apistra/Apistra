@@ -17,8 +17,8 @@ isolated project creation with audit, and non-disclosing foreign-project denial.
 
 ## Fixture contract
 
-The following fixture identities are specifications, not claims that a generator
-already exists:
+The following fixture identities are deterministic reset targets for an
+explicitly isolated local staging database:
 
 - `FX-PRC-01-FRESH`: resettable local staging snapshot with no Administrator and
   no project.
@@ -41,13 +41,23 @@ Fixture requirements:
 - emitted fixture revision and checksum bound to the execution receipt;
 - cleanup by restoring the named snapshot, not by ad hoc destructive UI action.
 
-Fixture definition state: `IMPLEMENTED AND LOCALLY VERIFIED` by
-`tools/fixtures/cap_01/`. The generator creates deterministic, checksummed
-synthetic descriptors and never claims to mutate product state. Actual
-application to the unchanged staging candidate, resulting-state verification,
-and the application receipt remain `NOT EXECUTED`; those belong to
-WO-CAP-01-05. Every manual case remains blocked for execution until that
-candidate-bound preparation succeeds.
+Fixture implementation state: `IMPLEMENTED; CANDIDATE EXECUTION PENDING`.
+`tools/fixtures/cap_01/` creates deterministic, checksummed descriptors. The
+separate `apistra.entrypoints.cap01_fixture` entrypoint performs the database
+reset and seed only when all of these fail-closed conditions match:
+
+- the runtime environment equals `local-staging-<run-id>`;
+- `APISTRA_FIXTURE_GATE` equals `apply-cap01-<run-id>`;
+- `--confirm-reset` exactly names the selected fixture;
+- non-fresh fixtures receive `STAGING_ADMIN_PASSWORD` through the protected
+  environment, never a command-line value;
+- the Compose `fixtures` profile is selected explicitly.
+
+The entrypoint is not exposed through the product HTTP API. It emits a
+secret-free JSON receipt containing the environment, run ID, fixture revision,
+fixture identity checksum, application time, and resulting row counts. Actual
+application to an immutable candidate and retention of that receipt belong to
+WO-CAP-01-05.
 
 ## Cases
 

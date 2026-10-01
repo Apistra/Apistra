@@ -17,6 +17,7 @@ export interface AuditEventView {
   correlation_id: string;
   actor: string | null;
   subject_id: string | null;
+  installation_id?: string | null;
   project_id: string | null;
   project_key: string | null;
 }

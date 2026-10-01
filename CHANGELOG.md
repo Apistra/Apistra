@@ -11,6 +11,12 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Added
 
+- Guarded CAP-01 local-staging fixture application with deterministic Atlas and
+  Orion ownership, disabled foreign login, secret-free application receipts,
+  and explicit environment/run/reset gates outside the product HTTP API.
+- CAP-01 administration views for bootstrap status, Administrator actions,
+  expired-session guidance, exact approved page titles, and rendered
+  installation/project audit identifiers.
 - Authenticated CAP-01 audit read model with Administrator- and project-owner scoping, exact approved event labels, safe direct project routes, an audit-log route, and immutable staging verification of revocation attribution.
 - CAP-01 isolated project lifecycle with owner-scoped PostgreSQL persistence, idempotent creation,
   optimistic version checks, safe foreign/unknown-project handling, attributable project audit
@@ -52,6 +58,8 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Changed
 
+- Local identity persistence now supports multiple principals while preserving
+  exactly-once bootstrap through a transaction-scoped PostgreSQL advisory lock.
 - Workorder validation now supports controlled 0.x DRAFT, READY, and DONE revisions while requiring
   the specification binding to match, with retained negative status and path fixtures.
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
@@ -70,6 +78,9 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Security
 
+- Added real foreign-project isolation coverage against a non-login synthetic
+  owner and a fail-closed fixture entrypoint that refuses non-local-staging
+  targets before opening a database connection.
 - Containers run non-root with read-only filesystems, dropped capabilities, no-new-privileges, and declared resource limits.
 - Runtime and evidence contracts require secret references, safe diagnostics, project isolation, bounded egress, and no hidden telemetry.
 

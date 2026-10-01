@@ -24,6 +24,10 @@ export interface SessionView {
   expires_at: string;
 }
 
+export function focusErrorAlert(element: { focus: () => void } | null): void {
+  element?.focus();
+}
+
 export function validateCredentials(credentials: Credentials): string | null {
   if (!/^[A-Za-z0-9][A-Za-z0-9_.@-]{2,127}$/.test(credentials.username)) {
     return "Use 3 to 128 letters, numbers, or approved punctuation for the username.";

@@ -44,7 +44,7 @@ def test_cap01_isolation_descriptor_has_stable_authorisation_boundary(
     assert projects["11111111-1111-4111-8111-111111111111"]["authorised"] is True
     assert projects["22222222-2222-4222-8222-222222222222"]["authorised"] is False
     assert payload["expected_state"]["foreign_project_disclosure"] is False
-    assert payload["application_mode"] == "descriptor-only"
+    assert payload["application_mode"] == "guarded-database-reset"
 
 
 def test_cap01_manifest_detects_tampering(tmp_path: Path) -> None:
