@@ -17,6 +17,14 @@ RELEASE_VERSION_PATTERN = re.compile(
     r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-(?:alpha|beta|rc)\.(0|[1-9]\d*))?$"
 )
+FULL_COMMIT_SHA_LENGTH = 40
+SHORT_COMMIT_SHA_LENGTH = 12
+HASH_READ_BLOCK_BYTES = 1024 * 1024
+UTF8 = "utf-8"
+RUNTIME_PYTHON = "python"
+DOCKER = "docker"
+FIELD_NAME = "name"
+SERVICE_API = "api"
 
 
 def run(*command: str, capture: bool = False) -> str:
@@ -29,7 +37,7 @@ def run(*command: str, capture: bool = False) -> str:
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
+        for block in iter(lambda: stream.read(HASH_READ_BLOCK_BYTES), b""):
             digest.update(block)
     return digest.hexdigest()
 
@@ -38,13 +46,13 @@ def assert_clean_commit() -> str:
     if run("git", "status", "--porcelain", capture=True):
         raise SystemExit("Candidate builds require a clean committed worktree.")
     commit = run("git", "rev-parse", "HEAD", capture=True)
-    if len(commit) != 40:
+    if len(commit) != FULL_COMMIT_SHA_LENGTH:
         raise SystemExit("Could not resolve a full commit SHA.")
     return commit
 
 
 def release_version() -> str:
-    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+    version = VERSION_FILE.read_text(encoding=UTF8).strip()
     if not RELEASE_VERSION_PATTERN.fullmatch(version):
         raise SystemExit(
             "VERSION must contain a supported SemVer value without build metadata."
@@ -53,14 +61,14 @@ def release_version() -> str:
 
 
 def packages(image: str, runtime: str) -> list[dict[str, str]]:
-    if runtime == "python":
+    if runtime == RUNTIME_PYTHON:
         code = "import importlib.metadata as m,json;print(json.dumps(sorted([{'name':d.metadata['Name'],'version':d.version} for d in m.distributions()],key=lambda x:(x['name'] or '').lower())))"
         raw = run(
-            "docker",
+            DOCKER,
             "run",
             "--rm",
             "--entrypoint",
-            "python",
+            RUNTIME_PYTHON,
             image,
             "-c",
             code,
@@ -69,7 +77,7 @@ def packages(image: str, runtime: str) -> list[dict[str, str]]:
     else:
         code = "const fs=require('fs'),p=require('path'),out=[];function w(d){if(!fs.existsSync(d))return;for(const n of fs.readdirSync(d)){const q=p.join(d,n);if(n==='package.json'){try{const x=JSON.parse(fs.readFileSync(q));if(x.name&&x.version)out.push({name:x.name,version:x.version})}catch{}}else if(!n.startsWith('.')){try{if(fs.statSync(q).isDirectory())w(q)}catch{}}}}w('/app/node_modules');console.log(JSON.stringify(out.sort((a,b)=>a.name.localeCompare(b.name))))"
         raw = run(
-            "docker",
+            DOCKER,
             "run",
             "--rm",
             "--entrypoint",
@@ -79,19 +87,19 @@ def packages(image: str, runtime: str) -> list[dict[str, str]]:
             code,
             capture=True,
         )
-    unique = {(item["name"], item["version"]): item for item in json.loads(raw)}
+    unique = {(item[FIELD_NAME], item["version"]): item for item in json.loads(raw)}
     return list(unique.values())
 
 
 def main() -> int:
     commit = assert_clean_commit()
     base_version = release_version()
-    version = f"{base_version}+{commit[:12]}"
+    version = f"{base_version}+{commit[:SHORT_COMMIT_SHA_LENGTH]}"
     if ARTIFACTS.exists():
         shutil.rmtree(ARTIFACTS)
     ARTIFACTS.mkdir(parents=True)
     images = {
-        "api": f"apistra-api:cap00-{commit}",
+        SERVICE_API: f"apistra-api:cap00-{commit}",
         "worker": f"apistra-worker:cap00-{commit}",
         "web": f"apistra-web:cap00-{commit}",
     }
@@ -102,19 +110,19 @@ def main() -> int:
         f"APISTRA_COMMIT={commit}",
     )
     run(
-        "docker",
+        DOCKER,
         "build",
         "--file",
         "backend/Dockerfile",
         "--target",
-        "api",
+        SERVICE_API,
         "--tag",
-        images["api"],
+        images[SERVICE_API],
         *common,
         ".",
     )
     run(
-        "docker",
+        DOCKER,
         "build",
         "--file",
         "backend/Dockerfile",
@@ -126,7 +134,7 @@ def main() -> int:
         ".",
     )
     run(
-        "docker",
+        DOCKER,
         "build",
         "--file",
         "apps/web/Dockerfile",
@@ -138,11 +146,11 @@ def main() -> int:
     manifest_images: dict[str, object] = {}
     for service, image in images.items():
         archive = ARTIFACTS / f"{service}.tar"
-        run("docker", "image", "save", "--output", str(archive), image)
+        run(DOCKER, "image", "save", "--output", str(archive), image)
         manifest_images[service] = {
             "reference": image,
             "image_id": run(
-                "docker", "image", "inspect", "--format", "{{.Id}}", image, capture=True
+                DOCKER, "image", "inspect", "--format", "{{.Id}}", image, capture=True
             ),
             "archive": archive.name,
             "archive_sha256": sha256(archive),
@@ -151,7 +159,7 @@ def main() -> int:
         "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
-        "name": f"apistra-cap00-{commit}",
+        FIELD_NAME: f"apistra-cap00-{commit}",
         "documentNamespace": f"https://apistra.dev/sbom/cap00/{commit}",
         "creationInfo": {
             "created": datetime.now(UTC).isoformat(),
@@ -159,20 +167,22 @@ def main() -> int:
         },
         "packages": [
             {
-                "name": item["name"],
+                FIELD_NAME: item[FIELD_NAME],
                 "versionInfo": item["version"],
                 "SPDXID": f"SPDXRef-Package-{index}",
                 "downloadLocation": "NOASSERTION",
                 "filesAnalyzed": False,
             }
             for index, item in enumerate(
-                packages(images["api"], "python") + packages(images["web"], "node"), 1
+                packages(images[SERVICE_API], RUNTIME_PYTHON)
+                + packages(images["web"], "node"),
+                1,
             )
         ],
     }
     sbom_path = ARTIFACTS / "sbom.spdx.json"
     sbom_path.write_text(
-        json.dumps(sbom, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(sbom, indent=2, sort_keys=True) + "\n", encoding=UTF8
     )
     manifest = {
         "schema_version": "1.0",
@@ -183,7 +193,7 @@ def main() -> int:
         "created_at": datetime.now(UTC).isoformat(),
         "images": manifest_images,
         "base_images": {
-            "python": "python:3.12-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e",
+            RUNTIME_PYTHON: "python:3.12-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e",
             "node": "node:24.19.0-bookworm-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df",
         },
         "contracts": [
@@ -203,10 +213,10 @@ def main() -> int:
     }
     manifest_path = ARTIFACTS / "candidate-manifest.json"
     manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding=UTF8
     )
     (ARTIFACTS / "candidate-manifest.sha256").write_text(
-        f"{sha256(manifest_path)}  {manifest_path.name}\n", encoding="utf-8"
+        f"{sha256(manifest_path)}  {manifest_path.name}\n", encoding=UTF8
     )
     print(f"Candidate written to {ARTIFACTS}")
     return 0

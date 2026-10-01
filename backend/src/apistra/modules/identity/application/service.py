@@ -5,7 +5,7 @@ from __future__ import annotations
 import hmac
 import re
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from apistra.modules.identity.domain import (
@@ -135,6 +135,8 @@ class IdentityService:
         if result.error:
             return result
         context = result.value
+        if context is None:
+            return self._invalid_session()
         supplied_csrf_hash = self._tokens.digest(csrf_token or "")
         if not csrf_token or not hmac.compare_digest(context.session.csrf_hash, supplied_csrf_hash):
             return OperationResult(
@@ -187,7 +189,9 @@ class IdentityService:
             return self._invalid_session()
         return OperationResult()
 
-    def _new_session(self, administrator: Administrator, now) -> tuple[IssuedSession, Session]:
+    def _new_session(
+        self, administrator: Administrator, now: datetime
+    ) -> tuple[IssuedSession, Session]:
         raw_token, token_hash = self._tokens.issue()
         csrf_token, csrf_hash = self._tokens.issue()
         expires_at = now + self._session_ttl
@@ -223,7 +227,7 @@ class IdentityService:
         return None
 
     @staticmethod
-    def _invalid_session() -> OperationResult:
+    def _invalid_session[T]() -> OperationResult[T]:
         return OperationResult(
             error=IdentityError(
                 IdentityErrorCode.SESSION_INVALID,

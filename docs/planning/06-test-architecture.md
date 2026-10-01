@@ -70,6 +70,9 @@ Static architecture references:
 - AT-ARCH-013 detects dependency cycles in the TypeScript graph and rejects forbidden Python layer direction.
 - AT-ARCH-SCOPE rejects an empty source scope.
 - AT-ARCH-FIXTURE requires retained allowed graphs to pass and retained forbidden graphs to fail.
+- AT-CONVENTIONS-018 executes the Python convention contract: the expanded Ruff profile,
+  complete product annotations, strict mypy, selected repeated-literal and magic-number
+  checks, blanket-suppression detection, and retained positive and negative fixtures.
 
 The authoritative commands, tool versions, paths, and exception policy are maintained in `docs/architecture/testing.md`. These tests are structural evidence only and cannot substitute for behavioural, integration, security, deployment, or recovery tests.
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 import psycopg
@@ -15,6 +16,9 @@ from apistra.modules.projects.domain import (
     ProjectAuditEvent,
     ProjectStatus,
 )
+
+type MappingRow = dict[str, Any]
+type MappingCursor = psycopg.Cursor[MappingRow]
 
 
 class PostgresProjectStore:
@@ -246,7 +250,7 @@ class PostgresProjectStore:
             return self._get(cursor, owner_id, replay["project_id"]), None
 
     @staticmethod
-    def _owned_conflict(cursor, owner_id: UUID, project_id: UUID) -> str:
+    def _owned_conflict(cursor: MappingCursor, owner_id: UUID, project_id: UUID) -> str:
         cursor.execute(
             "SELECT version, status FROM projects WHERE id = %s AND owner_administrator_id = %s",
             (project_id, owner_id),
@@ -254,7 +258,7 @@ class PostgresProjectStore:
         return "version" if cursor.fetchone() else "not_found"
 
     @staticmethod
-    def _get(cursor, owner_id: UUID, project_id: UUID) -> Project | None:
+    def _get(cursor: MappingCursor, owner_id: UUID, project_id: UUID) -> Project | None:
         cursor.execute(
             """
             SELECT id, owner_administrator_id, name, project_key, status,
@@ -268,7 +272,7 @@ class PostgresProjectStore:
         return PostgresProjectStore._project(row) if row else None
 
     @staticmethod
-    def _project(row: dict) -> Project:
+    def _project(row: MappingRow) -> Project:
         return Project(
             id=row["id"],
             owner_administrator_id=row["owner_administrator_id"],
@@ -282,7 +286,7 @@ class PostgresProjectStore:
 
     @staticmethod
     def _insert_event(
-        cursor,
+        cursor: MappingCursor,
         event: ProjectAuditEvent,
         *,
         created_at: datetime | None = None,

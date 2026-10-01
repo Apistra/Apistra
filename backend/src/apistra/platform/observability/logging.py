@@ -6,14 +6,13 @@ import json
 import logging
 import sys
 from datetime import UTC, datetime
-from typing import Any
 
 
 def configure_logging() -> None:
     logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(message)s", force=True)
 
 
-def log_event(event: str, **fields: Any) -> None:
+def log_event(event: str, **fields: object) -> None:
     record = {
         "timestamp": datetime.now(UTC).isoformat(),
         "level": "INFO",

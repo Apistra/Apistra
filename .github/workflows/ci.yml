@@ -71,6 +71,31 @@ jobs:
             echo "TypeScript negative complexity fixture unexpectedly passed"
             exit 1
           fi
+      - name: CI-TS-18 Python code conventions and proof fixtures
+        run: |
+          uv run --project backend ruff check backend/src --select ANN
+          uv run --project backend mypy --config-file backend/pyproject.toml backend/src/apistra
+          uv run --project backend flake8 backend/src engineering/softwaretest/*.py tools
+          uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/positive.py
+
+          overused_log="$(mktemp)"
+          if uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/negative_overused_string.py >"${overused_log}" 2>&1; then
+            echo "Overused-string negative convention fixture unexpectedly passed"
+            exit 1
+          fi
+          grep -q WPS226 "${overused_log}"
+
+          magic_log="$(mktemp)"
+          if uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/negative_magic_number.py >"${magic_log}" 2>&1; then
+            echo "Magic-number negative convention fixture unexpectedly passed"
+            exit 1
+          fi
+          grep -q WPS432 "${magic_log}"
+
+          if grep -R -n -E '#[[:space:]]*(noqa[[:space:]]*$|type:[[:space:]]*ignore[[:space:]]*$|ruff:[[:space:]]*noqa|pylint:[[:space:]]*disable=all)' backend/src engineering tools; then
+            echo "Blanket Python suppression detected"
+            exit 1
+          fi
       - name: CI-TS-06 and CI-TS-16 public Softwaretest.it contract preflight
         run: python engineering/softwaretest/preflight.py
 

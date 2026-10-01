@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import datetime
 from threading import RLock
 from uuid import UUID
 
@@ -17,7 +18,11 @@ class InMemoryProjectStore:
         self.audit_events: list[ProjectAuditEvent] = []
 
     def create(
-        self, project, event, idempotency_key, request_fingerprint
+        self,
+        project: Project,
+        event: ProjectAuditEvent,
+        idempotency_key: str,
+        request_fingerprint: str,
     ) -> tuple[Project | None, str | None]:
         with self._lock:
             idempotency = self._idempotency.get((project.owner_administrator_id, idempotency_key))
@@ -57,7 +62,14 @@ class InMemoryProjectStore:
             return project if project and project.owner_administrator_id == owner_id else None
 
     def update(
-        self, owner_id, project_id, expected_version, name, key, updated_at, event
+        self,
+        owner_id: UUID,
+        project_id: UUID,
+        expected_version: int,
+        name: str,
+        key: str,
+        updated_at: datetime,
+        event: ProjectAuditEvent,
     ) -> tuple[Project | None, str | None]:
         with self._lock:
             current = self.get_for_owner(owner_id, project_id)
@@ -84,7 +96,12 @@ class InMemoryProjectStore:
             return updated, None
 
     def archive(
-        self, owner_id, project_id, expected_version, updated_at, event
+        self,
+        owner_id: UUID,
+        project_id: UUID,
+        expected_version: int,
+        updated_at: datetime,
+        event: ProjectAuditEvent,
     ) -> tuple[Project | None, str | None]:
         with self._lock:
             current = self.get_for_owner(owner_id, project_id)
