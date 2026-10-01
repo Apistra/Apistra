@@ -77,6 +77,42 @@ def _normalise_markdown_lines(value: str) -> str:
     return " ".join(line.strip() for line in value.splitlines() if line.strip())
 
 
+def _new_step(line: str) -> dict[str, str] | None:
+    match = STEP_PATTERN.match(line)
+    if not match:
+        return None
+    number, kind, role, action = match.groups()
+    return {
+        "number": number,
+        "action": f"{role}: {action}",
+        "test_data": "",
+        "expected": "",
+        "kind": kind,
+    }
+
+
+def _step_field(line: str) -> tuple[str, str] | None:
+    fields = {
+        "**Test data:**": "test_data",
+        "**Expected result:**": "expected",
+    }
+    for prefix, field in fields.items():
+        if line.startswith(prefix):
+            return field, line.removeprefix(prefix).strip()
+    return None
+
+
+def _validate_steps(steps: list[dict[str, str]]) -> None:
+    if not steps:
+        raise ValueError("manual case has no procedure steps")
+    for index, step in enumerate(steps, 1):
+        if int(step.pop("number")) != index:
+            raise ValueError("manual steps must be consecutively numbered")
+        step.pop("kind")
+        if not step["action"] or not step["expected"]:
+            raise ValueError(f"step {index} has no action or expected result")
+
+
 def _parse_steps(text: str) -> list[dict[str, str]]:
     procedure = _section(text, "Procedure", "Cleanup")
     steps: list[dict[str, str]] = []
@@ -86,41 +122,25 @@ def _parse_steps(text: str) -> list[dict[str, str]]:
         line = raw_line.strip()
         if not line:
             continue
-        match = STEP_PATTERN.match(line)
-        if match:
+        new_step = _new_step(line)
+        if new_step:
             if current:
                 steps.append(current)
-            number, kind, role, action = match.groups()
-            current = {
-                "number": number,
-                "action": f"{role}: {action}",
-                "test_data": "",
-                "expected": "",
-                "kind": kind,
-            }
+            current = new_step
             active_field = "action"
             continue
         if current is None:
             raise ValueError("content found before the first procedure step")
-        if line.startswith("**Test data:**"):
-            current["test_data"] = line.removeprefix("**Test data:**").strip()
-            active_field = "test_data"
-        elif line.startswith("**Expected result:**"):
-            current["expected"] = line.removeprefix("**Expected result:**").strip()
-            active_field = "expected"
+        field = _step_field(line)
+        if field:
+            field_name, value = field
+            current[field_name] = value
+            active_field = field_name
         elif active_field:
             current[active_field] = f"{current[active_field]} {line}".strip()
     if current:
         steps.append(current)
-
-    for index, step in enumerate(steps, 1):
-        if int(step.pop("number")) != index:
-            raise ValueError("manual steps must be consecutively numbered")
-        step.pop("kind")
-        if not step["action"] or not step["expected"]:
-            raise ValueError(f"step {index} has no action or expected result")
-    if not steps:
-        raise ValueError("manual case has no procedure steps")
+    _validate_steps(steps)
     return steps
 
 

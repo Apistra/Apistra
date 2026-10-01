@@ -46,6 +46,7 @@ def main() -> int:
         ("CAP00-ACCESS-014", "CI-TS-14 bootstrap shell accessibility"),
         ("CAP00-PACKAGE-015", "CI-TS-15 immutable packaging"),
         ("CAP00-REPORT-016", "CI-TS-16 public contract and lossless outbox"),
+        ("CAP00-COMPLEXITY-017", "CI-TS-17 cyclomatic complexity"),
     ]
     bundle = {
         "schema_version": "1.0",

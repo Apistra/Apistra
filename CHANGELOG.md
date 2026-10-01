@@ -6,11 +6,16 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
-- Split the CI quality matrix into explicit executable stages and limited CI-TS-12 to deterministic resource and complexity contracts until representative performance infrastructure exists.
+- Split the CI quality matrix into explicit executable stages and limited CI-TS-12 to deterministic resource and boundary-load contracts until representative performance infrastructure exists.
 - Published all six CAP-01 manual definitions to Softwaretest.it with exact field-/ordered-step read-back, stable source/payload fingerprints, zero-result separation, and an idempotent protected-CI publisher.
+
+### Changed
+
+- Refactored API route composition, Softwaretest.it parsing/reporting, architecture analysis, repository-contract validation, and immutable-candidate verification into smaller single-purpose functions without changing their external contracts.
 
 ### Added
 
+- A fail-closed CI-TS-17 cyclomatic-complexity gate with a hard maximum of 10 for Python and TypeScript/TSX/JavaScript, including retained positive and negative analyser fixtures.
 - Guarded CAP-01 local-staging fixture application with deterministic Atlas and
   Orion ownership, disabled foreign login, secret-free application receipts,
   and explicit environment/run/reset gates outside the product HTTP API.

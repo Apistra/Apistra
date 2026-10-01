@@ -30,12 +30,7 @@ def get_json(url: str) -> dict[str, object]:
         return json.load(response)
 
 
-def verify_identity_round_trip(web_base: str) -> None:
-    """Exercise bootstrap and immediate revocation through the web/API boundary."""
-
-    installation = get_json(f"{web_base}/api/v1/installation")
-    if installation != {"bootstrap_available": True}:
-        raise RuntimeError("fresh candidate did not expose the bootstrap state")
+def _bootstrap_administrator(web_base: str) -> tuple[str, str, dict[str, object], str]:
     username = "candidate-administrator"
     password = secrets.token_urlsafe(24)
     request = urllib.request.Request(
@@ -62,6 +57,12 @@ def verify_identity_round_trip(web_base: str) -> None:
     session_cookie = set_cookie.split(";", 1)[0]
     if receipt.get("administrator", {}).get("username") != username:
         raise RuntimeError("administrator bootstrap receipt did not match")
+    return username, password, receipt, session_cookie
+
+
+def _create_project(
+    web_base: str, session_cookie: str, csrf_token: str
+) -> dict[str, object]:
     project_request = urllib.request.Request(
         f"{web_base}/api/v1/projects",
         data=json.dumps({"name": "Atlas Research", "key": "ATLAS"}).encode("utf-8"),
@@ -70,7 +71,7 @@ def verify_identity_round_trip(web_base: str) -> None:
             "cookie": session_cookie,
             "idempotency-key": "staging-create-atlas",
             "x-correlation-id": "staging-project-create",
-            "x-csrf-token": receipt["csrf_token"],
+            "x-csrf-token": csrf_token,
         },
         method="POST",
     )
@@ -78,15 +79,25 @@ def verify_identity_round_trip(web_base: str) -> None:
         if response.status != 201 or response.headers.get("etag") != '"1"':
             raise RuntimeError("project creation did not return its initial version")
         project = json.load(response)
-    project_id = project.get("id")
     if project.get("key") != "ATLAS" or project.get("status") != "ACTIVE":
         raise RuntimeError("project creation receipt did not match")
+    return project
+
+
+def _verify_project_list(
+    web_base: str, session_cookie: str, project_id: object
+) -> None:
     listed_request = urllib.request.Request(
         f"{web_base}/api/v1/projects", headers={"cookie": session_cookie}
     )
     listed = json.load(urllib.request.urlopen(listed_request, timeout=3))
     if [item.get("id") for item in listed.get("items", [])] != [project_id]:
         raise RuntimeError("authorised project list did not match")
+
+
+def _update_and_archive_project(
+    web_base: str, session_cookie: str, csrf_token: str, project_id: object
+) -> None:
     update_request = urllib.request.Request(
         f"{web_base}/api/v1/projects/{project_id}",
         data=json.dumps({"name": "Atlas Platform", "key": "ATLAS-2"}).encode("utf-8"),
@@ -94,7 +105,7 @@ def verify_identity_round_trip(web_base: str) -> None:
             "content-type": "application/json",
             "cookie": session_cookie,
             "if-match": '"1"',
-            "x-csrf-token": receipt["csrf_token"],
+            "x-csrf-token": csrf_token,
         },
         method="PATCH",
     )
@@ -108,13 +119,18 @@ def verify_identity_round_trip(web_base: str) -> None:
         headers={
             "cookie": session_cookie,
             "if-match": '"2"',
-            "x-csrf-token": receipt["csrf_token"],
+            "x-csrf-token": csrf_token,
         },
         method="POST",
     )
     archived = json.load(urllib.request.urlopen(archive_request, timeout=5))
     if archived.get("status") != "ARCHIVED" or archived.get("version") != 3:
         raise RuntimeError("version-checked project archive did not match")
+
+
+def _verify_audit(
+    web_base: str, session_cookie: str, username: str, project_id: object
+) -> None:
     audit_request = urllib.request.Request(
         f"{web_base}/api/v1/audit-events", headers={"cookie": session_cookie}
     )
@@ -148,6 +164,11 @@ def verify_identity_round_trip(web_base: str) -> None:
         raise RuntimeError(
             "project audit attribution did not match the authenticated context"
         )
+
+
+def _verify_revocation(
+    web_base: str, session_cookie: str, csrf_token: str, username: str
+) -> None:
     current_request = urllib.request.Request(
         f"{web_base}/api/v1/session", headers={"cookie": session_cookie}
     )
@@ -156,7 +177,7 @@ def verify_identity_round_trip(web_base: str) -> None:
         raise RuntimeError("issued session was not readable")
     revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
-        headers={"cookie": session_cookie, "x-csrf-token": receipt["csrf_token"]},
+        headers={"cookie": session_cookie, "x-csrf-token": csrf_token},
         method="DELETE",
     )
     with urllib.request.urlopen(revoke, timeout=3) as response:
@@ -169,6 +190,11 @@ def verify_identity_round_trip(web_base: str) -> None:
             raise
     else:
         raise RuntimeError("revoked session remained usable")
+
+
+def _sign_in_after_revocation(
+    web_base: str, username: str, password: str
+) -> tuple[dict[str, object], str]:
     sign_in_request = urllib.request.Request(
         f"{web_base}/api/v1/sessions",
         data=json.dumps({"username": username, "password": password}).encode("utf-8"),
@@ -183,10 +209,14 @@ def verify_identity_round_trip(web_base: str) -> None:
             raise RuntimeError("sign-in after revocation did not return 201")
         new_receipt = json.load(response)
         new_cookie = response.headers.get("set-cookie", "").split(";", 1)[0]
+    return new_receipt, new_cookie
+
+
+def _verify_revocation_audit(web_base: str, session_cookie: str) -> None:
     post_revoke_audit = json.load(
         urllib.request.urlopen(
             urllib.request.Request(
-                f"{web_base}/api/v1/audit-events", headers={"cookie": new_cookie}
+                f"{web_base}/api/v1/audit-events", headers={"cookie": session_cookie}
             ),
             timeout=3,
         )
@@ -195,17 +225,41 @@ def verify_identity_round_trip(web_base: str) -> None:
         event.get("event_type") for event in post_revoke_audit.get("items", [])
     }:
         raise RuntimeError("session revocation was not attributable in the audit log")
+
+
+def _revoke_cleanup_session(
+    web_base: str, session_cookie: str, csrf_token: object
+) -> None:
     cleanup_revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
         headers={
-            "cookie": new_cookie,
-            "x-csrf-token": new_receipt["csrf_token"],
+            "cookie": session_cookie,
+            "x-csrf-token": str(csrf_token),
         },
         method="DELETE",
     )
     with urllib.request.urlopen(cleanup_revoke, timeout=3) as response:
         if response.status != 204:
             raise RuntimeError("cleanup session revocation did not return 204")
+
+
+def verify_identity_round_trip(web_base: str) -> None:
+    """Exercise bootstrap and immediate revocation through the web/API boundary."""
+
+    installation = get_json(f"{web_base}/api/v1/installation")
+    if installation != {"bootstrap_available": True}:
+        raise RuntimeError("fresh candidate did not expose the bootstrap state")
+    username, password, receipt, session_cookie = _bootstrap_administrator(web_base)
+    csrf_token = str(receipt["csrf_token"])
+    project = _create_project(web_base, session_cookie, csrf_token)
+    project_id = project.get("id")
+    _verify_project_list(web_base, session_cookie, project_id)
+    _update_and_archive_project(web_base, session_cookie, csrf_token, project_id)
+    _verify_audit(web_base, session_cookie, username, project_id)
+    _verify_revocation(web_base, session_cookie, csrf_token, username)
+    new_receipt, new_cookie = _sign_in_after_revocation(web_base, username, password)
+    _verify_revocation_audit(web_base, new_cookie)
+    _revoke_cleanup_session(web_base, new_cookie, new_receipt["csrf_token"])
 
 
 def apply_cap01_fixture(

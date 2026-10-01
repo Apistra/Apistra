@@ -18,6 +18,7 @@ Status: IMPLEMENTED AND HOSTED VERIFIED; external acceptance pending
 - CI-TS-14: semantic landmarks, label association, dark color scheme, reduced-motion contract, and web unit/build checks. Browser/screen-reader measurement remains assigned to the design gate.
 - CI-TS-15: clean-commit image build, local archives, manifest, SBOM, Compose health, marker match, and exact-image verification.
 - CI-TS-16: public OpenAPI preflight, all five result statuses, redaction, stable command-specific idempotency, unsupported-status rejection, result bundle, dry-run outbox, and authenticated create/import/finalize/report/receipt round-trip.
+- CI-TS-17: Ruff and ESLint classic McCabe complexity at a hard maximum of 10 per function across Python, TypeScript/TSX, and JavaScript scope; retained complexity-3 fixtures pass and complexity-11 fixtures fail.
 
 Stable definitions: `tests/bdd/features/cap00-bootstrap.feature` and `tests/manual/CAP00-MAN-001.md`.
 

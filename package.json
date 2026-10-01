@@ -12,11 +12,14 @@
     "architecture:typescript": "node tools/architecture/verify-typescript-architecture.mjs",
     "architecture:typescript-fixtures": "node tools/architecture/verify-typescript-fixtures.mjs",
     "build:web": "corepack pnpm --filter @apistra/web build",
+    "complexity": "eslint apps/web/src tools",
     "test:web": "corepack pnpm --filter @apistra/web test",
     "typecheck": "corepack pnpm --filter @apistra/web typecheck"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "8.71.0",
     "dependency-cruiser": "18.4.0",
+    "eslint": "10.11.0",
     "typescript": "6.0.3"
   }
 }
