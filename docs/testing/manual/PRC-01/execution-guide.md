@@ -11,8 +11,8 @@ This guide prepares one immutable local candidate for the six published
 Run from the repository root in WSL:
 
 ```bash
-python tools/release/build_candidate.py
-python -m tools.staging.manual_acceptance start \
+python3 tools/release/build_candidate.py
+python3 -m tools.staging.manual_acceptance start \
   artifacts/cap00-candidate/candidate-manifest.json \
   --run-id cap01-acceptance-01
 ```
@@ -29,11 +29,11 @@ Use a fresh private browser profile for every case. Before each case, reset the
 exact required fixture:
 
 ```bash
-python -m tools.staging.manual_acceptance fixture FX-PRC-01-FRESH \
+python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-FRESH \
   --run-id cap01-acceptance-01
-python -m tools.staging.manual_acceptance fixture FX-PRC-01-ADMIN-NO-PROJECT \
+python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-ADMIN-NO-PROJECT \
   --run-id cap01-acceptance-01
-python -m tools.staging.manual_acceptance fixture FX-PRC-01-ISOLATION \
+python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-ISOLATION \
   --run-id cap01-acceptance-01
 ```
 
@@ -53,8 +53,8 @@ Softwaretest.it against the candidate commit printed by the session tool.
 ## 3. Check and close the session
 
 ```bash
-python -m tools.staging.manual_acceptance status --run-id cap01-acceptance-01
-python -m tools.staging.manual_acceptance stop --run-id cap01-acceptance-01
+python3 -m tools.staging.manual_acceptance status --run-id cap01-acceptance-01
+python3 -m tools.staging.manual_acceptance stop --run-id cap01-acceptance-01
 ```
 
 `stop` removes containers and volumes and deletes the local runtime secrets.
