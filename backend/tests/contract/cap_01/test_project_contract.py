@@ -11,9 +11,7 @@ ROOT = Path(__file__).resolve().parents[4]
 
 def test_cap01_administration_contract_matches_runtime_routes() -> None:
     contract = json.loads(
-        (ROOT / "contracts/openapi/cap01-administration.openapi.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "contracts/openapi/cap01-administration.openapi.json").read_text(encoding="utf-8")
     )
     runtime = create_app(
         RuntimeSettings("api", "0.1.0", "contract", "test", secure_cookies=True)
@@ -25,9 +23,7 @@ def test_cap01_administration_contract_matches_runtime_routes() -> None:
 
 def test_project_request_contract_is_closed_and_bounded() -> None:
     contract = json.loads(
-        (ROOT / "contracts/openapi/cap01-administration.openapi.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "contracts/openapi/cap01-administration.openapi.json").read_text(encoding="utf-8")
     )
     schema = contract["components"]["schemas"]["ProjectRequest"]
     assert schema["additionalProperties"] is False
