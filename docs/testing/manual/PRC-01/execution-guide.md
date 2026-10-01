@@ -12,7 +12,7 @@ Run from the repository root in WSL:
 
 ```bash
 python tools/release/build_candidate.py
-python tools/staging/manual_acceptance.py start \
+python -m tools.staging.manual_acceptance start \
   artifacts/cap00-candidate/candidate-manifest.json \
   --run-id cap01-acceptance-01
 ```
@@ -29,11 +29,11 @@ Use a fresh private browser profile for every case. Before each case, reset the
 exact required fixture:
 
 ```bash
-python tools/staging/manual_acceptance.py fixture FX-PRC-01-FRESH \
+python -m tools.staging.manual_acceptance fixture FX-PRC-01-FRESH \
   --run-id cap01-acceptance-01
-python tools/staging/manual_acceptance.py fixture FX-PRC-01-ADMIN-NO-PROJECT \
+python -m tools.staging.manual_acceptance fixture FX-PRC-01-ADMIN-NO-PROJECT \
   --run-id cap01-acceptance-01
-python tools/staging/manual_acceptance.py fixture FX-PRC-01-ISOLATION \
+python -m tools.staging.manual_acceptance fixture FX-PRC-01-ISOLATION \
   --run-id cap01-acceptance-01
 ```
 
@@ -53,8 +53,8 @@ Softwaretest.it against the candidate commit printed by the session tool.
 ## 3. Check and close the session
 
 ```bash
-python tools/staging/manual_acceptance.py status --run-id cap01-acceptance-01
-python tools/staging/manual_acceptance.py stop --run-id cap01-acceptance-01
+python -m tools.staging.manual_acceptance status --run-id cap01-acceptance-01
+python -m tools.staging.manual_acceptance stop --run-id cap01-acceptance-01
 ```
 
 `stop` removes containers and volumes and deletes the local runtime secrets.
