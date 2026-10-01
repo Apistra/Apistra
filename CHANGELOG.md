@@ -11,6 +11,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Added
 
+- Authenticated CAP-01 audit read model with Administrator- and project-owner scoping, exact approved event labels, safe direct project routes, an audit-log route, and immutable staging verification of revocation attribution.
 - CAP-01 isolated project lifecycle with owner-scoped PostgreSQL persistence, idempotent creation,
   optimistic version checks, safe foreign/unknown-project handling, attributable project audit
   events, a versioned administration API contract, and the approved sign-in/project UI flow.
