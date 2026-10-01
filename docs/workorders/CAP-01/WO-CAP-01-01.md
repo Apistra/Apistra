@@ -1,11 +1,11 @@
 # WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session
 
-Version: 0.6-draft
-Status: DRAFT
-Status reason: authenticated Softwaretest.it publication and read-back receipt is pending
-Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: CAP-01 PLANNING APPROVED; IMPLEMENTATION NOT APPROVED
+Version: 0.8-done
+Status: DONE
+Status reason: implementation snapshot c5601e4 passed the complete owned local and hosted CI matrix
+Implementation state: COMPLETE
+Evidence state: COMPLETE FOR THIS WORKORDER; CAPABILITY MATRIX REMAINS WITH WO-CAP-01-05
+Approval state: TECHNICAL WORKORDER REVIEW COMPLETE; CAPABILITY HUMAN ACCEPTANCE REMAINS WITH WO-CAP-01-05
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-01
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED by WO-CAP-01-04; released testcase keys APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-01
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-done; implementation evidence is bound to snapshot c5601e4
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md; the authenticated Softwaretest.it publication/read-back receipt remains the only READY blocker.
+Current evidence does not yet establish this implementation result. Existing code and CAP-00 evidence are an observed baseline only. The CAP-01 expectation, architecture, security, design, and path review is approved in ../../planning/13-cap01-readiness-review.md. WO-CAP-01-04 is DONE and the authenticated Softwaretest.it publication/read-back receipt closes the former READY blocker.
 
 ## Target result
 
@@ -76,6 +76,19 @@ Observed existing paths within the bounded change area:
 - EXISTING: `CHANGELOG.md`
 - EXISTING: `backend/src/apistra/modules/`
 - EXISTING: `backend/src/apistra/entrypoints/api/composition.py`
+- EXISTING: `backend/src/apistra/entrypoints/api/main.py`
+- EXISTING: `backend/src/apistra/entrypoints/migration.py`
+- EXISTING: `backend/src/apistra/platform/runtime.py`
+- EXISTING: `backend/pyproject.toml`
+- EXISTING: `backend/uv.lock`
+- EXISTING: `apps/web/src/app/page.tsx`
+- EXISTING: `apps/web/src/app/layout.tsx`
+- EXISTING: `apps/web/src/app/styles.css`
+- EXISTING: `apps/web/next.config.mjs`
+- EXISTING: `.github/workflows/ci.yml`
+- EXISTING: `deploy/compose/compose.staging.yml`
+- EXISTING: `tools/staging/verify_candidate.py`
+- EXISTING: `tools/contracts/validate_repository.py`
 - EXISTING: `backend/src/apistra/entrypoints/worker/composition.py`
 - EXISTING: `apps/web/src/features/`
 - EXISTING: `backend/tests/unit/`
@@ -90,6 +103,7 @@ Planned additions to the bounded change area after READY:
 
 - PLANNED: `backend/src/apistra/modules/identity/`
 - PLANNED: `apps/web/src/features/administration/`
+- PLANNED: `apps/web/src/app/api/v1/`
 - PLANNED: `backend/tests/unit/cap_01/`
 - PLANNED: `backend/tests/component/cap_01/`
 - PLANNED: `backend/tests/contract/cap_01/`
@@ -98,6 +112,13 @@ Planned additions to the bounded change area after READY:
 - PLANNED: `backend/src/apistra/platform/database/migrations/cap_01/`
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
+
+Change-impact reconciliation: the additional existing paths above are the observed dependency-lock,
+runtime configuration, HTTP/web composition, migration entrypoint, isolated staging composition,
+staging verifier, and CI integration points required
+to make the already-approved identity module reachable and verifiable. They introduce no new capability,
+top-level root, deployment target, or architecture boundary. The expectation, security, and design
+baselines remain unchanged; tests for the touched integration points are mandatory in this workorder.
 
 Architecture path gate: DECIDED for CAP-01 by ADR-019 and the approved CAP-01 mapping; an unlisted path or new root remains blocking.
 
@@ -168,7 +189,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-WO-CAP-01-04 must define and publish the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-01-05 unless a case is explicitly assigned here.
+WO-CAP-01-04 defined and published the applicable catalog-listed scenarios (BDD-AUTH-001, BDD-PROJ-001) before this workorder became READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-01-05 unless a case is explicitly assigned here.
 
 ## Softwaretest.it and CI reporting
 
@@ -188,6 +209,18 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+
+Completion evidence:
+
+- implementation snapshot: `c5601e4ab4e1a8932940a5d9c9812483151dac2b`;
+- hosted CI run: `36890612241`, all required feature-branch jobs passed, including real
+  PostgreSQL integration/migration, 93% backend coverage, architecture, security, packaging,
+  SBOM, isolated staging, identity round-trip, and recovery;
+- local isolated candidate run `local-wo01-complete` passed with API image
+  `sha256:93227e6021e82e7ea52c7e956a8555722155e2b996f185094131407b03888918`, web image
+  `sha256:cc3af3e6dd4e31a4506d8212b012044982d21706a26dc63a5504419abcd02682`, and worker
+  image `sha256:202dd0a9b89227de77dabb4ccc7c2cc2f25f233c7afaed2fa79715c794d0601e`;
+- no password, raw session value, CSRF value, or database credential is retained in evidence.
 
 ## Definition of Done
 

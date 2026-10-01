@@ -14,12 +14,57 @@ x-security: &security
         pids: 100
 
 services:
+  postgres:
+    image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
+    read_only: true
+    user: "999:999"
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      POSTGRES_DB: apistra
+      POSTGRES_USER: apistra
+      POSTGRES_PASSWORD: ${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /var/run/postgresql:size=4m,mode=1777
+      - /var/lib/postgresql/data:uid=999,gid=999,mode=0700
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apistra -d apistra"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+          pids: 100
+    networks: [bootstrap]
+
+  migrate:
+    <<: *security
+    image: ${APISTRA_API_IMAGE:?set APISTRA_API_IMAGE}
+    command: ["python", "-m", "apistra.entrypoints.migration"]
+    environment:
+      APISTRA_COMMIT: ${APISTRA_COMMIT:-unknown}
+      APISTRA_DATABASE_URL: postgresql://apistra:${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}@postgres:5432/apistra
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [bootstrap]
+
   api:
     <<: *security
     image: ${APISTRA_API_IMAGE:?set APISTRA_API_IMAGE}
     environment:
       APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
       APISTRA_FORCE_NOT_READY: ${APISTRA_API_FORCE_NOT_READY:-false}
+      APISTRA_DATABASE_URL: postgresql://apistra:${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}@postgres:5432/apistra
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     ports: ["127.0.0.1:${APISTRA_API_PORT:?set APISTRA_API_PORT}:8080"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
@@ -50,6 +95,10 @@ services:
     image: ${APISTRA_WEB_IMAGE:?set APISTRA_WEB_IMAGE}
     environment:
       APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
+      APISTRA_API_URL: http://api:8080
+    depends_on:
+      api:
+        condition: service_healthy
     ports: ["127.0.0.1:${APISTRA_WEB_PORT:?set APISTRA_WEB_PORT}:3000"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]

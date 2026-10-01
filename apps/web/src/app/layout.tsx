@@ -5,7 +5,7 @@ import "./styles.css";
 
 export const metadata: Metadata = {
   title: "Apistra",
-  description: "CAP-00 bootstrap status"
+  description: "Local-first AI business process orchestration"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

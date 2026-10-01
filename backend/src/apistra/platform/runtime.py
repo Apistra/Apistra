@@ -1,4 +1,4 @@
-"""Runtime configuration for the CAP-00 health-only services."""
+"""Runtime configuration for Apistra services."""
 
 from __future__ import annotations
 
@@ -14,6 +14,9 @@ class RuntimeSettings:
     environment: str
     force_not_ready: bool = False
     heartbeat_path: str = "/tmp/apistra-worker-heartbeat"  # noqa: S108 - container tmpfs
+    database_url: str | None = None
+    session_ttl_seconds: int = 43_200
+    secure_cookies: bool = True
 
     @classmethod
     def from_environment(cls, service: str) -> RuntimeSettings:
@@ -28,6 +31,10 @@ class RuntimeSettings:
                 "APISTRA_HEARTBEAT_PATH",
                 "/tmp/apistra-worker-heartbeat",  # noqa: S108
             ),
+            database_url=os.getenv("APISTRA_DATABASE_URL"),
+            session_ttl_seconds=int(os.getenv("APISTRA_SESSION_TTL_SECONDS", "43200")),
+            secure_cookies=os.getenv("APISTRA_SECURE_COOKIES", "true").lower()
+            in {"1", "true", "yes"},
         )
 
     def marker(self) -> dict[str, str]:

@@ -131,6 +131,7 @@ BUSINESS_PATH_AUTHORITY = (
 )
 BUSINESS_PATH_OBSERVATION = "Repository observation: 2026-09-30 at commit `be7e84d`."
 ALLOWED_REPOSITORY_PATH_ROOTS = {
+    ".github",
     "apps",
     "artifacts",
     "backend",
@@ -145,6 +146,9 @@ ALLOWED_REPOSITORY_PATH_ROOTS = {
     "tests",
     "tools",
 }
+WORKORDER_VERSION_PATTERN = re.compile(
+    r"^Version: (0\.\d+(?:-(?:draft|ready|done))?)$", re.MULTILINE
+)
 ALLOWED_REPOSITORY_ROOT_FILES = {
     "CHANGELOG.md",
     "COMMERCIAL-LICENSE.md",
@@ -426,8 +430,9 @@ def validate_workorder_contract(
     errors: list[str] = []
     if re.search(r"^## Stop conditions\S", text, re.MULTILINE):
         errors.append(f"{path}: malformed Stop conditions heading")
-    if "Version: 0.6-draft" not in text:
-        errors.append(f"{path}: workorder contract must use Version: 0.6-draft")
+    version_match = WORKORDER_VERSION_PATTERN.search(text)
+    if version_match is None:
+        errors.append(f"{path}: workorder contract must use a supported 0.x revision")
 
     status_match = re.search(r"^Status: (.+)$", text, re.MULTILINE)
     status = status_match.group(1) if status_match else ""
@@ -449,8 +454,9 @@ def validate_workorder_contract(
         errors.append(f"{path}: missing or unsupported delivery class")
     if f"- Owned verification group: TST-{workorder_id}" not in text:
         errors.append(f"{path}: owned verification group must be TST-{workorder_id}")
-    if "- Specification revision: 0.6-draft" not in text:
-        errors.append(f"{path}: missing 0.6 specification revision binding")
+    version = version_match.group(1) if version_match else ""
+    if f"- Specification revision: {version}" not in text:
+        errors.append(f"{path}: specification revision must match Version")
     if "- **Positive oracle:**" not in text or "- **Negative oracle:**" not in text:
         errors.append(f"{path}: positive and negative test oracles are mandatory")
     if "- Positive expectation:" not in text or "- Counterexample:" not in text:
@@ -810,8 +816,12 @@ def main() -> int:
         )
         if fixture_errors:
             errors.append("positive workorder contract fixture must pass")
-        invalid_workorder = fixture_text.replace(
-            "Status: DRAFT", "Status: PLANNED", 1
+        invalid_workorder = re.sub(
+            r"^Status: .+$",
+            "Status: PLANNED",
+            fixture_text,
+            count=1,
+            flags=re.MULTILINE,
         ).replace("BDD-AUTH-001", "BDD-CAP-01-01")
         invalid_errors, _, _ = validate_workorder_contract(
             fixture_args[0], fixture_args[1], invalid_workorder, *fixture_args[2:]
