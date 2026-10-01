@@ -1,7 +1,7 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 0.3-draft
-Status: DRAFT; only external Softwaretest.it publishing readiness blocks implementation READY
+Version: 0.4-draft
+Status: READY FOR SEQUENTIAL IMPLEMENTATION AFTER WO-CAP-01-04 INTEGRATION; NOT IMPLEMENTED OR ACCEPTED
 Release: 0.1
 Assurance: EXTENDED
 
@@ -9,8 +9,8 @@ Assurance: EXTENDED
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
 **Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** The authenticated Softwaretest.it definition publication and field-/step-level read-back receipt remains unavailable.
-**Next step:** Complete only that external publishing gate before moving an independently executable first implementation workorder to READY.
+**Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
+**Next step:** Integrate WO-CAP-01-04 into `test`, then move only dependency-satisfied WO-CAP-01-01 to READY and implement the remaining workorders in their declared order.
 
 ## Goal and value
 
@@ -90,7 +90,7 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 ## Test and evidence contract
 
 - BDD-AUTH-001, BDD-PROJ-001, and MT-PRC-01-001 through MT-PRC-01-006 are defined locally and mapped to PRC-01.
-- Definition, Softwaretest.it publication, fixtures, execution, and reporting are separate evidence states.
+- Definition and Softwaretest.it publication are verified; fixtures, execution, behavioral results, reporting, and acceptance remain separate evidence states.
 - Deterministic fixture descriptors are implemented locally; actual staging application and verification remain capability-execution evidence.
 - The unchanged candidate runs the complete scope matrix before manual staging acceptance.
 
@@ -112,6 +112,10 @@ The CAP-01 expectation, architecture, security, path, design, BDD, manual-case,
 and local fixture-definition decisions are recorded in
 `../planning/13-cap01-readiness-review.md`.
 
-Only the authenticated Softwaretest.it publication/read-back receipt remains
-blocking. No implementing agent may waive or infer that receipt.
+The authenticated Softwaretest.it publication/read-back receipt is verified
+for manifest SHA-256
+`b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`.
+No unresolved planning decision blocks the first dependency-satisfied
+implementation workorder. Later workorders, staging execution, behavioral
+evidence, capability acceptance, and production approval are not inferred.
 

@@ -7,6 +7,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 ## [Unreleased]
 
 - Split the CI quality matrix into explicit executable stages and limited CI-TS-12 to deterministic resource and complexity contracts until representative performance infrastructure exists.
+- Published all six CAP-01 manual definitions to Softwaretest.it with exact field-/ordered-step read-back, stable source/payload fingerprints, zero-result separation, and an idempotent protected-CI publisher.
 
 ### Added
 

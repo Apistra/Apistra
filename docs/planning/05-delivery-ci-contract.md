@@ -112,6 +112,7 @@ CI-TS-06 — Schema and consumer contracts
 - Trigger: API, workflow, event, connector, callback, or persistence contract changes
 - Scope: OpenAPI, JSON Schema, compatibility, round-trip
 - Oracle: compatible changes or explicit approved version break
+- Softwaretest.it definition publication: feature branches validate a lossless local CAP-01 manifest and adapter behavior; trusted `test`, `staging`, and `main` pushes use the protected environment to publish the six committed manual definitions idempotently and require field- and ordered-step read-back before the job can pass. Publication creates no execution result.
 
 CI-TS-07 — Integration tests
 - Trigger: data, adapter, execution, or infrastructure changes
@@ -138,12 +139,12 @@ CI-TS-11 — Migration tests
 - Scope: upgrade from supported previous state, failed migration recovery, forward compatibility
 - Oracle: deterministic success or safe documented recovery
 
-CI-TS-12 — Deterministic resource and complexity limits
+CI-TS-12 — Deterministic resource, boundary-load, and complexity limits
 - Trigger: resource declarations, input/batch limits, budget policies, runtime configuration, or release candidates
 - Scope: declared CPU, memory, PID, temporary-storage and loopback-exposure limits plus deterministic input, batch, retry, token, cost, and complexity bounds as those contracts are introduced
 - Oracle: every applicable bound is explicit, fail-closed, and exercised at/below/above its boundary; an empty applicable suite fails
 - Current command: `uv run --project backend pytest --no-cov backend/tests/resource`; the separate aggregate backend run enforces the repository-wide coverage threshold.
-- Explicit limitation: this stage does not measure latency, throughput, or concurrent load. There is currently no running representative candidate with controlled hardware, data scale, warm-up, and measurement windows from which a defensible performance threshold could be derived.
+- Explicit limitation: pipeline load coverage is restricted to deterministic at/below/above boundary cases, bounded batches, declared container resources, and fail-closed overload behavior that do not require a running installation or shared-runner timing. It does not measure latency, throughput, or concurrent load and does not claim sustained-load, scalability, or capacity evidence. There is currently no running representative candidate with controlled hardware, data scale, warm-up, and measurement windows from which a defensible performance threshold could be derived.
 - Activation rule for future performance gates: add a separately identified stage only after a representative running candidate and reproducible environment exist; record workload, hardware, data scale, warm-up, duration, thresholds, variance, and abort limits before execution.
 
 CI-TS-13 — Resilience and recovery

@@ -179,9 +179,13 @@ Direct URLs are stable test inputs, not visible navigation labels:
 The product owner approved this exact revision on 2026-09-30 for DSN-001
 through DSN-004 and the six `MTP-PRC-01` cases. The maintained sources and
 rendered previews define information hierarchy; implementation still must
-prove states, responsive behaviour, accessibility, and interaction. No
-approval is inferred for DSN-005 through DSN-021. Test definitions remain
-`NOT PUBLISHED` and `NOT EXECUTED` until their separate gates are satisfied.
+prove states, responsive behaviour, accessibility, and interaction. The
+approved cases include only the three named CAP-01 audit events, the `Audit`
+navigation action, and the `Audit log` page-title oracle in sections 4.2–4.4.
+This narrow evidence view does not approve the general DSN-020 information
+architecture or any unrelated audit-log behavior. No approval is inferred for
+DSN-005 through DSN-021 beyond this narrow CAP-01 evidence view. The six definitions are published but
+remain `NOT EXECUTED` until their separate execution gate is satisfied.
 
 ## 5. Workflow editor contract
 
