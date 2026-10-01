@@ -134,8 +134,39 @@ class SoftwaretestContractTests(unittest.TestCase):
         }
         _, entries, _ = publisher.build_payloads(bundle, "c" * 36)
         self.assertEqual(
-            {entry["status"] for entry in entries}, publisher.ALLOWED_STATUSES
+            {entry["status"] for entry in entries if entry["kind"] == "test"},
+            publisher.ALLOWED_STATUSES,
         )
+
+    def test_payload_contains_required_stage_and_canonical_timestamps(self) -> None:
+        bundle = {
+            "candidate": {"commit": "a" * 40, "manifest_sha256": "b" * 64},
+            "started_at": "2026-10-01T12:34:56.123987+00:00",
+            "finished_at": "2026-10-01T12:35:00.987654Z",
+            "results": [
+                {
+                    "test_id": "CAP00-UNIT-001",
+                    "status": "PASSED",
+                    "started_at": "2026-10-01T14:34:56.123987+02:00",
+                    "finished_at": "2026-10-01T12:35:00.987654Z",
+                }
+            ],
+        }
+        report, entries, final = publisher.build_payloads(bundle, "c" * 36)
+        self.assertEqual(report["started_at"], "2026-10-01T12:34:56.123Z")
+        self.assertEqual(final["finished_at"], "2026-10-01T12:35:00.987Z")
+        self.assertEqual(entries[0]["kind"], "stage")
+        self.assertEqual(entries[0]["status"], "PASSED")
+        self.assertEqual(entries[1]["started_at"], report["started_at"])
+
+    def test_stage_status_preserves_non_passing_outcome(self) -> None:
+        self.assertEqual(
+            publisher.aggregate_stage_status({"PASSED", "FAILED"}), "FAILED"
+        )
+        self.assertEqual(publisher.aggregate_stage_status({"PASSED", "ERROR"}), "ERROR")
+        self.assertEqual(publisher.aggregate_stage_status({"SKIPPED"}), "SKIPPED")
+        with self.assertRaises(ValueError):
+            publisher.aggregate_stage_status(set())
 
     def test_unsupported_status_is_not_invented(self) -> None:
         bundle = {
@@ -197,6 +228,7 @@ class SoftwaretestContractTests(unittest.TestCase):
         entries = [{"test_id": "CAP00-UNIT-001", "status": "PASSED"}]
         document = {
             "status": "finalized",
+            "completeness": "COMPLETE",
             "manifest": {
                 **report,
                 "started_at": "2026-09-30T00:00:00Z",
@@ -209,6 +241,21 @@ class SoftwaretestContractTests(unittest.TestCase):
         self.assertEqual(
             publisher.verify_readback(report, entries, document),
             ["entries[0].status: value differs"],
+        )
+
+    def test_readback_rejects_incomplete_required_stage(self) -> None:
+        document = {
+            "status": "INCOMPLETE",
+            "completeness": "INCOMPLETE",
+            "manifest": {},
+            "entries": [],
+        }
+        self.assertEqual(
+            publisher.verify_readback({}, [], document),
+            [
+                "status: report is not finalised",
+                "completeness: required stages or tests are missing",
+            ],
         )
 
     def test_atomic_receipt_write_leaves_no_temporary_file(self) -> None:
@@ -301,6 +348,7 @@ class SoftwaretestContractTests(unittest.TestCase):
             return {
                 "report_id": "report-1",
                 "status": "FINALIZED",
+                "completeness": "COMPLETE",
                 "manifest": report,
                 "entries": entries,
             }

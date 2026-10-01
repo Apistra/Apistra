@@ -74,16 +74,40 @@ def redact(value: Any, secrets: tuple[str, ...]) -> Any:
     return value
 
 
+def canonical_datetime(value: str) -> str:
+    """Return an RFC 3339 UTC timestamp at the API's millisecond precision."""
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("report timestamps must include a timezone")
+    return (
+        parsed.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    )
+
+
+def aggregate_stage_status(statuses: set[str]) -> str:
+    """Derive the required stage result without hiding a non-passing test."""
+    if not statuses:
+        raise ValueError("at least one result is required")
+    for status in ("ERROR", "FAILED", "CANCELLED"):
+        if status in statuses:
+            return status
+    if statuses == {"SKIPPED"}:
+        return "SKIPPED"
+    return "PASSED"
+
+
 def build_payloads(
     bundle: dict[str, Any], cycle_id: str
 ) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, str]]:
-    now = datetime.now(UTC).isoformat()
+    now = canonical_datetime(datetime.now(UTC).isoformat())
     candidate = bundle["candidate"]
     results = bundle["results"]
     statuses = {result["status"] for result in results}
     unsupported = statuses - ALLOWED_STATUSES
     if unsupported:
         raise ValueError(f"unsupported result statuses: {sorted(unsupported)}")
+    started_at = canonical_datetime(bundle.get("started_at", now))
+    finished_at = canonical_datetime(bundle.get("finished_at", now))
     report = {
         "cycle_id": cycle_id,
         "external_key": f"cap00-{candidate['commit']}",
@@ -91,7 +115,7 @@ def build_payloads(
         "job_id": bundle.get("job_id", "cap00-candidate"),
         "commit_sha": candidate["commit"],
         "artifact_digest": candidate["manifest_sha256"],
-        "started_at": bundle.get("started_at", now),
+        "started_at": started_at,
         "contract_version": "1.0",
         "source_repository": "Apistra/Apistra",
         "capability_ids": ["CAP-00"],
@@ -105,7 +129,7 @@ def build_payloads(
             }
         ],
     }
-    entries = [
+    test_entries = [
         {
             "kind": "test",
             "stage_id": "cap00",
@@ -115,8 +139,8 @@ def build_payloads(
             "name": result.get("name", result["test_id"]),
             "attempt_no": result.get("attempt_no", 1),
             "status": result["status"],
-            "started_at": result.get("started_at", now),
-            "finished_at": result.get("finished_at", now),
+            "started_at": canonical_datetime(result.get("started_at", now)),
+            "finished_at": canonical_datetime(result.get("finished_at", now)),
             "duration_ms": int(result.get("duration_ms", 0)),
             "error_details": result.get("error_details", ""),
             "metrics": result.get("metrics", []),
@@ -125,7 +149,23 @@ def build_payloads(
         }
         for result in results
     ]
-    return report, entries, {"finished_at": bundle.get("finished_at", now)}
+    stage_entry = {
+        "kind": "stage",
+        "stage_id": "cap00",
+        "job_id": "cap00-candidate",
+        "suite": "CAP-00",
+        "name": "CAP-00 required CI stage",
+        "attempt_no": 1,
+        "status": aggregate_stage_status(statuses),
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "duration_ms": 0,
+        "error_details": "",
+        "metrics": [],
+        "findings": [],
+        "attachments": [],
+    }
+    return report, [stage_entry, *test_entries], {"finished_at": finished_at}
 
 
 def request_json(
@@ -216,6 +256,8 @@ def verify_readback(
     _compare_requested(entries, document.get("entries"), "entries", mismatches)
     if str(document.get("status", "")).upper() not in {"FINALIZED", "COMPLETE"}:
         mismatches.append("status: report is not finalised")
+    if str(document.get("completeness", "")).upper() != "COMPLETE":
+        mismatches.append("completeness: required stages or tests are missing")
     return mismatches
 
 
@@ -624,7 +666,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--command-revision",
-        default="ci-guide-1.1",
+        default="ci-guide-1.1-stage-v2",
         help="Rotate idempotency keys after a rejected command contract changes.",
     )
     parser.add_argument("--apply", action="store_true")
