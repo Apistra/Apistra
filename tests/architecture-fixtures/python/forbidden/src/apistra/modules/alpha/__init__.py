@@ -1,0 +1,1 @@
+"""Forbidden alpha module."""

@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+
+disallowWorkspaceCycles: true
+
+minimumReleaseAge: 1440
+
+minimumReleaseAgeExclude:
+  - dependency-cruiser@18.4.0
+  - typescript@6.0.3

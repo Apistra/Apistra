@@ -1,0 +1,12 @@
+[flake8]
+select = WPS226,WPS432
+max-string-usages = 3
+exclude =
+    .git,
+    .venv,
+    node_modules,
+    backend/tests,
+    engineering/softwaretest/tests,
+    tests
+show-source = true
+statistics = true

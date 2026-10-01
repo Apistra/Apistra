@@ -1,176 +1,65 @@
 # Capabilities and Gate-Based Roadmap
 
-Version: 0.1-draft
+Version: 0.2-draft
 Status: DRAFT
 
-The roadmap has no dates. Progress depends on evidence gates, not elapsed time.
+## Control summary
+
+**Result:** Apistra is split into nineteen vertically testable capabilities with one canonical contract per file and a gate-based release order.
+**Change:** The former catalogue summaries are now indexed to detailed files under `docs/capabilities/`; no implementation or acceptance is inferred.
+**Current position:** CAP-00 is accepted with hosted candidate, staging/recovery, human, and authenticated Softwaretest.it evidence. CAP-01 through CAP-18 remain DRAFT.
+**Main blocker:** CAP-01 implementation remains blocked only by publication and readback of its separate reviewed test-definition package.
+**Next step:** Execute that CAP-01 publication workorder, then approve only an independently executable first implementation workorder as READY.
+
+The roadmap has no dates. Progress depends on evidence gates, not elapsed time. The [capability catalogue](../capabilities/README.md) is canonical for capability scope, rules, acceptance, tests, dependencies, decisions, and workorder links.
 
 ## Release 0.0 — Delivery foundation
 
-### CAP-00 — Reproducible delivery walking skeleton
+- [CAP-00 — Reproducible Delivery Walking Skeleton](../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 
-Outcome:
-
-A maintainer can build an immutable minimal candidate, run the complete bootstrap checks, manually deploy that candidate to isolated local staging, diagnose it, recover it, and report results without any business functionality.
-
-Gate:
-
-- Complete CAP-00 test matrix passed
-- Exact candidate deployed locally
-- Recovery demonstrated
-- Softwaretest.it publishing readiness passed
-- Human bootstrap acceptance
+Gate: complete bootstrap matrix on the exact candidate, isolated local staging, recovery, authenticated Softwaretest.it round-trip, independent review, and human bootstrap acceptance.
 
 ## Release 0.1 — Governed end-to-end AI process
 
-### CAP-01 — Installation and isolated project administration
+- [CAP-01 — Installation and Isolated Project Administration](../capabilities/CAP-01-installation-and-isolated-project-administration.md)
+- [CAP-02 — Secrets, Endpoints, Agents, Tools, and Limits](../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
+- [CAP-03 — Connector Foundation and Trusted Sources](../capabilities/CAP-03-connector-foundation-and-trusted-sources.md)
+- [CAP-04 — Knowledge and Cited Retrieval](../capabilities/CAP-04-knowledge-and-cited-retrieval.md)
+- [CAP-05 — Workflow Authoring and Publication](../capabilities/CAP-05-workflow-authoring-and-publication.md)
+- [CAP-06 — Durable Process API](../capabilities/CAP-06-durable-process-api.md)
+- [CAP-07 — Human Approval and Controlled Writes](../capabilities/CAP-07-human-approval-and-controlled-writes.md)
 
-Outcome:
-
-An Administrator can bootstrap an offline-capable installation and manage isolated projects with audited configuration.
-
-### CAP-02 — Secrets, endpoints, agents, tools, and limits
-
-Outcome:
-
-An Administrator can configure protected secrets, model and embedding endpoints, versioned agents, governed tools, and configurable resource limits.
-
-### CAP-03 — Connector foundation and trusted sources
-
-Outcome:
-
-An Administrator can configure and synchronise file or directory, REST, and Git sources through a versioned public connector contract.
-
-### CAP-04 — Knowledge and cited retrieval
-
-Outcome:
-
-An Administrator can create knowledge sources, index them, retrieve cited content, and reliably remove stale derived data.
-
-### CAP-05 — Workflow authoring and publication
-
-Outcome:
-
-An Administrator can author the same workflow visually and as YAML or JSON, validate and test it, and publish an immutable version.
-
-0.1 node set:
-
-- Input
-- Output
-- Agent
-- Retrieval
-- Tool
-- Transform
-- Validation
-- Decision
-- Human Approval
-- Retry
-- explicit error path
-
-### CAP-06 — Durable Process API
-
-Outcome:
-
-An API client can start, observe, cancel, and obtain results from a durable, idempotent, schema-valid workflow run.
-
-### CAP-07 — Human approval and controlled writes
-
-Outcome:
-
-A writing action pauses safely, is approved or rejected through the inbox or API, and resumes or terminates with complete auditability.
-
-### 0.1 release gate
-
-- CAP-00 through CAP-07 accepted
-- Offline local demonstration succeeds
-- Required manual process packages pass
-- All automated results are confirmed in Softwaretest.it
-- No blocking architecture or security finding
-- AGPL and commercial licensing texts receive legal approval
-- Public documentation and brand asset gate pass
+Release gate: CAP-00 through CAP-07 accepted; offline demonstration and all required manual process packages pass; all automated results are confirmed in Softwaretest.it; no blocking architecture/security finding; legal, documentation, and brand gates pass.
 
 ## Release 0.2 — Advanced orchestration and integrations
 
-### CAP-08 — Advanced control flow
+- [CAP-08 — Advanced Control Flow](../capabilities/CAP-08-advanced-control-flow.md)
+- [CAP-09 — Scheduled and Event-Triggered Execution](../capabilities/CAP-09-scheduled-and-event-triggered-execution.md)
+- [CAP-10 — Expanded Connector Catalogue](../capabilities/CAP-10-expanded-connector-catalogue.md)
+- [CAP-11 — Import, Export, and Templates](../capabilities/CAP-11-import-export-and-templates.md)
 
-Outcome:
-
-Workflow authors can use parallel and merge, loops and for-each, subflows, fallback, human input, and human edit while preserving durability and versioning.
-
-### CAP-09 — Scheduled and event-triggered execution
-
-Outcome:
-
-Administrators can configure scheduled or event-triggered runs with authenticated sources, replay protection, and limits.
-
-### CAP-10 — Expanded connector catalogue
-
-Outcome:
-
-Administrators can connect S3-compatible storage, PostgreSQL, websites, Jira, and Confluence through the same contract and provenance model.
-
-### CAP-11 — Import, export, and templates
-
-Outcome:
-
-Administrators can move reviewed project assets between installations without exporting secrets or violating ownership.
-
-### 0.2 release gate
-
-- Advanced control-flow recovery and compensation proven
-- Connector security and incremental-sync contract proven
-- Import and export isolation proven
-- 0.1 regression gate passes on the unchanged candidate
+Release gate: advanced recovery/compensation, connector security and incremental sync, import/export isolation, and the unchanged-candidate 0.1 regression gate pass.
 
 ## Release 0.3 — Evaluation and AI quality
 
-### CAP-12 — Versioned evaluation datasets
+- [CAP-12 — Versioned Evaluation Datasets](../capabilities/CAP-12-versioned-evaluation-datasets.md)
+- [CAP-13 — Evaluation Gates](../capabilities/CAP-13-evaluation-gates.md)
+- [CAP-14 — Candidate Comparison](../capabilities/CAP-14-candidate-comparison.md)
 
-Outcome:
-
-AI engineers can define versioned test cases and expected properties for workflows and agents.
-
-### CAP-13 — Evaluation gates
-
-Outcome:
-
-Teams can observe, warn, request review, or block based on calibrated deterministic and AI-assisted policies.
-
-### CAP-14 — Candidate comparison
-
-Outcome:
-
-AI engineers can compare model, prompt, agent, retrieval, and workflow candidates using quality, cost, and latency evidence.
-
-### 0.3 release gate
-
-- Evaluation dataset provenance proven
-- LLM-judge calibration and limitations documented
-- No uncalibrated judge acts as sole blocking authority
-- Regression and comparison results are reproducible
+Release gate: dataset provenance, judge calibration/limitations, non-AI sole authority, and reproducible comparison/regression evidence pass.
 
 ## Later 0.x
 
-### CAP-15 — Role-based administration and enterprise identity
-
-Additional roles, OIDC or SSO, project membership, and separation of duties.
-
-### CAP-16 — Trusted third-party plugin execution
-
-Signed plugins, declared permissions, compatibility contract, resource isolation, and revocation.
-
-### CAP-17 — Kubernetes deployment profile
-
-Operationally supported Kubernetes packaging without weakening the Compose baseline.
-
-### CAP-18 — Commercial operations and optional managed service
-
-Commercial entitlements, support operations, managed hosting boundaries, and production environment contracts.
+- [CAP-15 — Role-Based Administration and Enterprise Identity](../capabilities/CAP-15-role-based-administration-and-enterprise-identity.md)
+- [CAP-16 — Trusted Third-Party Plugin Execution](../capabilities/CAP-16-trusted-third-party-plugin-execution.md)
+- [CAP-17 — Kubernetes Deployment Profile](../capabilities/CAP-17-kubernetes-deployment-profile.md)
+- [CAP-18 — Commercial Operations and Optional Managed Service](../capabilities/CAP-18-commercial-operations-and-optional-managed-service.md)
 
 ## Cross-capability gate rules
 
-- One active capability and at most one or two independent active workorders are the default until review capacity is demonstrated.
+- One active capability and one or two independent active workorders are the default until review capacity is demonstrated.
 - Blocked work and waiting reviews count as work in progress.
-- Every capability has one final staging acceptance workorder.
-- Changes to shared foundations may invalidate evidence for later capabilities.
-- No capability is accepted from partial green evidence or a percentage score.
+- Every capability ends with one final staging-acceptance workorder.
+- Changes to shared foundations trigger explicit impact/invalidity analysis.
+- No capability is accepted from partial green evidence, a percentage score, a merge, or an agent assertion.
+- Workorder DONE, capability acceptance, release approval, and production approval are separate states.

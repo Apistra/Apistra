@@ -94,6 +94,9 @@ CI-TS-03 — Architecture rules
 - Trigger: source, package, build, or ARCH-rule changes
 - Scope: dependency directions, cycles, module APIs, type leaks, composition roots
 - Oracle: zero unauthorised dependencies; allowed fixture passes and forbidden fixture fails
+- Implemented commands: locked Python architecture pytest suite, Import Linter contracts, and the pnpm TypeScript architecture suite
+- Fail-closed controls: source discovery must be non-empty; retained positive fixtures pass; retained negative fixtures fail for the intended rule
+- Current CI jobs: `Architecture / Python` and `Architecture / TypeScript`, each with a ten-minute timeout and read-only repository permission
 
 CI-TS-04 — Unit tests
 - Trigger: affected modules
@@ -109,10 +112,11 @@ CI-TS-06 — Schema and consumer contracts
 - Trigger: API, workflow, event, connector, callback, or persistence contract changes
 - Scope: OpenAPI, JSON Schema, compatibility, round-trip
 - Oracle: compatible changes or explicit approved version break
+- Softwaretest.it definition publication: feature branches validate a lossless local CAP-01 manifest and adapter behavior; trusted `test`, `staging`, and `main` pushes use the protected environment to publish the six committed manual definitions idempotently and require field- and ordered-step read-back before the job can pass. Publication creates no execution result.
 
 CI-TS-07 — Integration tests
 - Trigger: data, adapter, execution, or infrastructure changes
-- Scope: PostgreSQL, Qdrant, durable engine, model and connector simulators
+- Scope: PostgreSQL, Qdrant, Apistra runtime persistence and dispatch, model and connector simulators
 - Oracle: state, idempotency, transactions, and error paths match the contract
 
 CI-TS-08 — Automated BDD end-to-end
@@ -135,10 +139,13 @@ CI-TS-11 — Migration tests
 - Scope: upgrade from supported previous state, failed migration recovery, forward compatibility
 - Oracle: deterministic success or safe documented recovery
 
-CI-TS-12 — Performance and resource limits
-- Trigger: runtime, query, ingestion, retrieval, and release candidates
-- Scope: agreed synthetic profiles and configured limits
-- Oracle: limits enforce safely; release thresholds are defined before execution
+CI-TS-12 — Deterministic resource, boundary-load, and workload limits
+- Trigger: resource declarations, input/batch limits, budget policies, runtime configuration, or release candidates
+- Scope: declared CPU, memory, PID, temporary-storage and loopback-exposure limits plus deterministic input, batch, retry, token, and cost bounds as those contracts are introduced; source-code complexity is owned separately by CI-TS-17
+- Oracle: every applicable bound is explicit, fail-closed, and exercised at/below/above its boundary; an empty applicable suite fails
+- Current command: `uv run --project backend pytest --no-cov backend/tests/resource`; the separate aggregate backend run enforces the repository-wide coverage threshold.
+- Explicit limitation: pipeline load coverage is restricted to deterministic at/below/above boundary cases, bounded batches, declared container resources, and fail-closed overload behavior that do not require a running installation or shared-runner timing. It does not measure latency, throughput, or concurrent load and does not claim sustained-load, scalability, or capacity evidence. There is currently no running representative candidate with controlled hardware, data scale, warm-up, and measurement windows from which a defensible performance threshold could be derived.
+- Activation rule for future performance gates: add a separately identified stage only after a representative running candidate and reproducible environment exist; record workload, hardware, data scale, warm-up, duration, thresholds, variance, and abort limits before execution.
 
 CI-TS-13 — Resilience and recovery
 - Trigger: durable runtime, data, deployment, and final candidate
@@ -159,6 +166,27 @@ CI-TS-16 — Softwaretest.it reporting
 - Trigger: after all other stages, and independently for retry
 - Scope: all actual results including passed, failed, skipped, error, and cancelled
 - Oracle: idempotent upload and round-trip receipt count and status match the immutable result bundle
+
+CI-TS-17 — Cyclomatic complexity
+- Trigger: every Python, TypeScript, TSX, JavaScript, lint-configuration, or CI change
+- Scope: all Python product, engineering, and repository-tool functions plus all TypeScript/TSX web and JavaScript repository-tool functions
+- Metric and tools: classic McCabe cyclomatic complexity, measured by Ruff `C901` for Python and ESLint `complexity` for TypeScript/TSX/JavaScript
+- Oracle: every function has complexity at most 10; there are no per-file suppressions, grandfathered violations, or higher subsystem limits
+- Fail-closed controls: the complete configured source scope must pass; retained positive Python and TypeScript fixtures must pass; retained functions with complexity 11 must be rejected by their respective analyser
+- Current CI job: `Contract and static checks`, with the pinned Ruff, ESLint, TypeScript parser, and repository lockfiles
+
+CI-TS-18 — Python code conventions
+- Trigger: every Python, Python-tooling, dependency-lock, convention-document, or CI change
+- Scope: Python product code plus repository-owned engineering and release tools; tests retain readable scenario literals but remain subject to Ruff and formatting
+- Tools: Ruff for the common rule set and annotations, mypy in strict mode for product code, and the pinned wemake-python-styleguide checks `WPS226` and `WPS432` for repeated strings and magic numbers
+- Oracle: all applicable source passes without blanket suppressions; public and internal product functions are fully typed; repeated domain/protocol strings and non-trivial numeric policy values are named constants
+- Fail-closed controls: a retained conforming fixture passes, retained overused-string and magic-number fixtures fail with their exact expected rule identifiers, and an explicit scan rejects blanket `noqa`, `type: ignore`, Ruff, or Pylint disable-all directives
+- Current CI job: `Contract and static checks`, using only dependencies pinned in `backend/uv.lock`
+
+Pipeline mapping rule:
+- Each executable stage has its own named workflow step or job and an explicit command. A combined test command must not be presented as evidence for stages for which it discovered no applicable tests.
+- Focused Python stage commands disable the global coverage plugin because a single slice cannot cover the complete backend. A subsequent aggregate `pytest backend/tests` run is the only repository-wide coverage oracle and remains blocking.
+- Candidate packaging depends on contract/static, architecture, test, and security jobs. It cannot create a green result bundle while a prerequisite quality job is failed or incomplete.
 
 ## 6. Stage execution and retries
 

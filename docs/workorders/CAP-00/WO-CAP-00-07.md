@@ -1,0 +1,178 @@
+# WO-CAP-00-07 — Complete bootstrap candidate gate
+
+Version: 0.6-draft
+Status: DONE
+Status reason: the full candidate matrix, staging/recovery, external receipts, independent review, and human acceptance are recorded
+Implementation state: COMPLETE
+Evidence state: VERIFIED — run 36875393087 bound the complete matrix and Softwaretest.it receipts to commit e1619a0d6fe5d5edd7cca1c88a57e5b9845084e6
+Approval state: HUMAN ACCEPTED — product-owner decision recorded 2026-09-30; production remains unapproved
+Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
+Assurance: EXTENDED
+
+## Status and traceability
+
+- Requirements: REQ-019, REQ-020
+- Process: PRC-07
+- Capability contract: ../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md
+- CI test group: TST-WO-CAP-00-07
+- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Delivery class: capability-acceptance
+- Owned verification group: TST-WO-CAP-00-07
+- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+
+## Risk profile and escalation
+
+EXTENDED applies because this workorder affects delivery_control and architecture_boundary. Impact is potentially system-wide, uncertainty remains until the named contracts and paths are observed, and unsafe state or external effects may not be simply reversible.
+
+Stop and reassess the profile, specification, tests, and dependent evidence if implementation reveals a new identity/project boundary, data migration, external permission, destructive or uncertain effect, provider limitation, architecture boundary, or material scope increase. Time pressure or a green partial test does not justify de-escalation.
+
+## Baselines and contract delta
+
+- Product: ../../planning/01-product-scope.md
+- Decisions: ../../planning/02-decision-register.md
+- Architecture/patterns: ../../planning/03-architecture.md and ../../planning/11-architecture-decisions-and-patterns.md
+- Security: ../../planning/04-security-concept.md
+- Delivery, tests, design: ../../planning/05-delivery-ci-contract.md through ../../planning/07-design-contract.md
+- Delta: deliver only “Complete bootstrap candidate gate”; all other baseline behavior remains unchanged.
+
+## Context and current behavior
+
+CAP-00 implementation and earlier hosted evidence exist against prior workorder revisions. This 0.6 revision strengthens the execution and evidence contract without claiming a new implementation result. A documented change-impact review must identify which prior evidence remains valid and which checks or approvals must be repeated.
+
+## Target result
+
+One immutable capability candidate is fully tested, manually deployed to the named isolated staging environment, recovered, reported, independently reviewed, and presented for explicit human capability acceptance.
+
+## Prerequisites
+
+- Dependencies: None
+- GATE-CAP00-DONE and Softwaretest.it publishing readiness for business implementation
+- Approved expectation review for this specification revision
+- Approved ADRs, security decisions, and design references actually used by this workorder
+
+## Scope
+
+- Freeze candidate identity and execute the complete capability-required CI, architecture, security, contract, BDD, migration, packaging, and recovery matrix once on that unchanged candidate.
+- Manually deploy the exact digests, verify environment/fixture identity, then execute every assigned manual process/UI/security case and record step evidence, defects, and retests.
+- Confirm Softwaretest.it receipts and request human capability acceptance; do not promote to production.
+
+## Non-goals and prohibited side effects
+
+- No unrelated refactor, dependency, connector, node type, role, production target, or automatic deployment
+- No secret values in definitions, logs, exports, fixtures, screenshots, or evidence
+- No weakening of architecture tests, required CI stages, security rules, or prior accepted behavior
+- No new repository path or module boundary before it is reconciled with the observed ADR-019 layout
+
+## Allowed changes
+
+Observed path scope for this completed bootstrap slice: CAP-00 gate, evidence, test-matrix, and control-status documents only. Any change outside these paths requires an explicit scope/impact update before work continues.
+
+## Stop conditions
+
+- CAP-00 or another prerequisite is not accepted
+- A required ADR, schema, identity, project boundary, design state, authorised test target, or Softwaretest.it resource is missing
+- The observed repository contradicts this workorder
+- Acceptance would require an unlisted external mutation, destructive test, or production deployment
+- A blocking architecture/security finding or ambiguous expected behavior appears
+
+## Technical guardrails
+
+- Application Service/use-case entrypoints coordinate behavior; domain code remains framework-independent.
+- Ports and Adapters apply only at volatile or security-relevant boundaries.
+- Persisted lifecycles use explicit state machines; external redelivery uses outbox/inbox/idempotency where applicable.
+- Schema-first boundary mappers prevent vendor or transport models from entering domain code.
+- Mutable administration uses optimistic concurrency; no global CQRS or Event Sourcing is introduced.
+
+No new UI is authorised unless the capability design contract explicitly assigns one.
+
+## ARCH rules and pattern limits
+
+- Rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-010, ARCH-011, ARCH-012, ARCH-014
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
+- ADRs/patterns: ADR-017 and ADR-019
+- Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
+- Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
+
+## SEC rules and safe test conditions
+
+- Rules: SEC-001, SEC-002, SEC-007, SEC-011, SEC-012, SEC-015
+- Applicability: the full capability envelope because this workorder owns unchanged-candidate acceptance.
+- Tests use only authorised local/staging targets and synthetic project-scoped data.
+- Positive own-project and negative foreign-project/anonymous/revoked cases are mandatory where access exists.
+- Egress, secrets, destructive operations, cost, concurrency, and recovery limits follow the security baseline.
+
+## Acceptance criteria
+
+1. Every prerequisite workorder is DONE and no blocking or expired exception remains.
+2. The complete required matrix passes on one unchanged commit/candidate with current suite and input fingerprints.
+3. The same digests are staged manually; migration, health, smoke, observability, controlled failure, recovery, and all assigned manual cases pass with confirmed reporting.
+4. An authorised human accepts the exact capability/candidate/environment evidence package; no production approval is inferred.
+
+## Acceptance examples and test oracles
+
+- **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
+- **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
+- **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
+- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+
+## Expectation sources and independent review
+
+- Sources: confirmed product decisions, the linked capability, requirements REQ-019, REQ-020, process PRC-07, and cited architecture/security/design contracts.
+- Positive expectation: The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
+- Counterexample: A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
+- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+
+The product-owner independent expectation/implementation review and human bootstrap acceptance are recorded in [the CAP-00 review and acceptance record](../../testing/cap00-review-and-acceptance.md). No unresolved discrepancy was stated. This closes the human decision dimensions but does not replace the missing Softwaretest.it receipt or exact final-candidate binding.
+
+## Required tests
+
+- TST-WO-CAP-00-07: gate completeness, candidate/digest equality, evidence freshness, and receipt validation.
+- Full capability CI and BDD matrix on the unchanged candidate; no selective reuse substitutes for this final run.
+- Every published `MT-*` case for PRC-07 executed on staging with atomic step results.
+- Recovery and rollback/roll-forward drill appropriate to the capability's state and external effects.
+
+## BDD and manual tests
+
+Execute the complete applicable scenario set (BDD-OFFLINE-001) and every published `MT-PRC-07-NNN` case in `MTP-PRC-07`. Missing, unallocated, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
+
+## Softwaretest.it and CI reporting
+
+Definitions must be idempotently published and field-level round-tripped before execution. All CI stage and individual results are reported with candidate identity and all statuses. A reporting-only failure retries the reporting stage and never reruns successful tests.
+
+## CI retry and evidence reuse
+
+Retry only a failed/aborted/invalid stage for an unchanged candidate. After a repair commit, rerun that stage plus stages invalidated by recorded change impact. Before capability acceptance, run the complete required matrix once against the exact unchanged candidate.
+
+## Deployment and staging evidence
+
+This workorder owns the capability staging gate. Candidate manifest, image digests, configuration, fixture version, deployment marker, health/smoke, diagnostics, recovery, Softwaretest.it receipts, and human decision must identify the same attempt.
+
+## Documentation and evidence
+
+- Updated contracts/ADRs only where their approved delta requires it
+- Test definitions/results, architecture/security evidence, and redacted diagnostics
+- Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
+- No invented pass, approval, cost, duration, or external receipt
+
+## Definition of Done
+
+- All prerequisite workorders are DONE with current evidence
+- Full matrix and required manual cases pass on the exact staged candidate
+- Reporting receipts, recovery evidence, and independent implementation review are complete
+- Authorised human capability acceptance is recorded; production remains separately unapproved
+
+## Workorder completion versus capability acceptance
+
+DONE proves only this integrated result. CAP-00 remains unaccepted until every workorder is DONE, the unchanged candidate passes the full scope matrix on staging, required manual tests and Softwaretest.it reporting are confirmed, and an authorised human accepts the capability.
+
+## Events, rework, and cost
+
+Record available intake, READY, start, wait/resume, review, acceptance, reopen, rework, intervention, escaped-defect, and cost evidence. Unknown time or cost remains unknown; no new dashboard is a prerequisite.
+
+## Dependencies and follow-up
+
+- Upstream capabilities/gates: None
+- Required workorders: WO-CAP-00-01, WO-CAP-00-02, WO-CAP-00-03, WO-CAP-00-04, WO-CAP-00-05, WO-CAP-00-06
+- Downstream acceptance owner: none; this is the capability acceptance workorder
+- Numbering is an identifier, not permission to bypass this dependency graph. Test-definition publication may therefore complete before a lower-numbered implementation workorder.
+- A changed prerequisite contract, ADR, design revision, test package, or candidate triggers documented impact analysis and may return this workorder to DRAFT/BLOCKED.

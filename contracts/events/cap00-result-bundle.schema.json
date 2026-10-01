@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apistra.dev/schemas/cap00-result-bundle.schema.json",
+  "title": "CAP-00 result bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate", "results", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "candidate": {
+      "type": "object",
+      "required": ["commit", "manifest_sha256"],
+      "properties": {
+        "commit": { "type": "string", "minLength": 7 },
+        "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["test_id", "status"],
+        "properties": {
+          "test_id": { "type": "string", "pattern": "^CAP00-[A-Z]+-[0-9]{3}$" },
+          "status": { "enum": ["PASSED", "FAILED", "SKIPPED", "ERROR", "CANCELLED"] },
+          "duration_ms": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "evidence": { "type": "array", "items": { "type": "string" } }
+  }
+}

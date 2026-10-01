@@ -1,0 +1,1 @@
+"""Forbidden fixture package."""

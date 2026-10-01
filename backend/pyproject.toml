@@ -1,0 +1,83 @@
+[project]
+name = "apistra-backend"
+version = "0.0.0"
+description = "Apistra backend services"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "argon2-cffi==25.1.0",
+  "fastapi==0.142.0",
+  "psycopg[binary]==3.3.3",
+  "uvicorn==0.54.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  "httpx==0.28.1",
+  "import-linter==2.15",
+  "mypy==2.3.1",
+  "pip-audit==2.10.1",
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "ruff==0.16.9",
+  "wemake-python-styleguide==1.8.1",
+]
+
+[tool.uv]
+required-version = "==0.12.20"
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers --cov=apistra --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]
+markers = [
+  "migration: persistence and schema migration behavior",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "B",
+  "C4",
+  "C90",
+  "DTZ",
+  "E",
+  "F",
+  "I",
+  "LOG",
+  "N",
+  "PERF",
+  "PGH",
+  "PIE",
+  "RET",
+  "RSE",
+  "RUF",
+  "S",
+  "SIM",
+  "T10",
+  "TID",
+  "UP",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/apistra"]
+strict = true
+warn_unreachable = true
+show_error_codes = true
+pretty = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apistra"]

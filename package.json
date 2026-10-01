@@ -1,0 +1,25 @@
+{
+  "name": "apistra",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": "24.19.0",
+    "pnpm": "12.8.1"
+  },
+  "scripts": {
+    "architecture": "node tools/architecture/verify-typescript-architecture.mjs && node tools/architecture/verify-typescript-fixtures.mjs",
+    "architecture:typescript": "node tools/architecture/verify-typescript-architecture.mjs",
+    "architecture:typescript-fixtures": "node tools/architecture/verify-typescript-fixtures.mjs",
+    "build:web": "corepack pnpm --filter @apistra/web build",
+    "complexity": "eslint apps/web/src tools",
+    "test:web": "corepack pnpm --filter @apistra/web test",
+    "typecheck": "corepack pnpm --filter @apistra/web typecheck"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "8.71.0",
+    "dependency-cruiser": "18.4.0",
+    "eslint": "10.11.0",
+    "typescript": "6.0.3"
+  }
+}

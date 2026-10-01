@@ -1,0 +1,301 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      softwaretest_roundtrip:
+        description: Run the protected Softwaretest.it round-trip
+        required: true
+        type: boolean
+        default: false
+  pull_request:
+    branches: [test, staging, main]
+  push:
+    branches: ["feature/**", test, staging, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  UV_VERSION: "0.12.20"
+  PNPM_VERSION: "12.8.1"
+
+jobs:
+  contract-static:
+    name: Contract and static checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - name: Install locked dependencies
+        run: |
+          uv sync --project backend --locked --group dev
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm install --frozen-lockfile
+      - name: CI-TS-01 repository contracts and proof fixtures
+        run: python tools/contracts/validate_repository.py --fixtures
+      - name: CI-TS-02 Python static and formatting checks
+        run: |
+          uv run --project backend ruff check backend tools engineering
+          uv run --project backend ruff format --check backend tools engineering
+      - name: CI-TS-02 TypeScript and production build
+        run: |
+          pnpm typecheck
+          pnpm build:web
+      - name: CI-TS-17 cyclomatic complexity and proof fixtures
+        run: |
+          uv run --project backend ruff check backend tools engineering --select C901
+          pnpm complexity
+          uv run --project backend ruff check tests/complexity-fixtures/python/positive.py --select C901
+          if uv run --project backend ruff check tests/complexity-fixtures/python/negative.py --select C901; then
+            echo "Python negative complexity fixture unexpectedly passed"
+            exit 1
+          fi
+          pnpm exec eslint tests/complexity-fixtures/typescript/positive.ts
+          if pnpm exec eslint tests/complexity-fixtures/typescript/negative.ts; then
+            echo "TypeScript negative complexity fixture unexpectedly passed"
+            exit 1
+          fi
+      - name: CI-TS-18 Python code conventions and proof fixtures
+        run: |
+          uv run --project backend ruff check backend/src --select ANN
+          uv run --project backend mypy --config-file backend/pyproject.toml backend/src/apistra
+          uv run --project backend flake8 backend/src engineering/softwaretest/*.py tools
+          uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/positive.py
+
+          overused_log="$(mktemp)"
+          if uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/negative_overused_string.py >"${overused_log}" 2>&1; then
+            echo "Overused-string negative convention fixture unexpectedly passed"
+            exit 1
+          fi
+          grep -q WPS226 "${overused_log}"
+
+          magic_log="$(mktemp)"
+          if uv run --project backend flake8 --isolated --select WPS226,WPS432 tests/convention-fixtures/python/negative_magic_number.py >"${magic_log}" 2>&1; then
+            echo "Magic-number negative convention fixture unexpectedly passed"
+            exit 1
+          fi
+          grep -q WPS432 "${magic_log}"
+
+          if grep -R -n -E '#[[:space:]]*(noqa[[:space:]]*$|type:[[:space:]]*ignore[[:space:]]*$|ruff:[[:space:]]*noqa|pylint:[[:space:]]*disable=all)' backend/src engineering tools; then
+            echo "Blanket Python suppression detected"
+            exit 1
+          fi
+      - name: CI-TS-06 and CI-TS-16 public Softwaretest.it contract preflight
+        run: python engineering/softwaretest/preflight.py
+
+  architecture:
+    name: Architecture
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - name: Install locked architecture tools
+        run: |
+          uv sync --project backend --locked --group dev
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm install --frozen-lockfile
+      - name: CI-TS-03 Python architecture and negative fixture
+        run: uv run --project backend pytest --no-cov backend/tests/architecture
+      - name: CI-TS-03 Import Linter contracts
+        env:
+          PYTHONPATH: backend/src
+        run: uv run --project backend lint-imports --config backend/.importlinter
+      - name: CI-TS-03 TypeScript architecture and negative fixture
+        run: pnpm architecture
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
+        env:
+          POSTGRES_DB: apistra
+          POSTGRES_PASSWORD: apistra-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d apistra"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      APISTRA_TEST_DATABASE_URL: postgresql://postgres:apistra-ci-only@127.0.0.1:5432/apistra
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - name: Install locked test dependencies
+        run: |
+          uv sync --project backend --locked --group dev
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm install --frozen-lockfile
+      - name: CI-TS-04 Python unit tests
+        run: uv run --project backend pytest --no-cov backend/tests/unit
+      - name: CI-TS-04 web unit tests
+        run: pnpm test:web
+      - name: CI-TS-05 component tests
+        run: uv run --project backend pytest --no-cov backend/tests/component
+      - name: CI-TS-06 schema and consumer contract tests
+        run: uv run --project backend pytest --no-cov backend/tests/contract
+      - name: CI-TS-06 Softwaretest.it adapter contracts
+        run: |
+          python -m unittest discover -s engineering/softwaretest/tests -v
+          python engineering/softwaretest/definition_publisher.py
+      - name: CI-TS-07 integration tests
+        run: uv run --project backend pytest --no-cov backend/tests/integration -m "not migration"
+      - name: CI-TS-11 migration tests
+        run: uv run --project backend pytest --no-cov backend/tests/integration -m migration
+      - name: CI-TS-12 deterministic resource-limit contracts
+        run: uv run --project backend pytest --no-cov backend/tests/resource
+      - name: CI-TS-14 UI accessibility and visual contracts
+        run: pnpm test:web
+      - name: Aggregate backend coverage gate
+        run: uv run --project backend pytest backend/tests
+
+  security:
+    name: Security and supply chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - name: Install locked audit tools
+        run: |
+          uv sync --project backend --locked --group dev
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm install --frozen-lockfile
+      - name: CI-TS-09 secret scan and negative proof fixture
+        run: python tools/security/scan_repository.py --prove-negative-fixture
+      - name: CI-TS-10 dependency vulnerability audits
+        run: |
+          uv run --project backend pip-audit
+          pnpm audit --prod --audit-level high
+
+  package:
+    name: Package candidate
+    needs: [contract-static, architecture, tests, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: CI-TS-10 and CI-TS-15 build immutable images, archives, manifest and SBOM
+        run: python tools/release/build_candidate.py
+      - name: CI-TS-08, CI-TS-13 and CI-TS-15 isolated staging and recovery
+        run: python tools/staging/verify_candidate.py artifacts/cap00-candidate/candidate-manifest.json --run-id "gha-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+      - name: Create result bundle and lossless Softwaretest.it outbox
+        run: |
+          python tools/release/create_result_bundle.py artifacts/cap00-candidate/candidate-manifest.json
+          python engineering/softwaretest/publisher.py artifacts/cap00-result-bundle.json
+      - name: Retain compact candidate evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cap00-evidence-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            artifacts/cap00-candidate/candidate-manifest.json
+            artifacts/cap00-candidate/candidate-manifest.sha256
+            artifacts/cap00-candidate/sbom.spdx.json
+            artifacts/cap00-result-bundle.json
+            artifacts/softwaretest-outbox.json
+
+  softwaretest-roundtrip:
+    name: Softwaretest.it authenticated round-trip
+    if: >-
+      (github.event_name == 'push' &&
+       (github.ref == 'refs/heads/test' ||
+        github.ref == 'refs/heads/staging' ||
+        github.ref == 'refs/heads/main')) ||
+      (github.event_name == 'workflow_dispatch' &&
+       inputs.softwaretest_roundtrip == true)
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: softwaretest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Download verified CAP-00 evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cap00-evidence-${{ github.sha }}
+          path: artifacts
+      - name: CI-TS-16 authenticated Softwaretest.it preflight
+        env:
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: python engineering/softwaretest/preflight.py --require-reporting
+      - name: CI-TS-06 publish and verify CAP-01 manual definitions
+        env:
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: >-
+          python engineering/softwaretest/definition_publisher.py
+          --apply
+          --command-revision cap01-definitions-v1
+      - name: CI-TS-16 publish, read back and verify receipts
+        env:
+          SOFTWARETEST_ANCHOR_VERSION_ID: ${{ vars.SOFTWARETEST_ANCHOR_VERSION_ID }}
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: >-
+          python engineering/softwaretest/publisher.py
+          artifacts/cap00-result-bundle.json
+          --apply
+          --ensure-cycle
+          --command-revision ci-guide-1.1-stage-v2
+      - name: Retain Softwaretest.it round-trip receipt
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: softwaretest-roundtrip-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            artifacts/softwaretest-roundtrip-receipt.json
+            artifacts/softwaretest-cap01-definition-outbox.json
+            artifacts/softwaretest-cap01-definition-receipt.json

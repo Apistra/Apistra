@@ -1,6 +1,6 @@
 # System-Centred Test Architecture
 
-Version: 0.2-draft
+Version: 0.3-draft
 Status: DRAFT
 
 ## 1. Test purpose and scope
@@ -8,6 +8,8 @@ Status: DRAFT
 Testing must demonstrate that Apistra preserves project isolation, executes versioned workflows durably, applies human and automated policy correctly, exposes stable APIs, manages knowledge provenance, operates offline, and can be delivered and recovered reproducibly.
 
 Implementation-derived tests are not the sole authority. Expected behaviour is derived from the approved product, architecture, security, delivery, and design contracts.
+
+This document defines the system-centred test architecture: test boundaries, layers, models, and technical evidence paths. The operational rules for planning, executing, evaluating, and accepting tests are defined in the [Test Concept](../testing/test-concept.md).
 
 ## 2. System test map
 
@@ -58,6 +60,21 @@ Static architecture references:
 - [Runtime containers](../visuals/architecture/containers.svg)
 - [Module dependency direction](../visuals/architecture/module-dependencies.svg)
 - [Core domain model](../visuals/architecture/domain-model.svg)
+
+### 3.1 Executable architecture test model
+
+- AT-ARCH-001 checks domain independence with Import Linter and the Python AST rule set.
+- AT-ARCH-010 keeps engineering-only Softwaretest.it integration outside the runtime graph.
+- AT-ARCH-011 verifies explicit API and worker composition roots and adapter containment.
+- AT-ARCH-012 verifies public feature and module contracts.
+- AT-ARCH-013 detects dependency cycles in the TypeScript graph and rejects forbidden Python layer direction.
+- AT-ARCH-SCOPE rejects an empty source scope.
+- AT-ARCH-FIXTURE requires retained allowed graphs to pass and retained forbidden graphs to fail.
+- AT-CONVENTIONS-018 executes the Python convention contract: the expanded Ruff profile,
+  complete product annotations, strict mypy, selected repeated-literal and magic-number
+  checks, blanket-suppression detection, and retained positive and negative fixtures.
+
+The authoritative commands, tool versions, paths, and exception policy are maintained in `docs/architecture/testing.md`. These tests are structural evidence only and cannot substitute for behavioural, integration, security, deployment, or recovery tests.
 
 ## 4. Critical process models
 
@@ -144,7 +161,7 @@ Contract:
 Integration:
 - PostgreSQL transactions and isolation
 - Qdrant provenance and deletion
-- durable engine checkpoints and retries
+- Apistra runtime state transitions, journal, leases, checkpoints, timers, retries, and recovery
 - endpoint and connector simulators
 
 Automated BDD E2E:
@@ -286,12 +303,15 @@ Logs, metrics, traces, and audit records must allow failure localisation without
 ## 13. Test gate status
 
 - Test architecture definition: DRAFT
-- Automated tests: NOT IMPLEMENTED
-- Manual test definitions: NOT YET EXPANDED
-- Fixtures: NOT IMPLEMENTED
-- Softwaretest.it project and plan: NOT CREATED OR VERIFIED
-- Test execution: NOT STARTED
-- Capability acceptance: BLOCKED
+- Test concept: DRAFT
+- CAP-00 automated architecture, contract, unit, integration, BDD, security, recovery, packaging, and evidence checks: IMPLEMENTED AND HOSTED VERIFIED
+- Business capability automated tests: NOT IMPLEMENTED
+- CAP-00 manual test definition: IMPLEMENTED; product-owner review and human acceptance recorded 2026-09-30, final candidate/receipt binding verified in run 36875393087
+- Business capability manual packages: NOT YET EXPANDED OR PUBLISHED
+- CAP-00 synthetic engineering fixtures: IMPLEMENTED; business fixtures expand with their owning capabilities
+- Softwaretest.it public API and CI-reporting contract: VERIFIED; authenticated CAP-00 project/cycle/report/receipt round-trip passed in run 36875393087
+- CAP-00 formal completion: VERIFIED with authenticated Softwaretest.it evidence and final immutable-candidate binding
+- Business capability acceptance: NOT STARTED
 
 ## 14. Review obligations
 

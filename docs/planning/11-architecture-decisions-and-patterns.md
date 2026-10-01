@@ -1,7 +1,7 @@
 # Architecture Decisions and Pattern Catalogue
 
-Version: 0.2-draft
-Status: DRAFT
+Version: 0.4-draft
+Status: DRAFT; CAP-01 PATTERN SLICE APPROVED
 Assurance profile: EXTENDED
 
 This document makes the software-architecture choices operational. Pattern names are not quality claims. Every decision states the concrete problem, scope, simpler alternative, intended use, prohibited use, consequences, and verification.
@@ -9,6 +9,8 @@ This document makes the software-architecture choices operational. Pattern names
 ## ADR-001 — Modular monolith as the 0.x backend system style
 
 Status: PROPOSED
+
+CAP-01 applicability: DECIDED on 2026-09-30
 
 ### Context and decision
 
@@ -18,7 +20,7 @@ Use a modular monolith for backend source and domain ownership, deployed through
 
 Modules:
 
-- identity_admin
+- identity
 - projects
 - secrets_endpoints
 - connectors
@@ -58,7 +60,7 @@ Status: PROPOSED
 
 ### Context and decision
 
-Model providers, embedding providers, vector stores, connectors, durable engines, identity systems, licences, clocks, identifiers, and external tools can vary or introduce vendor-specific semantics.
+Model providers, embedding providers, vector stores, connectors, identity systems, licences, clocks, identifiers, and external tools can vary or introduce vendor-specific semantics. Durable orchestration is an owned Apistra capability and is not delegated to a third-party product.
 
 Use Ports and Adapters for:
 
@@ -121,6 +123,8 @@ ARCH-002; route and worker dependency tests; focused use-case tests without fram
 
 Status: PROPOSED
 
+CAP-01 applicability: DECIDED on 2026-09-30
+
 ### Context and decision
 
 Some operations preserve invariants across several persisted records. A generic repository per table would hide query cost and spread invariants.
@@ -148,6 +152,14 @@ Prohibited:
 Verification:
 
 Transaction integration tests, module-boundary tests, and failure injection around commit and external hand-off.
+
+CAP-01 decision:
+
+The Project is the aggregate root and uses a project repository plus one unit
+of work per command. Race-safe Administrator bootstrap uses the same bounded
+transaction rule through dedicated `AdministratorStore` and `SessionStore`
+ports owned by the `identity` module. Administrator and session persistence do
+not introduce a generic repository or cross-module ORM relationship.
 
 ## ADR-005 — Persisted State Machine for lifecycle-heavy entities
 
@@ -179,26 +191,29 @@ Verification:
 
 Transition-table tests, invalid-transition property tests, optimistic-concurrency tests, restart tests, and timeout tests.
 
-## ADR-006 — Durable Saga and Process Manager for workflow runs
+## ADR-006 — Apistra-owned durable Saga and Process Manager
 
-Status: PROPOSED at pattern level; engine selection remains BLOCKING
+Status: PROPOSED at pattern level; product ownership is decided by ADR-020
 
 ### Context and decision
 
 Workflow runs span model calls, connectors, tools, approvals, timers, retries, callbacks, and process restarts. A database transaction cannot cover them.
 
-Model each run as a durable process manager implemented through the selected durable execution engine. It owns orchestration, checkpoints, timers, retry decisions, cancellation, and explicit compensation commands.
+Model each run as a durable process manager implemented by the Apistra runtime. It owns orchestration, checkpoints, timers, retry decisions, cancellation, and explicit compensation commands. PostgreSQL is the durable system of record; API and worker processes remain replaceable execution hosts.
 
 The workflow graph is execution data interpreted by a versioned runtime. Side effects remain in activities or adapters and are protected by idempotency or compensation.
+
+The owned runtime is split into persisted state machines, an append-only execution journal, transactional outbox and inbox records, lease-based dispatch, idempotency records, durable timers, human-signal intake, and explicit recovery operations. Current state remains directly queryable; the journal does not introduce global Event Sourcing.
 
 Prohibited:
 
 - In-memory orchestration in an API process.
 - Distributed two-phase commit across external systems.
 - Automatic compensation without an explicitly defined safe inverse.
-- Building a bespoke durable engine.
+- A runtime dependency on an external workflow engine, hosted control plane, online licence service, or paid management product.
+- Embedding orchestration semantics in a replaceable library or adapter.
 
-ADR-PENDING-001 must select the engine based on offline deployment, PostgreSQL support, licensing, worker model, pause and resume, cancellation, visibility, recovery, and operations.
+Runtime delivery is incremental: durable sequential execution; graph decisions and fan-out/fan-in; human waits and signals; operational pause, resume, cancellation, and diagnosis; compensation and uncertain-response recovery; then measured scale, priority, and fairness. Each slice must pass crash, duplicate-delivery, stale-lease, version-compatibility, and recovery tests before later slices rely on it.
 
 Verification:
 
@@ -388,7 +403,7 @@ Status: PROPOSED
 
 Visual editing, YAML or JSON, APIs, events, callbacks, connector SDKs, and snapshots need one meaning across TypeScript and Python.
 
-Define versioned schemas in packages/contracts. Generate or validate boundary types for both languages. Translate DTOs to domain commands and values at adapters.
+Define versioned schemas in `contracts`. Generate or validate boundary types for both languages. Translate DTOs to domain commands and values at adapters.
 
 The workflow schema is the only semantic source for both editors. Published snapshots store schema version and content digest.
 
@@ -405,6 +420,8 @@ ARCH-006 and ARCH-012; round-trip, compatibility, cross-language fixture, and un
 ## ADR-014 — Optimistic concurrency for mutable administration
 
 Status: PROPOSED
+
+CAP-01 applicability: DECIDED for mutable project administration on 2026-09-30
 
 ### Context and decision
 
@@ -468,10 +485,10 @@ Status: PROPOSED
 
 Each deployable has one explicit composition root:
 
-- services/api/bootstrap
-- services/worker/bootstrap
-- apps/web application bootstrap
-- engineering/softwaretest bootstrap
+- `backend/src/apistra/entrypoints/api/composition.py`
+- `backend/src/apistra/entrypoints/worker/composition.py`
+- `apps/web/src/app/bootstrap.ts`
+- `engineering/softwaretest` bootstrap when that adapter is implemented
 
 Constructor injection is the default. Framework DI is allowed only at the outer composition boundary.
 
@@ -519,6 +536,163 @@ Verification:
 
 Error-mapping, safe-message, retry-classification, and redaction tests.
 
+## ADR-019 — Monorepo layout and executable dependency boundaries
+
+Status: DECIDED
+
+Decision date: 2026-09-29
+
+### Context and decision
+
+Apistra needs independently understandable web, backend, public-contract, connector-SDK, deployment, and engineering boundaries without introducing multiple Python distribution graphs or a monorepo orchestrator before measured need.
+
+Use one public monorepo with:
+
+- `apps/web` for the TypeScript web application;
+- `backend` for one installable Python package used by separate API and worker entrypoints;
+- `contracts/{openapi,workflow,events,connectors}` for language-neutral canonical contracts;
+- `connector-sdk/python` for the public Python connector boundary;
+- `deploy/compose` for local, test, and isolated staging packaging;
+- `engineering/softwaretest` for test-management integration outside the product runtime;
+- `tests/architecture-fixtures` for retained positive and negative dependency graphs;
+- `tools` for repository automation.
+
+Backend business ownership is module-first. A module contains `domain`, `application`, `ports`, and `adapters`, and exposes cross-module use only through `modules.<name>.public`. Dependencies point inward: domain; application and ports; adapters; entrypoint composition roots. The API and worker share the backend package but have separate explicit composition roots.
+
+Use uv for the Python project and pnpm workspaces for TypeScript. Do not add Nx, Turborepo, or multiple Python workspace packages until measured build or ownership pressure justifies a new ADR.
+
+### Consequences
+
+- Module ownership is enforceable without premature network-service boundaries.
+- API and worker code cannot drift into separate domain models.
+- Language-neutral contracts and the connector SDK have visible ownership.
+- A single Python lock and a single pnpm lock keep clean-clone execution reproducible.
+- Adding a module requires a public contract and the standard internal layer direction.
+
+### Verification
+
+CI-TS-03 runs Import Linter, pytest plus AST rules, Dependency Cruiser, and pnpm workspace-cycle protection. Source discovery fails closed on an empty scope. Retained allowed fixtures must pass and retained forbidden fixtures must fail. No initial exceptions exist; a future exception requires rule ID, reason, owner, expiry, removal workorder, and approval.
+
+## ADR-020 — Apistra-owned durable execution runtime
+
+Status: DECIDED
+
+Decision date: 2026-09-30
+
+### Context and decision
+
+Durable orchestration is part of Apistra's differentiating product capability. Depending on an external workflow product or its control plane would make offline operation, commercial continuity, and core behaviour subject to another provider's pricing, roadmap, availability, and licence decisions.
+
+Apistra therefore owns the execution state model, scheduler and dispatcher semantics, worker protocol, timer and signal handling, idempotency and recovery rules, operational inspection model, and compatibility contract. PostgreSQL provides durable storage and concurrency primitives but does not own product semantics.
+
+Third-party libraries may implement generic technical mechanisms only when they are offline-capable, licence-compatible, pinned, inventoried, isolated behind an owned boundary, and practically replaceable or forkable. No external orchestration server, SaaS, control plane, licence service, or paid feature is required to start, execute, recover, inspect, or administer a run.
+
+### Consequences and verification
+
+- CAP-06 owns the first vertically usable durable runtime rather than integrating an external engine.
+- CAP-07 adds durable human interaction; CAP-08 adds advanced graph control without replacing the runtime core.
+- ARCH-008 and ARCH-009 remain mandatory; a new dependency rule rejects imports or deployment dependencies on third-party orchestration products.
+- Worker-loss, restart, duplicate delivery, lease expiry, stale result, cancellation, approval resume, timer recovery, version evolution, backup/restore, and uncertain external response are mandatory test classes.
+- Runtime scope grows only through accepted capability slices; a general-purpose BPM platform is not implied.
+
+## ADR-021 — Local Administrator authentication
+
+Status: DECIDED
+
+Decision date: 2026-09-30
+
+Release 0.1 uses local Administrator authentication suitable for offline installation. Passwords use Argon2id through an established library. Browser authentication uses opaque, revocable server-side sessions stored in PostgreSQL and secure, HTTP-only, same-site cookies with server-side CSRF protection. Bootstrap and recovery are local privileged CLI operations with no default credential, email, hosted identity, or phone-home dependency. Session rotation, timeout, revocation, and security events are explicit and testable. OIDC and enterprise identity remain CAP-15 concerns.
+
+## ADR-022 — Source-available and commercial licensing boundary
+
+Status: DECIDED; IMPLEMENTED
+
+Decision date: 2026-09-30
+
+Releases from the transition commit are source available under PolyForm Noncommercial 1.0.0 for its permitted purposes, with PolyForm Free Trial 1.0.0 as the company-evaluation path for fewer than 32 consecutive calendar days. Productive commercial use, internal business operation, commercial integration, redistribution, resale, SaaS, and managed-service operation require a separate licence signed by the licensee and Jens Bekersch.
+
+Apistra must not be described as OSI Open Source under this model. Existing AGPL grants remain valid for versions already published. `LICENSE-TRANSITION.md` identifies the last AGPL commit and the first source-available commit; `NOTICE` supplies the Required Notice; `COMMERCIAL-LICENSE.md` contains the standard commercial terms. External contributions remain closed until an explicit compatible rights grant is introduced. No mandatory online activation is introduced.
+
+## ADR-023 — Multiple local principals and guarded acceptance fixtures
+
+Status: DECIDED
+
+Decision date: 2026-10-01
+
+### Context and decision
+
+Project isolation must be proven against an existing foreign project, but a
+single-row identity schema cannot represent that state and would prevent later
+role assignment. One installation may therefore persist multiple local
+principals. This is a persistence capability, not an early user-management
+feature: release 0.1 still exposes only the bootstrap Administrator role.
+
+Bootstrap no longer relies on a unique installation column. The PostgreSQL
+adapter takes a transaction-scoped advisory lock, checks for an existing
+login-enabled local principal, and creates the first Administrator, session,
+and audit event atomically. Concurrent attempts therefore produce one success
+and one safe closed-bootstrap result. Usernames remain unique.
+
+CAP-01 acceptance uses a separate process entrypoint to reset an ephemeral
+local-staging database and create deterministic Atlas and Orion ownership. Its
+foreign owner is explicitly non-login-enabled and receives no usable
+credential. The process is absent from the HTTP API and requires all of these
+conditions before connecting to PostgreSQL:
+
+- exact `local-staging-<run-id>` environment identity;
+- matching `apply-cap01-<run-id>` fixture gate;
+- exact named-fixture reset confirmation;
+- explicit Compose `fixtures` profile;
+- protected password injection for login-enabled fixtures.
+
+### Consequences and verification
+
+- Project queries remain owner-scoped and foreign/unknown responses remain
+  indistinguishable.
+- A disabled fixture principal cannot authenticate even if its username is
+  known.
+- Migration, competing-bootstrap, reset idempotency, disabled-login,
+  Atlas-listing, and Orion-denial tests are mandatory.
+- Fixture execution emits a secret-free candidate/run/revision/checksum/count
+  receipt and is never a production deployment action.
+- Additional roles, invitations, recovery, and user administration remain
+  separately gated capabilities.
+
+## ADR-024 — Google/PEP-based executable Python convention profile
+
+Status: DECIDED
+
+Decision date: 2026-10-01
+
+### Context and decision
+
+Apistra needs one readable Python contract before more product code is added. The
+repository adopts the Google Python Style Guide and PEP 8/257 as its baseline,
+then narrows them through the binding Apistra profile in
+`docs/engineering/python-code-conventions.md`. The repository profile wins where
+the upstream guides allow alternatives.
+
+The contract is executable. Ruff owns formatting, imports, common correctness,
+modernisation, security-oriented static checks, annotations, and complexity.
+Mypy checks product code in strict mode. The pinned wemake-python-styleguide
+rules `WPS226` and `WPS432` reject overused string literals and unexplained
+non-trivial numbers in product and repository-owned engineering code. CI also
+rejects blanket suppression directives.
+
+Constants are required for stable domain vocabulary, protocol and persistence
+discriminators, security parameters, thresholds, timeouts, limits, and strings
+used more than three times in one module. This is not a rule that every literal
+must become a constant: obvious local values, one-use diagnostics, test data,
+docstrings, comments, and typed configuration stay close to their use.
+
+### Consequences and verification
+
+- Python tooling versions are lockfile-pinned and updated through reviewed dependency changes.
+- Test scenarios favour visible values, while product and repository-owned engineering code use named policy vocabulary.
+- New violations fail CI-TS-18; there is no grandfathering and no blanket local bypass.
+- Retained positive and negative fixtures prove that the convention gate can both accept and reject.
+- Architecture and code review remain responsible for semantics that static analysis cannot infer.
+
 ## Pattern-to-module summary
 
 Cross-cutting backend:
@@ -539,7 +713,7 @@ Workflow runtime:
 
 External integration:
 
-- Ports and Adapters: providers, connectors, vector store, durable engine, tools, identity, licence
+- Ports and Adapters: providers, connectors, vector store, worker execution mechanisms, tools, identity, licence
 - Strategy: versioned implementation selection
 - Anti-Corruption Layer: request, result, usage, and error translation
 
@@ -561,4 +735,13 @@ Deliberately not selected globally:
 
 ## Decision gate
 
-These decisions remain DRAFT until product-owner and qualified architecture review. ADR-PENDING-001 for the durable engine and ADR-PENDING-004 for authentication implementation still block their dependent workorders.
+ADR-019 is product-owner approved and implemented as the architecture-test foundation. ADR-020 through ADR-023 are product-owner approved constraints, and ADR-022 is implemented by the repository licence set and transition record. ADR-001 through ADR-018 remain PROPOSED globally until qualified architecture review.
+
+The CAP-01 slice is approved by the readiness review dated 2026-09-30:
+ADR-001 through ADR-004 where explicitly mapped, ADR-013, ADR-014 for mutable
+project administration, ADR-017, and ADR-018. ADR-002 covers identity/session
+and Softwaretest.it boundaries; ADR-010 applies only to the Softwaretest.it
+adapter. ADR-005 is explicitly not applicable to CAP-01. ADR-019 and ADR-021
+and ADR-023 remain the decided layout, authentication, principal, and guarded
+acceptance-fixture constraints. This scoped decision
+does not approve those proposed ADRs for unrelated capabilities.
