@@ -17,16 +17,18 @@ services:
   postgres:
     image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
     read_only: true
+    user: "999:999"
     cap_drop: ["ALL"]
     security_opt: ["no-new-privileges:true"]
     environment:
       POSTGRES_DB: apistra
       POSTGRES_USER: apistra
       POSTGRES_PASSWORD: ${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
     tmpfs:
       - /tmp:size=16m,mode=1777
       - /var/run/postgresql:size=4m,mode=1777
-    volumes: [postgres-state:/var/lib/postgresql/data]
+      - /var/lib/postgresql/data:uid=999,gid=999,mode=0700
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U apistra -d apistra"]
       interval: 3s
@@ -116,5 +118,3 @@ networks:
 volumes:
   bootstrap-state:
     name: ${APISTRA_COMPOSE_PROJECT}_state
-  postgres-state:
-    name: ${APISTRA_COMPOSE_PROJECT}_postgres
