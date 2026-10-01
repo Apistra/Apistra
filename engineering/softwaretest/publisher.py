@@ -206,43 +206,60 @@ def request_json(
         raise ApiError(error.code, problem) from None
 
 
-def _compare_requested(
-    expected: Any, actual: Any, path: str, mismatches: list[str]
+def _compare_mapping(
+    expected: dict[str, Any], actual: Any, path: str, mismatches: list[str]
 ) -> None:
-    if isinstance(expected, dict):
-        if not isinstance(actual, dict):
-            mismatches.append(f"{path}: expected object")
-            return
-        for key, value in expected.items():
-            if key not in actual:
-                mismatches.append(f"{path}.{key}: missing")
-            else:
-                _compare_requested(value, actual[key], f"{path}.{key}", mismatches)
+    if not isinstance(actual, dict):
+        mismatches.append(f"{path}: expected object")
         return
-    if isinstance(expected, list):
-        if not isinstance(actual, list):
-            mismatches.append(f"{path}: expected array")
-            return
-        if len(expected) != len(actual):
-            mismatches.append(
-                f"{path}: expected {len(expected)} items, received {len(actual)}"
-            )
-            return
-        for index, value in enumerate(expected):
-            _compare_requested(value, actual[index], f"{path}[{index}]", mismatches)
+    for key, value in expected.items():
+        if key not in actual:
+            mismatches.append(f"{path}.{key}: missing")
+            continue
+        _compare_requested(value, actual[key], f"{path}.{key}", mismatches)
+
+
+def _compare_sequence(
+    expected: list[Any], actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if not isinstance(actual, list):
+        mismatches.append(f"{path}: expected array")
         return
-    if (
+    if len(expected) != len(actual):
+        mismatches.append(
+            f"{path}: expected {len(expected)} items, received {len(actual)}"
+        )
+        return
+    for index, value in enumerate(expected):
+        _compare_requested(value, actual[index], f"{path}[{index}]", mismatches)
+
+
+def _equivalent_timestamp(expected: Any, actual: Any, path: str) -> bool:
+    if not (
         isinstance(expected, str)
         and isinstance(actual, str)
         and path.endswith(("started_at", "finished_at"))
     ):
-        try:
-            expected_time = datetime.fromisoformat(expected.replace("Z", "+00:00"))
-            actual_time = datetime.fromisoformat(actual.replace("Z", "+00:00"))
-            if expected_time == actual_time:
-                return
-        except ValueError:
-            pass
+        return False
+    try:
+        expected_time = datetime.fromisoformat(expected.replace("Z", "+00:00"))
+        actual_time = datetime.fromisoformat(actual.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return expected_time == actual_time
+
+
+def _compare_requested(
+    expected: Any, actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if isinstance(expected, dict):
+        _compare_mapping(expected, actual, path, mismatches)
+        return
+    if isinstance(expected, list):
+        _compare_sequence(expected, actual, path, mismatches)
+        return
+    if _equivalent_timestamp(expected, actual, path):
+        return
     if expected != actual:
         mismatches.append(f"{path}: value differs")
 
@@ -500,6 +517,162 @@ def _start_cycle_run(
     return started
 
 
+def _select_cycle(
+    cycles: list[dict[str, Any]], configured_id: str, cycle_name: str
+) -> dict[str, Any] | None:
+    if configured_id:
+        selected = next(
+            (cycle for cycle in cycles if cycle.get("id") == configured_id), None
+        )
+        if selected is None:
+            raise ValueError("configured cycle is not visible in the project")
+        return selected
+    reusable = [
+        cycle
+        for cycle in cycles
+        if cycle.get("name") == cycle_name
+        and cycle.get("status") in {"DRAFT", "ACTIVE"}
+    ]
+    reusable.sort(key=lambda cycle: cycle.get("status") != "ACTIVE")
+    return reusable[0] if reusable else None
+
+
+def _create_cycle(
+    url: str, token: str, pipeline_run_id: str, requester
+) -> dict[str, Any]:
+    payload = {
+        "name": "Apistra CAP-00 Reporting",
+        "objective": (
+            "Authenticated CI report write/read round-trips and receipt evidence "
+            "for the CAP-00 delivery gate."
+        ),
+        "build": "CAP-00",
+        "environment": "local",
+    }
+    selected = requester(
+        url,
+        token,
+        method="POST",
+        key=command_key(
+            pipeline_run_id, "cycle", "cap00-integration", "create", "none", 1
+        ),
+        payload=payload,
+    )
+    if not selected.get("id"):
+        raise ValueError("cycle create response has no id")
+    return selected
+
+
+def _add_cycle_item(
+    url: str,
+    token: str,
+    selected: dict[str, Any],
+    anchor_version_id: str,
+    pipeline_run_id: str,
+    requester,
+) -> dict[str, Any]:
+    cycle_id = str(selected["id"])
+    revision = _revision(selected, "draft cycle")
+    item_url = f"{url}/{cycle_id}/items"
+    try:
+        requester(
+            item_url,
+            token,
+            method="POST",
+            key=command_key(
+                pipeline_run_id, "cycle", cycle_id, "add-item", revision, 1
+            ),
+            if_match=f'"{revision}"',
+            payload={"version_id": anchor_version_id},
+        )
+    except ApiError as error:
+        if error.code != "REVISION_CONFLICT":
+            raise ValueError(
+                f"cycle item creation failed: {_problem_context(error)}"
+            ) from None
+        selected = _refresh_cycle(url, token, cycle_id, requester)
+        if selected.get("run_count", 0) < 1:
+            revision = _revision(selected, "draft cycle")
+            requester(
+                item_url,
+                token,
+                method="POST",
+                key=command_key(
+                    pipeline_run_id, "cycle", cycle_id, "add-item", revision, 2
+                ),
+                if_match=f'"{revision}"',
+                payload={"version_id": anchor_version_id},
+            )
+    return _refresh_cycle(url, token, cycle_id, requester)
+
+
+def _ensure_cycle_item(
+    url: str,
+    token: str,
+    selected: dict[str, Any],
+    anchor_version_id: str,
+    pipeline_run_id: str,
+    requester,
+) -> dict[str, Any]:
+    needs_item = selected.get("status") == "DRAFT" and selected.get("run_count", 0) < 1
+    if not needs_item:
+        return selected
+    if not anchor_version_id:
+        raise ValueError(
+            "draft cycle has no planned run; SOFTWARETEST_ANCHOR_VERSION_ID is required"
+        )
+    return _add_cycle_item(
+        url,
+        token,
+        selected,
+        anchor_version_id,
+        pipeline_run_id,
+        requester,
+    )
+
+
+def _start_cycle(
+    url: str,
+    token: str,
+    selected: dict[str, Any],
+    pipeline_run_id: str,
+    requester,
+) -> dict[str, Any]:
+    if selected.get("status") != "DRAFT":
+        return selected
+    if selected.get("run_count", 0) < 1:
+        raise ValueError("draft cycle still has no executable planned run")
+    cycle_id = str(selected["id"])
+    revision = _revision(selected, "draft cycle")
+    start_url = f"{url}/{cycle_id}:start"
+    try:
+        return requester(
+            start_url,
+            token,
+            method="POST",
+            key=command_key(pipeline_run_id, "cycle", cycle_id, "start", revision, 1),
+            if_match=f'"{revision}"',
+        )
+    except ApiError as error:
+        if error.code == "CYCLE_START_PRECONDITION_FAILED":
+            raise ValueError(
+                f"cycle start precondition failed: {_problem_context(error)}"
+            ) from None
+        if error.code != "REVISION_CONFLICT":
+            raise ValueError(f"cycle start failed: {_problem_context(error)}") from None
+    refreshed = _refresh_cycle(url, token, cycle_id, requester)
+    if refreshed.get("status") != "DRAFT":
+        return refreshed
+    revision = _revision(refreshed, "draft cycle")
+    return requester(
+        start_url,
+        token,
+        method="POST",
+        key=command_key(pipeline_run_id, "cycle", cycle_id, "start", revision, 2),
+        if_match=f'"{revision}"',
+    )
+
+
 def ensure_cycle(
     *,
     base_url: str,
@@ -512,129 +685,18 @@ def ensure_cycle(
 ) -> tuple[dict[str, Any], bool, dict[str, Any]]:
     """Return an active CAP-00 cycle and its started execution run."""
     url = f"{base_url}/api/v1/projects/{project_id}/cycles"
-    cycle_name = "Apistra CAP-00 Reporting"
     page = requester(url, token, method="GET")
-    cycles = page.get("results", [])
-    selected: dict[str, Any] | None = None
-    created_cycle = False
-    if configured_id:
-        for cycle in cycles:
-            if cycle.get("id") == configured_id:
-                selected = cycle
-                break
-        if selected is None:
-            raise ValueError("configured cycle is not visible in the project")
-    else:
-        reusable = [
-            cycle
-            for cycle in cycles
-            if cycle.get("name") == cycle_name
-            and cycle.get("status") in {"DRAFT", "ACTIVE"}
-        ]
-        if reusable:
-            reusable.sort(key=lambda cycle: cycle.get("status") != "ACTIVE")
-            selected = reusable[0]
-
+    selected = _select_cycle(
+        page.get("results", []), configured_id, "Apistra CAP-00 Reporting"
+    )
+    created_cycle = selected is None
     if selected is None:
-        payload = {
-            "name": cycle_name,
-            "objective": (
-                "Authenticated CI report write/read round-trips and receipt evidence "
-                "for the CAP-00 delivery gate."
-            ),
-            "build": "CAP-00",
-            "environment": "local",
-        }
-        selected = requester(
-            url,
-            token,
-            method="POST",
-            key=command_key(
-                pipeline_run_id, "cycle", "cap00-integration", "create", "none", 1
-            ),
-            payload=payload,
-        )
-        created_cycle = True
-        if not selected.get("id"):
-            raise ValueError("cycle create response has no id")
+        selected = _create_cycle(url, token, pipeline_run_id, requester)
 
-    if selected.get("status") == "DRAFT" and selected.get("run_count", 0) < 1:
-        if not anchor_version_id:
-            raise ValueError(
-                "draft cycle has no planned run; SOFTWARETEST_ANCHOR_VERSION_ID "
-                "is required"
-            )
-        cycle_id = str(selected["id"])
-        revision = _revision(selected, "draft cycle")
-        item_url = f"{url}/{cycle_id}/items"
-        try:
-            requester(
-                item_url,
-                token,
-                method="POST",
-                key=command_key(
-                    pipeline_run_id, "cycle", cycle_id, "add-item", revision, 1
-                ),
-                if_match=f'"{revision}"',
-                payload={"version_id": anchor_version_id},
-            )
-        except ApiError as error:
-            if error.code != "REVISION_CONFLICT":
-                raise ValueError(
-                    f"cycle item creation failed: {_problem_context(error)}"
-                ) from None
-            selected = _refresh_cycle(url, token, cycle_id, requester)
-            if selected.get("run_count", 0) < 1:
-                revision = _revision(selected, "draft cycle")
-                requester(
-                    item_url,
-                    token,
-                    method="POST",
-                    key=command_key(
-                        pipeline_run_id, "cycle", cycle_id, "add-item", revision, 2
-                    ),
-                    if_match=f'"{revision}"',
-                    payload={"version_id": anchor_version_id},
-                )
-        selected = _refresh_cycle(url, token, cycle_id, requester)
-
-    if selected.get("status") == "DRAFT":
-        if selected.get("run_count", 0) < 1:
-            raise ValueError("draft cycle still has no executable planned run")
-        cycle_id = str(selected["id"])
-        revision = _revision(selected, "draft cycle")
-        start_url = f"{url}/{cycle_id}:start"
-        try:
-            selected = requester(
-                start_url,
-                token,
-                method="POST",
-                key=command_key(
-                    pipeline_run_id, "cycle", cycle_id, "start", revision, 1
-                ),
-                if_match=f'"{revision}"',
-            )
-        except ApiError as error:
-            if error.code == "CYCLE_START_PRECONDITION_FAILED":
-                raise ValueError(
-                    f"cycle start precondition failed: {_problem_context(error)}"
-                ) from None
-            if error.code != "REVISION_CONFLICT":
-                raise ValueError(
-                    f"cycle start failed: {_problem_context(error)}"
-                ) from None
-            selected = _refresh_cycle(url, token, cycle_id, requester)
-            if selected.get("status") == "DRAFT":
-                revision = _revision(selected, "draft cycle")
-                selected = requester(
-                    start_url,
-                    token,
-                    method="POST",
-                    key=command_key(
-                        pipeline_run_id, "cycle", cycle_id, "start", revision, 2
-                    ),
-                    if_match=f'"{revision}"',
-                )
+    selected = _ensure_cycle_item(
+        url, token, selected, anchor_version_id, pipeline_run_id, requester
+    )
+    selected = _start_cycle(url, token, selected, pipeline_run_id, requester)
     if selected.get("status") != "ACTIVE":
         raise ValueError("CAP-00 cycle is not active")
     run = _start_cycle_run(

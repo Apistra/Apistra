@@ -57,6 +57,20 @@ jobs:
         run: |
           pnpm typecheck
           pnpm build:web
+      - name: CI-TS-17 cyclomatic complexity and proof fixtures
+        run: |
+          uv run --project backend ruff check backend tools engineering --select C901
+          pnpm complexity
+          uv run --project backend ruff check tests/complexity-fixtures/python/positive.py --select C901
+          if uv run --project backend ruff check tests/complexity-fixtures/python/negative.py --select C901; then
+            echo "Python negative complexity fixture unexpectedly passed"
+            exit 1
+          fi
+          pnpm exec eslint tests/complexity-fixtures/typescript/positive.ts
+          if pnpm exec eslint tests/complexity-fixtures/typescript/negative.ts; then
+            echo "TypeScript negative complexity fixture unexpectedly passed"
+            exit 1
+          fi
       - name: CI-TS-06 and CI-TS-16 public Softwaretest.it contract preflight
         run: python engineering/softwaretest/preflight.py
 

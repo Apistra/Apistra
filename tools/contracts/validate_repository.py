@@ -333,43 +333,9 @@ def _dependency_cycles(graph: dict[str, set[str]]) -> set[str]:
     return cycles
 
 
-def validate_business_path_contract(
-    path: Path, workorder_id: str, text: str
-) -> list[str]:
-    if workorder_id.startswith("WO-CAP-00-"):
-        return []
-
+def _validate_path_entries(path: Path, entries: list[str]) -> list[str]:
     errors: list[str] = []
-    repository_root = path.resolve().parents[3]
-    allowed_section = text.split("## Allowed changes", 1)[-1].split(
-        "## Stop conditions", 1
-    )[0]
-
-    if PLACEHOLDER_ALLOWED_PATH in allowed_section:
-        errors.append(f"{path}: business workorder still has placeholder paths")
-    for required in (
-        BUSINESS_PATH_AUTHORITY,
-        BUSINESS_PATH_OBSERVATION,
-        "Observed existing paths within the bounded change area:",
-        "Planned additions to the bounded change area after READY:",
-        "Workorder-class boundary:",
-        "Architecture path gate:",
-        "Path boundary:",
-    ):
-        if required not in allowed_section:
-            errors.append(f"{path}: missing business path contract field: {required}")
-
-    existing_paths = re.findall(
-        r"^- EXISTING: `([^`]+)`$", allowed_section, re.MULTILINE
-    )
-    planned_paths = re.findall(r"^- PLANNED: `([^`]+)`$", allowed_section, re.MULTILINE)
-    if not existing_paths:
-        errors.append(f"{path}: business workorder must list observed EXISTING paths")
-    all_paths = existing_paths + planned_paths
-    if len(all_paths) != len(set(all_paths)):
-        errors.append(f"{path}: repository path entries must be unique")
-
-    for relative in all_paths:
+    for relative in entries:
         parsed = PurePosixPath(relative.rstrip("/"))
         if (
             parsed.is_absolute()
@@ -389,32 +355,208 @@ def validate_business_path_contract(
             errors.append(
                 f"{path}: repository path is outside approved roots: {relative}"
             )
+    return errors
 
+
+def _validate_existing_paths(path: Path, existing_paths: list[str]) -> list[str]:
+    errors: list[str] = []
+    repository_root = path.resolve().parents[3]
     for relative in existing_paths:
         if relative == "artifacts/" or relative.startswith("artifacts/"):
             errors.append(
                 f"{path}: generated artifact path cannot be observed EXISTING: {relative}"
             )
             continue
-        observed = repository_root / relative.rstrip("/")
-        if not observed.exists():
+        if not (repository_root / relative.rstrip("/")).exists():
             errors.append(f"{path}: observed EXISTING path does not exist: {relative}")
+    return errors
 
-    if workorder_id.startswith("WO-CAP-16-") and (
-        "Architecture path gate: BLOCKING" not in allowed_section
-        or "`contracts/plugins/`" not in allowed_section
-        or "`plugin-sdk/python/`" not in allowed_section
+
+def _validate_capability_path_gates(
+    path: Path, workorder_id: str, allowed_section: str
+) -> list[str]:
+    errors: list[str] = []
+    cap16_fields = (
+        "Architecture path gate: BLOCKING",
+        "`contracts/plugins/`",
+        "`plugin-sdk/python/`",
+    )
+    if workorder_id.startswith("WO-CAP-16-") and not all(
+        field in allowed_section for field in cap16_fields
     ):
         errors.append(
             f"{path}: CAP-16 must retain the plugin-root architecture blocker"
         )
-    if workorder_id.startswith("WO-CAP-17-") and (
-        "Architecture path gate: BLOCKING" not in allowed_section
-        or "`deploy/kubernetes/`" not in allowed_section
+    cap17_fields = ("Architecture path gate: BLOCKING", "`deploy/kubernetes/`")
+    if workorder_id.startswith("WO-CAP-17-") and not all(
+        field in allowed_section for field in cap17_fields
     ):
         errors.append(
             f"{path}: CAP-17 must retain the Kubernetes-root architecture blocker"
         )
+    return errors
+
+
+def validate_business_path_contract(
+    path: Path, workorder_id: str, text: str
+) -> list[str]:
+    if workorder_id.startswith("WO-CAP-00-"):
+        return []
+    errors: list[str] = []
+    allowed_section = text.split("## Allowed changes", 1)[-1].split(
+        "## Stop conditions", 1
+    )[0]
+    if PLACEHOLDER_ALLOWED_PATH in allowed_section:
+        errors.append(f"{path}: business workorder still has placeholder paths")
+    required_fields = (
+        BUSINESS_PATH_AUTHORITY,
+        BUSINESS_PATH_OBSERVATION,
+        "Observed existing paths within the bounded change area:",
+        "Planned additions to the bounded change area after READY:",
+        "Workorder-class boundary:",
+        "Architecture path gate:",
+        "Path boundary:",
+    )
+    errors.extend(
+        f"{path}: missing business path contract field: {field}"
+        for field in required_fields
+        if field not in allowed_section
+    )
+    existing_paths = re.findall(
+        r"^- EXISTING: `([^`]+)`$", allowed_section, re.MULTILINE
+    )
+    planned_paths = re.findall(r"^- PLANNED: `([^`]+)`$", allowed_section, re.MULTILINE)
+    if not existing_paths:
+        errors.append(f"{path}: business workorder must list observed EXISTING paths")
+    all_paths = existing_paths + planned_paths
+    if len(all_paths) != len(set(all_paths)):
+        errors.append(f"{path}: repository path entries must be unique")
+    errors.extend(_validate_path_entries(path, all_paths))
+    errors.extend(_validate_existing_paths(path, existing_paths))
+    errors.extend(_validate_capability_path_gates(path, workorder_id, allowed_section))
+    return errors
+
+
+def _validate_workorder_metadata(
+    path: Path, workorder_id: str, text: str
+) -> tuple[list[str], str, str | None, str]:
+    errors: list[str] = []
+    if re.search(r"^## Stop conditions\S", text, re.MULTILINE):
+        errors.append(f"{path}: malformed Stop conditions heading")
+    version_match = WORKORDER_VERSION_PATTERN.search(text)
+    if version_match is None:
+        errors.append(f"{path}: workorder contract must use a supported 0.x revision")
+    version = version_match.group(1) if version_match else ""
+    status_match = re.search(r"^Status: (.+)$", text, re.MULTILINE)
+    status = status_match.group(1) if status_match else ""
+    if status not in VALID_WORKORDER_STATUSES:
+        errors.append(
+            f"{path}: Status must be exactly one of {sorted(VALID_WORKORDER_STATUSES)}"
+        )
+    required_fields = (
+        "Status reason",
+        "Implementation state",
+        "Evidence state",
+        "Approval state",
+    )
+    errors.extend(
+        f"{path}: missing separate {field} field"
+        for field in required_fields
+        if re.search(rf"^{field}: \S.+$", text, re.MULTILINE) is None
+    )
+    delivery_class = _workorder_delivery_class(text)
+    if delivery_class not in WORKORDER_DELIVERY_CLASSES:
+        errors.append(f"{path}: missing or unsupported delivery class")
+    if f"- Owned verification group: TST-{workorder_id}" not in text:
+        errors.append(f"{path}: owned verification group must be TST-{workorder_id}")
+    if f"- Specification revision: {version}" not in text:
+        errors.append(f"{path}: specification revision must match Version")
+    return errors, status, delivery_class, version
+
+
+def _validate_workorder_required_content(path: Path, text: str) -> list[str]:
+    checks = (
+        (
+            "- **Positive oracle:**" in text and "- **Negative oracle:**" in text,
+            "positive and negative test oracles are mandatory",
+        ),
+        (
+            "- Positive expectation:" in text and "- Counterexample:" in text,
+            "independent expectation inputs are mandatory",
+        ),
+        (
+            "- Required workorders:" in text,
+            "explicit workorder dependencies are mandatory",
+        ),
+    )
+    return [f"{path}: {message}" for valid, message in checks if not valid]
+
+
+def _validate_rule_applicability(path: Path, text: str) -> list[str]:
+    arch_section = text.split("## ARCH rules and pattern limits", 1)[-1].split(
+        "## SEC rules", 1
+    )[0]
+    sec_section = text.split("## SEC rules and safe test conditions", 1)[-1].split(
+        "## Acceptance criteria", 1
+    )[0]
+    errors: list[str] = []
+    if "- Applicability:" not in arch_section:
+        errors.append(f"{path}: ARCH rule applicability is mandatory")
+    if "- Applicability:" not in sec_section:
+        errors.append(f"{path}: SEC rule applicability is mandatory")
+    return errors
+
+
+def _validate_rule_references(
+    path: Path, text: str, defined_arch_ids: set[str], defined_sec_ids: set[str]
+) -> list[str]:
+    arch_ids = _rule_ids(text, "## ARCH rules and pattern limits", "ARCH")
+    sec_ids = _rule_ids(text, "## SEC rules and safe test conditions", "SEC")
+    return [
+        *(
+            f"{path}: undefined architecture rule {rule_id}"
+            for rule_id in sorted(arch_ids - defined_arch_ids)
+        ),
+        *(
+            f"{path}: undefined security rule {rule_id}"
+            for rule_id in sorted(sec_ids - defined_sec_ids)
+        ),
+    ]
+
+
+def _validate_test_references(
+    path: Path, text: str, canonical_bdd_ids: set[str], canonical_mtp_ids: set[str]
+) -> list[str]:
+    errors = [
+        *(
+            f"{path}: undefined canonical behavioural test ID {test_id}"
+            for test_id in sorted(set(BDD_ID_PATTERN.findall(text)) - canonical_bdd_ids)
+        ),
+        *(
+            f"{path}: undefined canonical manual package ID {package_id}"
+            for package_id in sorted(
+                set(MTP_ID_PATTERN.findall(text)) - canonical_mtp_ids
+            )
+        ),
+    ]
+    errors.extend(
+        f"{path}: prohibited generated test alias {alias}"
+        for alias in PROHIBITED_TEST_ALIASES
+        if alias in text
+    )
+    if re.search(r"\b(?:BDD|MT)-[^\s`,;)]+\*", text):
+        errors.append(f"{path}: wildcard test identifiers are prohibited")
+    return errors
+
+
+def _validate_ready_workorder(path: Path, status: str, text: str) -> list[str]:
+    if status not in {"READY", "DONE"}:
+        return []
+    errors: list[str] = []
+    if PLACEHOLDER_ALLOWED_PATH in text:
+        errors.append(f"{path}: READY/DONE workorder still has placeholder paths")
+    if "NOT ALLOCATED" in text:
+        errors.append(f"{path}: READY/DONE workorder has unallocated test IDs")
     return errors
 
 
@@ -427,86 +569,24 @@ def validate_workorder_contract(
     defined_arch_ids: set[str],
     defined_sec_ids: set[str],
 ) -> tuple[list[str], str | None, set[str]]:
-    errors: list[str] = []
-    if re.search(r"^## Stop conditions\S", text, re.MULTILINE):
-        errors.append(f"{path}: malformed Stop conditions heading")
-    version_match = WORKORDER_VERSION_PATTERN.search(text)
-    if version_match is None:
-        errors.append(f"{path}: workorder contract must use a supported 0.x revision")
-
-    status_match = re.search(r"^Status: (.+)$", text, re.MULTILINE)
-    status = status_match.group(1) if status_match else ""
-    if status not in VALID_WORKORDER_STATUSES:
-        errors.append(
-            f"{path}: Status must be exactly one of {sorted(VALID_WORKORDER_STATUSES)}"
-        )
-    for field in (
-        "Status reason",
-        "Implementation state",
-        "Evidence state",
-        "Approval state",
-    ):
-        if re.search(rf"^{field}: \S.+$", text, re.MULTILINE) is None:
-            errors.append(f"{path}: missing separate {field} field")
-
-    delivery_class = _workorder_delivery_class(text)
-    if delivery_class not in WORKORDER_DELIVERY_CLASSES:
-        errors.append(f"{path}: missing or unsupported delivery class")
-    if f"- Owned verification group: TST-{workorder_id}" not in text:
-        errors.append(f"{path}: owned verification group must be TST-{workorder_id}")
-    version = version_match.group(1) if version_match else ""
-    if f"- Specification revision: {version}" not in text:
-        errors.append(f"{path}: specification revision must match Version")
-    if "- **Positive oracle:**" not in text or "- **Negative oracle:**" not in text:
-        errors.append(f"{path}: positive and negative test oracles are mandatory")
-    if "- Positive expectation:" not in text or "- Counterexample:" not in text:
-        errors.append(f"{path}: independent expectation inputs are mandatory")
-    if "- Required workorders:" not in text:
-        errors.append(f"{path}: explicit workorder dependencies are mandatory")
-    if (
-        "- Applicability:"
-        not in text.split("## ARCH rules and pattern limits", 1)[-1].split(
-            "## SEC rules", 1
-        )[0]
-    ):
-        errors.append(f"{path}: ARCH rule applicability is mandatory")
-    if (
-        "- Applicability:"
-        not in text.split("## SEC rules and safe test conditions", 1)[-1].split(
-            "## Acceptance criteria", 1
-        )[0]
-    ):
-        errors.append(f"{path}: SEC rule applicability is mandatory")
-
-    arch_ids = _rule_ids(text, "## ARCH rules and pattern limits", "ARCH")
-    sec_ids = _rule_ids(text, "## SEC rules and safe test conditions", "SEC")
-    for rule_id in sorted(arch_ids - defined_arch_ids):
-        errors.append(f"{path}: undefined architecture rule {rule_id}")
-    for rule_id in sorted(sec_ids - defined_sec_ids):
-        errors.append(f"{path}: undefined security rule {rule_id}")
-
-    referenced_bdd_ids = set(BDD_ID_PATTERN.findall(text))
-    referenced_mtp_ids = set(MTP_ID_PATTERN.findall(text))
-    for test_id in sorted(referenced_bdd_ids - canonical_bdd_ids):
-        errors.append(f"{path}: undefined canonical behavioural test ID {test_id}")
-    for package_id in sorted(referenced_mtp_ids - canonical_mtp_ids):
-        errors.append(f"{path}: undefined canonical manual package ID {package_id}")
-    for alias in PROHIBITED_TEST_ALIASES:
-        if alias in text:
-            errors.append(f"{path}: prohibited generated test alias {alias}")
-    if re.search(r"\b(?:BDD|MT)-[^\s`,;)]+\*", text):
-        errors.append(f"{path}: wildcard test identifiers are prohibited")
-
+    errors, status, delivery_class, _ = _validate_workorder_metadata(
+        path, workorder_id, text
+    )
+    errors.extend(_validate_workorder_required_content(path, text))
+    errors.extend(_validate_rule_applicability(path, text))
+    errors.extend(
+        _validate_rule_references(path, text, defined_arch_ids, defined_sec_ids)
+    )
+    errors.extend(
+        _validate_test_references(path, text, canonical_bdd_ids, canonical_mtp_ids)
+    )
     errors.extend(validate_business_path_contract(path, workorder_id, text))
-
-    if status in {"READY", "DONE"}:
-        if PLACEHOLDER_ALLOWED_PATH in text:
-            errors.append(f"{path}: READY/DONE workorder still has placeholder paths")
-        if "NOT ALLOCATED" in text:
-            errors.append(f"{path}: READY/DONE workorder has unallocated test IDs")
-    for phrase in sorted(WORKORDER_FORBIDDEN_BOILERPLATE):
-        if phrase in text:
-            errors.append(f"{path}: forbidden generic boilerplate remains: {phrase}")
+    errors.extend(_validate_ready_workorder(path, status, text))
+    errors.extend(
+        f"{path}: forbidden generic boilerplate remains: {phrase}"
+        for phrase in sorted(WORKORDER_FORBIDDEN_BOILERPLATE)
+        if phrase in text
+    )
     return errors, delivery_class, _required_workorders(text)
 
 
@@ -573,8 +653,231 @@ def validate_manual_test_definitions(root: Path, test_catalog: str) -> list[str]
     return errors
 
 
-def validate_planning_catalogues(root: Path) -> list[str]:
+def _validate_test_catalogue(
+    root: Path,
+    test_catalog_path: Path,
+    test_catalog: str,
+    canonical_bdd_ids: set[str],
+    canonical_mtp_ids: set[str],
+) -> list[str]:
     errors: list[str] = []
+    if "Version: 0.7-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
+        errors.append(f"{test_catalog_path}: must declare the 0.7 draft authority")
+    if len(canonical_bdd_ids) != 47:
+        errors.append(
+            f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
+        )
+    if canonical_mtp_ids != {f"MTP-PRC-{number:02d}" for number in range(1, 15)}:
+        errors.append(
+            f"{test_catalog_path}: manual package catalogue must be PRC-01 through PRC-14"
+        )
+    errors.extend(validate_manual_test_definitions(root, test_catalog))
+    return errors
+
+
+def _validate_capability_document(
+    path: Path, capability_id: str, capability_index: str
+) -> tuple[list[str], str]:
+    errors: list[str] = []
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith(f"# {capability_id} — "):
+        errors.append(f"{path}: heading must start with {capability_id}")
+    missing = _missing_sections(text, CAPABILITY_REQUIRED_SECTIONS)
+    if missing:
+        errors.append(f"{path}: missing sections: {', '.join(missing)}")
+    if path.name not in capability_index:
+        errors.append(f"{path}: missing from capability index")
+    return errors, text
+
+
+def _validate_workorder_document(
+    workorder_path: Path,
+    workorder_id: str,
+    canonical_bdd_ids: set[str],
+    canonical_mtp_ids: set[str],
+    defined_arch_ids: set[str],
+    defined_sec_ids: set[str],
+) -> tuple[list[str], str | None, set[str]]:
+    errors: list[str] = []
+    text = workorder_path.read_text(encoding="utf-8")
+    if not text.startswith(f"# {workorder_id} — "):
+        errors.append(f"{workorder_path}: heading must start with {workorder_id}")
+    missing = _missing_sections(text, WORKORDER_REQUIRED_SECTIONS)
+    if missing:
+        errors.append(f"{workorder_path}: missing sections: {', '.join(missing)}")
+    contract_errors, delivery_class, dependencies = validate_workorder_contract(
+        workorder_path,
+        workorder_id,
+        text,
+        canonical_bdd_ids,
+        canonical_mtp_ids,
+        defined_arch_ids,
+        defined_sec_ids,
+    )
+    return [*errors, *contract_errors], delivery_class, dependencies
+
+
+def _validate_delivery_classes(directory: Path, classes: list[str]) -> list[str]:
+    errors: list[str] = []
+    expected = (
+        ("test-definition-and-publication", "test-definition-and-publication"),
+        ("capability-acceptance", "capability-acceptance"),
+    )
+    for delivery_class, label in expected:
+        if classes.count(delivery_class) != 1:
+            errors.append(
+                f"{directory}: capability must own exactly one {label} workorder"
+            )
+    return errors
+
+
+def _validate_dependency_graph(
+    directory: Path, dependencies_by_workorder: dict[str, set[str]]
+) -> list[str]:
+    errors: list[str] = []
+    known_workorders = set(dependencies_by_workorder)
+    for workorder_id, dependencies in dependencies_by_workorder.items():
+        if workorder_id in dependencies:
+            errors.append(f"{directory}: {workorder_id} depends on itself")
+        errors.extend(
+            f"{directory}: {workorder_id} has missing or cross-capability dependency {dependency}"
+            for dependency in sorted(dependencies - known_workorders)
+        )
+    errors.extend(
+        f"{directory}: dependency cycle includes {workorder_id}"
+        for workorder_id in sorted(_dependency_cycles(dependencies_by_workorder))
+    )
+    return errors
+
+
+def _ids_for_class(classes: dict[str, str], expected: str) -> set[str]:
+    return {
+        workorder_id
+        for workorder_id, delivery_class in classes.items()
+        if delivery_class == expected
+    }
+
+
+def _validate_capability_dependencies(
+    directory: Path,
+    capability_id: str,
+    dependencies_by_workorder: dict[str, set[str]],
+    classes: dict[str, str],
+) -> list[str]:
+    errors: list[str] = []
+    known_workorders = set(dependencies_by_workorder)
+    publication_ids = _ids_for_class(classes, "test-definition-and-publication")
+    acceptance_ids = _ids_for_class(classes, "capability-acceptance")
+    if len(publication_ids) == 1 and capability_id != "CAP-00":
+        publication_id = next(iter(publication_ids))
+        errors.extend(
+            f"{directory}: implementation {workorder_id} must depend on {publication_id}"
+            for workorder_id, delivery_class in classes.items()
+            if delivery_class == "implementation"
+            and publication_id not in dependencies_by_workorder[workorder_id]
+        )
+    if len(acceptance_ids) == 1:
+        acceptance_id = next(iter(acceptance_ids))
+        expected_dependencies = known_workorders - {acceptance_id}
+        if dependencies_by_workorder[acceptance_id] != expected_dependencies:
+            errors.append(
+                f"{directory}: acceptance {acceptance_id} must depend on every other workorder"
+            )
+    return errors
+
+
+def _validate_capability_workorders(
+    *,
+    workorders: Path,
+    capability_id: str,
+    capability_path: Path,
+    capability_text: str,
+    workorder_index: str,
+    canonical_bdd_ids: set[str],
+    canonical_mtp_ids: set[str],
+    defined_arch_ids: set[str],
+    defined_sec_ids: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    expected_names = [
+        f"WO-{capability_id}-{number:02d}.md"
+        for number in range(1, EXPECTED_WORKORDER_COUNTS[capability_id] + 1)
+    ]
+    directory = workorders / capability_id
+    observed_names = sorted(path.name for path in directory.glob("WO-*.md"))
+    if observed_names != expected_names:
+        errors.append(
+            f"{directory}: expected {expected_names!r}, observed {observed_names!r}"
+        )
+    delivery_classes: list[str] = []
+    dependencies_by_workorder: dict[str, set[str]] = {}
+    classes: dict[str, str] = {}
+    for name in expected_names:
+        workorder_path = directory / name
+        if not workorder_path.is_file():
+            continue
+        workorder_id = name.removesuffix(".md")
+        document_errors, delivery_class, dependencies = _validate_workorder_document(
+            workorder_path,
+            workorder_id,
+            canonical_bdd_ids,
+            canonical_mtp_ids,
+            defined_arch_ids,
+            defined_sec_ids,
+        )
+        errors.extend(document_errors)
+        if delivery_class is not None:
+            delivery_classes.append(delivery_class)
+            classes[workorder_id] = delivery_class
+        dependencies_by_workorder[workorder_id] = dependencies
+        if f"{capability_id}/{name}" not in workorder_index:
+            errors.append(f"{workorder_path}: missing from workorder index")
+        if f"../workorders/{capability_id}/{name}" not in capability_text:
+            errors.append(f"{workorder_path}: missing from {capability_path}")
+    errors.extend(_validate_delivery_classes(directory, delivery_classes))
+    errors.extend(_validate_dependency_graph(directory, dependencies_by_workorder))
+    errors.extend(
+        _validate_capability_dependencies(
+            directory, capability_id, dependencies_by_workorder, classes
+        )
+    )
+    return errors
+
+
+def _validate_capability(
+    *,
+    capabilities: Path,
+    workorders: Path,
+    capability_id: str,
+    capability_index: str,
+    workorder_index: str,
+    canonical_bdd_ids: set[str],
+    canonical_mtp_ids: set[str],
+    defined_arch_ids: set[str],
+    defined_sec_ids: set[str],
+) -> list[str]:
+    matches = sorted(capabilities.glob(f"{capability_id}-*.md"))
+    if len(matches) != 1:
+        return [f"{capability_id} must have exactly one canonical capability file"]
+    path = matches[0]
+    errors, text = _validate_capability_document(path, capability_id, capability_index)
+    errors.extend(
+        _validate_capability_workorders(
+            workorders=workorders,
+            capability_id=capability_id,
+            capability_path=path,
+            capability_text=text,
+            workorder_index=workorder_index,
+            canonical_bdd_ids=canonical_bdd_ids,
+            canonical_mtp_ids=canonical_mtp_ids,
+            defined_arch_ids=defined_arch_ids,
+            defined_sec_ids=defined_sec_ids,
+        )
+    )
+    return errors
+
+
+def validate_planning_catalogues(root: Path) -> list[str]:
     capabilities = root / "docs/capabilities"
     workorders = root / "docs/workorders"
     capability_index = (capabilities / "README.md").read_text(encoding="utf-8")
@@ -591,18 +894,13 @@ def validate_planning_catalogues(root: Path) -> list[str]:
     )
     defined_arch_ids = set(re.findall(r"^(ARCH-\d{3}) —", architecture, re.MULTILINE))
     defined_sec_ids = set(re.findall(r"^(SEC-\d{3}) —", security, re.MULTILINE))
-
-    if "Version: 0.7-draft" not in test_catalog or "Status: DRAFT" not in test_catalog:
-        errors.append(f"{test_catalog_path}: must declare the 0.7 draft authority")
-    if len(canonical_bdd_ids) != 47:
-        errors.append(
-            f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
-        )
-    if canonical_mtp_ids != {f"MTP-PRC-{number:02d}" for number in range(1, 15)}:
-        errors.append(
-            f"{test_catalog_path}: manual package catalogue must be PRC-01 through PRC-14"
-        )
-    errors.extend(validate_manual_test_definitions(root, test_catalog))
+    errors = _validate_test_catalogue(
+        root,
+        test_catalog_path,
+        test_catalog,
+        canonical_bdd_ids,
+        canonical_mtp_ids,
+    )
 
     capability_files = sorted(capabilities.glob("CAP-*.md"))
     observed_capability_ids = [path.name[:6] for path in capability_files]
@@ -613,119 +911,19 @@ def validate_planning_catalogues(root: Path) -> list[str]:
         )
 
     for capability_id in expected_capability_ids:
-        matches = sorted(capabilities.glob(f"{capability_id}-*.md"))
-        if len(matches) != 1:
-            errors.append(
-                f"{capability_id} must have exactly one canonical capability file"
+        errors.extend(
+            _validate_capability(
+                capabilities=capabilities,
+                workorders=workorders,
+                capability_id=capability_id,
+                capability_index=capability_index,
+                workorder_index=workorder_index,
+                canonical_bdd_ids=canonical_bdd_ids,
+                canonical_mtp_ids=canonical_mtp_ids,
+                defined_arch_ids=defined_arch_ids,
+                defined_sec_ids=defined_sec_ids,
             )
-            continue
-        path = matches[0]
-        text = path.read_text(encoding="utf-8")
-        if not text.startswith(f"# {capability_id} — "):
-            errors.append(f"{path}: heading must start with {capability_id}")
-        missing = _missing_sections(text, CAPABILITY_REQUIRED_SECTIONS)
-        if missing:
-            errors.append(f"{path}: missing sections: {', '.join(missing)}")
-        if path.name not in capability_index:
-            errors.append(f"{path}: missing from capability index")
-
-        expected_names = [
-            f"WO-{capability_id}-{number:02d}.md"
-            for number in range(1, EXPECTED_WORKORDER_COUNTS[capability_id] + 1)
-        ]
-        directory = workorders / capability_id
-        observed_names = sorted(path.name for path in directory.glob("WO-*.md"))
-        if observed_names != expected_names:
-            errors.append(
-                f"{directory}: expected {expected_names!r}, observed {observed_names!r}"
-            )
-        delivery_classes: list[str] = []
-        workorder_dependencies: dict[str, set[str]] = {}
-        workorder_classes: dict[str, str] = {}
-        for name in expected_names:
-            workorder_path = directory / name
-            if not workorder_path.is_file():
-                continue
-            workorder_text = workorder_path.read_text(encoding="utf-8")
-            workorder_id = name.removesuffix(".md")
-            if not workorder_text.startswith(f"# {workorder_id} — "):
-                errors.append(
-                    f"{workorder_path}: heading must start with {workorder_id}"
-                )
-            missing = _missing_sections(workorder_text, WORKORDER_REQUIRED_SECTIONS)
-            if missing:
-                errors.append(
-                    f"{workorder_path}: missing sections: {', '.join(missing)}"
-                )
-            workorder_errors, delivery_class, dependencies = (
-                validate_workorder_contract(
-                    workorder_path,
-                    workorder_id,
-                    workorder_text,
-                    canonical_bdd_ids,
-                    canonical_mtp_ids,
-                    defined_arch_ids,
-                    defined_sec_ids,
-                )
-            )
-            errors.extend(workorder_errors)
-            if delivery_class is not None:
-                delivery_classes.append(delivery_class)
-                workorder_classes[workorder_id] = delivery_class
-            workorder_dependencies[workorder_id] = dependencies
-            if f"{capability_id}/{name}" not in workorder_index:
-                errors.append(f"{workorder_path}: missing from workorder index")
-            if f"../workorders/{capability_id}/{name}" not in text:
-                errors.append(f"{workorder_path}: missing from {path}")
-
-        if delivery_classes.count("test-definition-and-publication") != 1:
-            errors.append(
-                f"{directory}: capability must own exactly one test-definition-and-publication workorder"
-            )
-        if delivery_classes.count("capability-acceptance") != 1:
-            errors.append(
-                f"{directory}: capability must own exactly one capability-acceptance workorder"
-            )
-
-        known_workorders = set(workorder_dependencies)
-        for workorder_id, dependencies in workorder_dependencies.items():
-            if workorder_id in dependencies:
-                errors.append(f"{directory}: {workorder_id} depends on itself")
-            for dependency in sorted(dependencies - known_workorders):
-                errors.append(
-                    f"{directory}: {workorder_id} has missing or cross-capability dependency {dependency}"
-                )
-
-        for workorder_id in sorted(_dependency_cycles(workorder_dependencies)):
-            errors.append(f"{directory}: dependency cycle includes {workorder_id}")
-
-        publication_ids = {
-            workorder_id
-            for workorder_id, delivery_class in workorder_classes.items()
-            if delivery_class == "test-definition-and-publication"
-        }
-        acceptance_ids = {
-            workorder_id
-            for workorder_id, delivery_class in workorder_classes.items()
-            if delivery_class == "capability-acceptance"
-        }
-        if len(publication_ids) == 1 and capability_id != "CAP-00":
-            publication_id = next(iter(publication_ids))
-            for workorder_id, delivery_class in workorder_classes.items():
-                if (
-                    delivery_class == "implementation"
-                    and publication_id not in workorder_dependencies[workorder_id]
-                ):
-                    errors.append(
-                        f"{directory}: implementation {workorder_id} must depend on {publication_id}"
-                    )
-        if len(acceptance_ids) == 1:
-            acceptance_id = next(iter(acceptance_ids))
-            expected_dependencies = known_workorders - {acceptance_id}
-            if workorder_dependencies[acceptance_id] != expected_dependencies:
-                errors.append(
-                    f"{directory}: acceptance {acceptance_id} must depend on every other workorder"
-                )
+        )
 
     return errors
 
@@ -756,13 +954,8 @@ def validate_local_planning_links(root: Path) -> list[str]:
     return errors
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=Path.cwd())
-    parser.add_argument("--fixtures", action="store_true")
-    args = parser.parse_args()
-    root = args.root.resolve()
-    errors = (
+def validate_repository(root: Path) -> list[str]:
+    return (
         validate_contract(repository_contract(root))
         + validate_branch_policy(
             json.loads((root / ".github/branch-protection.expected.json").read_text())
@@ -773,91 +966,118 @@ def main() -> int:
         + validate_planning_catalogues(root)
         + validate_local_planning_links(root)
     )
+
+
+def _contract_fixture_errors(root: Path) -> list[str]:
+    positive_path = root / "tests/contract-fixtures/positive/repository-contract.json"
+    negative_path = root / "tests/contract-fixtures/negative/repository-contract.json"
+    positive = json.loads(positive_path.read_text())
+    negative = json.loads(negative_path.read_text())
+    checks = (
+        (not validate_contract(positive), "positive contract fixture must pass"),
+        (bool(validate_contract(negative)), "negative contract fixture must fail"),
+        (
+            not validate_version_values("0.1.0", "0.1.0", "0.1.0"),
+            "positive version fixture must pass",
+        ),
+        (
+            bool(validate_version_values("0.1.0+local", "0.1.0", "0.2.0")),
+            "negative version fixture must fail",
+        ),
+    )
+    return [message for valid, message in checks if not valid]
+
+
+def _workorder_fixture_context(root: Path) -> tuple[Path, str, tuple[object, ...]]:
+    catalogue_text = (root / "docs/testing/test-id-catalog.md").read_text(
+        encoding="utf-8"
+    )
+    architecture_text = (root / "docs/planning/03-architecture.md").read_text(
+        encoding="utf-8"
+    )
+    security_text = (root / "docs/planning/04-security-concept.md").read_text(
+        encoding="utf-8"
+    )
+    fixture_path = root / "docs/workorders/CAP-01/WO-CAP-01-01.md"
+    fixture_text = fixture_path.read_text(encoding="utf-8")
+    arguments: tuple[object, ...] = (
+        set(BDD_ID_PATTERN.findall(catalogue_text)),
+        set(MTP_ID_PATTERN.findall(catalogue_text)),
+        set(re.findall(r"^(ARCH-\d{3}) —", architecture_text, re.MULTILINE)),
+        set(re.findall(r"^(SEC-\d{3}) —", security_text, re.MULTILINE)),
+    )
+    return fixture_path, fixture_text, arguments
+
+
+def _workorder_fixture_errors(root: Path) -> list[str]:
+    errors: list[str] = []
+    path, text, arguments = _workorder_fixture_context(root)
+    fixture_errors, _, _ = validate_workorder_contract(
+        path, "WO-CAP-01-01", text, *arguments
+    )
+    if fixture_errors:
+        errors.append("positive workorder contract fixture must pass")
+    invalid_workorder = re.sub(
+        r"^Status: .+$", "Status: PLANNED", text, count=1, flags=re.MULTILINE
+    ).replace("BDD-AUTH-001", "BDD-CAP-01-01")
+    invalid_errors, _, _ = validate_workorder_contract(
+        path, "WO-CAP-01-01", invalid_workorder, *arguments
+    )
+    if not any("Status must be exactly" in error for error in invalid_errors):
+        errors.append("negative workorder status fixture must fail")
+    if not any("prohibited generated test alias" in error for error in invalid_errors):
+        errors.append("negative workorder test-ID fixture must fail")
+    invalid_path_workorder = re.sub(
+        r"^- EXISTING: `[^`]+`$",
+        "- EXISTING: `missing/path/`",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    invalid_path_errors, _, _ = validate_workorder_contract(
+        path, "WO-CAP-01-01", invalid_path_workorder, *arguments
+    )
+    if not any(
+        "observed EXISTING path does not exist" in error
+        for error in invalid_path_errors
+    ):
+        errors.append("negative business path fixture must fail")
+    return errors
+
+
+def _manual_fixture_errors(root: Path) -> list[str]:
+    errors: list[str] = []
+    manual_path = root / "docs/testing/manual/PRC-01/MT-PRC-01-001.md"
+    manual_text = manual_path.read_text(encoding="utf-8")
+    if validate_manual_test_case(manual_path, manual_text):
+        errors.append("positive manual test definition fixture must pass")
+    invalid_manual = manual_text.replace("**Expected result:**", "**Result:**", 1)
+    invalid_errors = validate_manual_test_case(manual_path, invalid_manual)
+    if not any(
+        "every manual step must have one test data and expected result" in error
+        for error in invalid_errors
+    ):
+        errors.append("negative manual test definition fixture must fail")
+    return errors
+
+
+def validate_proof_fixtures(root: Path) -> list[str]:
+    return [
+        *_contract_fixture_errors(root),
+        *_workorder_fixture_errors(root),
+        *_manual_fixture_errors(root),
+    ]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--fixtures", action="store_true")
+    args = parser.parse_args()
+    root = args.root.resolve()
+    errors = validate_repository(root)
     if args.fixtures:
-        positive = json.loads(
-            (
-                root / "tests/contract-fixtures/positive/repository-contract.json"
-            ).read_text()
-        )
-        negative = json.loads(
-            (
-                root / "tests/contract-fixtures/negative/repository-contract.json"
-            ).read_text()
-        )
-        if validate_contract(positive):
-            errors.append("positive contract fixture must pass")
-        if not validate_contract(negative):
-            errors.append("negative contract fixture must fail")
-        if validate_version_values("0.1.0", "0.1.0", "0.1.0"):
-            errors.append("positive version fixture must pass")
-        if not validate_version_values("0.1.0+local", "0.1.0", "0.2.0"):
-            errors.append("negative version fixture must fail")
-        catalogue_text = (root / "docs/testing/test-id-catalog.md").read_text(
-            encoding="utf-8"
-        )
-        architecture_text = (root / "docs/planning/03-architecture.md").read_text(
-            encoding="utf-8"
-        )
-        security_text = (root / "docs/planning/04-security-concept.md").read_text(
-            encoding="utf-8"
-        )
-        fixture_path = root / "docs/workorders/CAP-01/WO-CAP-01-01.md"
-        fixture_text = fixture_path.read_text(encoding="utf-8")
-        fixture_args = (
-            fixture_path,
-            "WO-CAP-01-01",
-            set(BDD_ID_PATTERN.findall(catalogue_text)),
-            set(MTP_ID_PATTERN.findall(catalogue_text)),
-            set(re.findall(r"^(ARCH-\d{3}) —", architecture_text, re.MULTILINE)),
-            set(re.findall(r"^(SEC-\d{3}) —", security_text, re.MULTILINE)),
-        )
-        fixture_errors, _, _ = validate_workorder_contract(
-            fixture_args[0], fixture_args[1], fixture_text, *fixture_args[2:]
-        )
-        if fixture_errors:
-            errors.append("positive workorder contract fixture must pass")
-        invalid_workorder = re.sub(
-            r"^Status: .+$",
-            "Status: PLANNED",
-            fixture_text,
-            count=1,
-            flags=re.MULTILINE,
-        ).replace("BDD-AUTH-001", "BDD-CAP-01-01")
-        invalid_errors, _, _ = validate_workorder_contract(
-            fixture_args[0], fixture_args[1], invalid_workorder, *fixture_args[2:]
-        )
-        if not any("Status must be exactly" in error for error in invalid_errors):
-            errors.append("negative workorder status fixture must fail")
-        if not any(
-            "prohibited generated test alias" in error for error in invalid_errors
-        ):
-            errors.append("negative workorder test-ID fixture must fail")
-        invalid_path_workorder = re.sub(
-            r"^- EXISTING: `[^`]+`$",
-            "- EXISTING: `missing/path/`",
-            fixture_text,
-            count=1,
-            flags=re.MULTILINE,
-        )
-        invalid_path_errors, _, _ = validate_workorder_contract(
-            fixture_args[0], fixture_args[1], invalid_path_workorder, *fixture_args[2:]
-        )
-        if not any(
-            "observed EXISTING path does not exist" in error
-            for error in invalid_path_errors
-        ):
-            errors.append("negative business path fixture must fail")
-        manual_path = root / "docs/testing/manual/PRC-01/MT-PRC-01-001.md"
-        manual_text = manual_path.read_text(encoding="utf-8")
-        if validate_manual_test_case(manual_path, manual_text):
-            errors.append("positive manual test definition fixture must pass")
-        invalid_manual = manual_text.replace("**Expected result:**", "**Result:**", 1)
-        invalid_manual_errors = validate_manual_test_case(manual_path, invalid_manual)
-        if not any(
-            "every manual step must have one test data and expected result" in error
-            for error in invalid_manual_errors
-        ):
-            errors.append("negative manual test definition fixture must fail")
+        errors.extend(validate_proof_fixtures(root))
     for error in errors:
         print(error)
     if errors:

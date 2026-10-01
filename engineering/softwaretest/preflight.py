@@ -36,36 +36,45 @@ def validate_openapi(
     return errors
 
 
-def validate_integration_guide(
-    document: dict[str, object], contract: dict[str, object]
+def _validate_command_protocol(
+    document: dict[str, object], expected: dict[str, object]
 ) -> list[str]:
-    errors: list[str] = []
-    expected = contract["integration_guide"]
-    if not isinstance(expected, dict):
-        return ["integration guide contract is not an object"]
-    if document.get("contract") != expected["contract"]:
-        errors.append("integration guide contract changed")
-    if document.get("version") != expected["version"]:
-        errors.append("integration guide version changed")
     protocol = document.get("command_protocol", {})
     if not isinstance(protocol, dict):
-        errors.append("integration guide command protocol is absent")
-    else:
-        if protocol.get("read_before_write") is not True:
-            errors.append("read-before-write is no longer required")
-        if protocol.get("revision_header") != expected["revision_header"]:
-            errors.append("revision header changed")
-        if protocol.get("idempotency_header") != expected["idempotency_header"]:
-            errors.append("idempotency header changed")
-    execution = document.get("cycle_execution", {})
-    if not isinstance(execution, dict):
-        return [*errors, "cycle execution guide is absent"]
-    operations = [
+        return ["integration guide command protocol is absent"]
+    checks = (
+        (
+            protocol.get("read_before_write") is True,
+            "read-before-write is no longer required",
+        ),
+        (
+            protocol.get("revision_header") == expected["revision_header"],
+            "revision header changed",
+        ),
+        (
+            protocol.get("idempotency_header") == expected["idempotency_header"],
+            "idempotency header changed",
+        ),
+    )
+    return [message for valid, message in checks if not valid]
+
+
+def _operation_ids(section: dict[str, object]) -> list[object]:
+    return [
         step.get("operation_id")
-        for step in execution.get("steps", [])
+        for step in section.get("steps", [])
         if isinstance(step, dict)
     ]
-    if operations != expected["cycle_operations"]:
+
+
+def _validate_cycle_execution(
+    document: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    execution = document.get("cycle_execution", {})
+    if not isinstance(execution, dict):
+        return ["cycle execution guide is absent"]
+    if _operation_ids(execution) != expected["cycle_operations"]:
         errors.append("cycle execution operation order changed")
     preconditions = execution.get("start_preconditions", {})
     if not isinstance(preconditions, dict):
@@ -82,16 +91,35 @@ def validate_integration_guide(
         expected["cycle_failure_codes"]
     ).issubset(recovery):
         errors.append("required failure recovery codes are absent")
+    return errors
 
+
+def _validate_reporting_prerequisites(
+    reporting: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    prerequisites = reporting.get("prerequisites", {})
+    if not isinstance(prerequisites, dict):
+        return ["CI reporting prerequisites are absent"]
+    automation_resource = str(prerequisites.get("automation_resource", ""))
+    automation_required = (
+        "no pre-provisioned automation resource" not in automation_resource.lower()
+    )
+    if automation_required != expected["automation_resource_required"]:
+        errors.append("CI reporting automation-resource prerequisite changed")
+    if not prerequisites.get("cycle") or not prerequisites.get("project"):
+        errors.append("CI reporting project/cycle prerequisites are absent")
+    return errors
+
+
+def _validate_ci_reporting(
+    document: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
     reporting = document.get("ci_reporting", {})
     if not isinstance(reporting, dict):
-        return [*errors, "CI reporting guide is absent"]
-    reporting_operations = [
-        step.get("operation_id")
-        for step in reporting.get("steps", [])
-        if isinstance(step, dict)
-    ]
-    if reporting_operations != expected["reporting_operations"]:
+        return ["CI reporting guide is absent"]
+    if _operation_ids(reporting) != expected["reporting_operations"]:
         errors.append("CI reporting operation order changed")
     if reporting.get("required_scopes") != expected["reporting_required_scopes"]:
         errors.append("CI reporting required scopes changed")
@@ -99,24 +127,32 @@ def validate_integration_guide(
         errors.append("CI reporting required headers changed")
     if reporting.get("uses_if_match") is not expected["reporting_uses_if_match"]:
         errors.append("CI reporting revision contract changed")
-    prerequisites = reporting.get("prerequisites", {})
-    if not isinstance(prerequisites, dict):
-        errors.append("CI reporting prerequisites are absent")
-    else:
-        automation_resource = str(prerequisites.get("automation_resource", ""))
-        automation_required = "no pre-provisioned automation resource" not in (
-            automation_resource.lower()
-        )
-        if automation_required != expected["automation_resource_required"]:
-            errors.append("CI reporting automation-resource prerequisite changed")
-        if not prerequisites.get("cycle") or not prerequisites.get("project"):
-            errors.append("CI reporting project/cycle prerequisites are absent")
+    errors.extend(_validate_reporting_prerequisites(reporting, expected))
     reporting_recovery = reporting.get("failure_recovery", {})
     if not isinstance(reporting_recovery, dict) or not set(
         expected["reporting_failure_codes"]
     ).issubset(reporting_recovery):
         errors.append("required CI reporting failure recovery codes are absent")
     return errors
+
+
+def validate_integration_guide(
+    document: dict[str, object], contract: dict[str, object]
+) -> list[str]:
+    expected = contract["integration_guide"]
+    if not isinstance(expected, dict):
+        return ["integration guide contract is not an object"]
+    errors = []
+    if document.get("contract") != expected["contract"]:
+        errors.append("integration guide contract changed")
+    if document.get("version") != expected["version"]:
+        errors.append("integration guide version changed")
+    return [
+        *errors,
+        *_validate_command_protocol(document, expected),
+        *_validate_cycle_execution(document, expected),
+        *_validate_ci_reporting(document, expected),
+    ]
 
 
 def get_json(url: str, token: str | None = None) -> dict[str, object]:

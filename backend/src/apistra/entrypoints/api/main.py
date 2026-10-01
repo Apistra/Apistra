@@ -96,24 +96,7 @@ def _expected_version(if_match: str | None) -> int | None:
     return int(value) if value.isdigit() and int(value) >= 1 else None
 
 
-def create_app(
-    runtime_settings: RuntimeSettings | None = None,
-    identity_service: IdentityService | None = None,
-    project_service: ProjectService | None = None,
-) -> FastAPI:
-    configured_settings = runtime_settings
-
-    def current_settings() -> RuntimeSettings:
-        return configured_settings or settings
-
-    identity = identity_service or build_identity_service(current_settings())
-    projects = project_service or build_project_service(current_settings())
-    application = FastAPI(
-        title="Apistra API",
-        version=current_settings().version,
-        description="Local-first API for Apistra administration and process automation.",
-    )
-
+def _register_request_context(application: FastAPI) -> None:
     @application.middleware("http")
     async def request_context(
         request: Request,
@@ -137,6 +120,10 @@ def create_app(
         )
         return response
 
+
+def _register_health_routes(
+    application: FastAPI, current_settings: Callable[[], RuntimeSettings]
+) -> None:
     @application.get("/health/live", tags=["health"])
     def live() -> dict[str, object]:
         return {"status": "ok", "deployment": current_settings().marker()}
@@ -160,36 +147,44 @@ def create_app(
             f'apistra_ready{{service="api"}} {ready_value}\n'
         )
 
+
+def _session_response(
+    result,
+    request: Request,
+    response: Response,
+    current_settings: Callable[[], RuntimeSettings],
+) -> dict[str, object] | JSONResponse:
+    if result.error:
+        return _problem(result.error, request.state.correlation_id)
+    issued = result.value
+    active_settings = current_settings()
+    response.set_cookie(
+        key=SESSION_COOKIE,
+        value=issued.raw_token,
+        httponly=True,
+        secure=active_settings.secure_cookies,
+        samesite="strict",
+        max_age=active_settings.session_ttl_seconds,
+        path="/",
+    )
+    return {
+        "administrator": {
+            "id": str(issued.administrator_id),
+            "username": issued.administrator_username,
+        },
+        "csrf_token": issued.csrf_token,
+        "expires_at": issued.expires_at.isoformat(),
+    }
+
+
+def _register_identity_creation_routes(
+    application: FastAPI,
+    identity: IdentityService,
+    current_settings: Callable[[], RuntimeSettings],
+) -> None:
     @application.get("/api/v1/installation", tags=["identity"])
     def installation_status() -> dict[str, bool]:
         return identity.installation_status()
-
-    def session_response(
-        result,
-        request: Request,
-        response: Response,
-    ) -> dict[str, object] | JSONResponse:
-        if result.error:
-            return _problem(result.error, request.state.correlation_id)
-        issued = result.value
-        active_settings = current_settings()
-        response.set_cookie(
-            key=SESSION_COOKIE,
-            value=issued.raw_token,
-            httponly=True,
-            secure=active_settings.secure_cookies,
-            samesite="strict",
-            max_age=active_settings.session_ttl_seconds,
-            path="/",
-        )
-        return {
-            "administrator": {
-                "id": str(issued.administrator_id),
-                "username": issued.administrator_username,
-            },
-            "csrf_token": issued.csrf_token,
-            "expires_at": issued.expires_at.isoformat(),
-        }
 
     @application.post(
         "/api/v1/administrators:bootstrap",
@@ -202,7 +197,7 @@ def create_app(
             credentials.password,
             request.state.correlation_id,
         )
-        return session_response(result, request, response)
+        return _session_response(result, request, response, current_settings)
 
     @application.post("/api/v1/sessions", tags=["identity"], status_code=status.HTTP_201_CREATED)
     def create_session(credentials: CredentialsRequest, request: Request, response: Response):
@@ -211,7 +206,14 @@ def create_app(
             credentials.password,
             request.state.correlation_id,
         )
-        return session_response(result, request, response)
+        return _session_response(result, request, response, current_settings)
+
+
+def _register_identity_session_routes(
+    application: FastAPI,
+    identity: IdentityService,
+    current_settings: Callable[[], RuntimeSettings],
+) -> None:
 
     @application.get("/api/v1/session", tags=["identity"])
     def get_session(
@@ -259,21 +261,30 @@ def create_app(
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
-    def authenticated(
-        request: Request,
-        session_token: str | None,
-        csrf_token: str | None = None,
-        *,
-        mutation: bool = False,
-    ):
-        result = (
-            identity.authorize_mutation(session_token, csrf_token)
-            if mutation
-            else identity.verify_session(session_token)
-        )
-        if result.error:
-            return None, _problem(result.error, request.state.correlation_id)
-        return result.value, None
+
+def _authenticated(
+    identity: IdentityService,
+    request: Request,
+    session_token: str | None,
+    csrf_token: str | None = None,
+    *,
+    mutation: bool = False,
+):
+    result = (
+        identity.authorize_mutation(session_token, csrf_token)
+        if mutation
+        else identity.verify_session(session_token)
+    )
+    if result.error:
+        return None, _problem(result.error, request.state.correlation_id)
+    return result.value, None
+
+
+def _register_project_collection_routes(
+    application: FastAPI,
+    identity: IdentityService,
+    projects: ProjectService,
+) -> None:
 
     @application.post("/api/v1/projects", tags=["projects"], status_code=status.HTTP_201_CREATED)
     def create_project(
@@ -284,7 +295,9 @@ def create_app(
         csrf_token: str | None = Header(None, alias="x-csrf-token"),
         idempotency_key: str | None = Header(None, alias="idempotency-key"),
     ):
-        context, problem = authenticated(request, session_token, csrf_token, mutation=True)
+        context, problem = _authenticated(
+            identity, request, session_token, csrf_token, mutation=True
+        )
         if problem:
             return problem
         result = projects.create(
@@ -305,18 +318,24 @@ def create_app(
         request: Request,
         session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
     ):
-        context, problem = authenticated(request, session_token)
+        context, problem = _authenticated(identity, request, session_token)
         if problem:
             return problem
         result = projects.list(context.session.administrator_id)
         return {"items": [_project(item) for item in result.value]}
 
+
+def _register_audit_route(
+    application: FastAPI,
+    identity: IdentityService,
+    projects: ProjectService,
+) -> None:
     @application.get("/api/v1/audit-events", tags=["audit"])
     def list_audit_events(
         request: Request,
         session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
     ):
-        context, problem = authenticated(request, session_token)
+        context, problem = _authenticated(identity, request, session_token)
         if problem:
             return problem
         administrator_id = context.session.administrator_id
@@ -354,6 +373,12 @@ def create_app(
         )
         return {"items": events}
 
+
+def _register_project_read_route(
+    application: FastAPI,
+    identity: IdentityService,
+    projects: ProjectService,
+) -> None:
     @application.get("/api/v1/projects/{project_id}", tags=["projects"])
     def get_project(
         project_id: uuid.UUID,
@@ -361,7 +386,7 @@ def create_app(
         response: Response,
         session_token: str | None = Cookie(None, alias=SESSION_COOKIE),
     ):
-        context, problem = authenticated(request, session_token)
+        context, problem = _authenticated(identity, request, session_token)
         if problem:
             return problem
         result = projects.get(context.session.administrator_id, project_id)
@@ -370,6 +395,12 @@ def create_app(
         response.headers["etag"] = f'"{result.value.version}"'
         return _project(result.value)
 
+
+def _register_project_mutation_routes(
+    application: FastAPI,
+    identity: IdentityService,
+    projects: ProjectService,
+) -> None:
     @application.patch("/api/v1/projects/{project_id}", tags=["projects"])
     def update_project(
         project_id: uuid.UUID,
@@ -380,7 +411,9 @@ def create_app(
         csrf_token: str | None = Header(None, alias="x-csrf-token"),
         if_match: str | None = Header(None, alias="if-match"),
     ):
-        context, problem = authenticated(request, session_token, csrf_token, mutation=True)
+        context, problem = _authenticated(
+            identity, request, session_token, csrf_token, mutation=True
+        )
         if problem:
             return problem
         version = _expected_version(if_match)
@@ -415,7 +448,9 @@ def create_app(
         csrf_token: str | None = Header(None, alias="x-csrf-token"),
         if_match: str | None = Header(None, alias="if-match"),
     ):
-        context, problem = authenticated(request, session_token, csrf_token, mutation=True)
+        context, problem = _authenticated(
+            identity, request, session_token, csrf_token, mutation=True
+        )
         if problem:
             return problem
         version = _expected_version(if_match)
@@ -438,6 +473,33 @@ def create_app(
             return _project_problem(result.error, request.state.correlation_id)
         response.headers["etag"] = f'"{result.value.version}"'
         return _project(result.value)
+
+
+def create_app(
+    runtime_settings: RuntimeSettings | None = None,
+    identity_service: IdentityService | None = None,
+    project_service: ProjectService | None = None,
+) -> FastAPI:
+    configured_settings = runtime_settings
+
+    def current_settings() -> RuntimeSettings:
+        return configured_settings or settings
+
+    identity = identity_service or build_identity_service(current_settings())
+    projects = project_service or build_project_service(current_settings())
+    application = FastAPI(
+        title="Apistra API",
+        version=current_settings().version,
+        description="Local-first API for Apistra administration and process automation.",
+    )
+    _register_request_context(application)
+    _register_health_routes(application, current_settings)
+    _register_identity_creation_routes(application, identity, current_settings)
+    _register_identity_session_routes(application, identity, current_settings)
+    _register_project_collection_routes(application, identity, projects)
+    _register_audit_route(application, identity, projects)
+    _register_project_read_route(application, identity, projects)
+    _register_project_mutation_routes(application, identity, projects)
 
     return application
 
