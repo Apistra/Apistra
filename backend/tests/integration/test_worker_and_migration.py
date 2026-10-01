@@ -3,6 +3,8 @@ import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import pytest
+
 from apistra.entrypoints import migration
 from apistra.entrypoints.worker import main as worker
 from apistra.platform.runtime import RuntimeSettings
@@ -36,11 +38,13 @@ def test_worker_rejects_missing_and_invalid_heartbeat(tmp_path: Path) -> None:
     assert not worker.heartbeat_is_healthy(path)
 
 
+@pytest.mark.migration
 def test_migration_is_an_idempotent_noop() -> None:
     assert migration.migration_result() == migration.migration_result()
     assert migration.migration_result()["applied"] == []
 
 
+@pytest.mark.migration
 def test_migration_cli_emits_json(capsys) -> None:
     assert migration.main() == 0
     assert json.loads(capsys.readouterr().out)["status"] == "up_to_date"

@@ -149,7 +149,7 @@ Production testing is NOT DEFINED. It requires an approved environment, data, ac
 - Automated BDD E2E: stable, externally observable critical journeys expressed as Given/When/Then.
 - Manual process and UI/UX: independent atomic cases covering complete user journeys, states, roles, errors, accessibility, and recovery.
 - Security and privacy: actual enforcement points with valid positive and negative identity/project controls.
-- Performance and resource: representative synthetic profiles, budgets, concurrency, rate, duration, token, and cost limits.
+- Performance and resource: deterministic resource declarations and enforceable input, batch, retry, token, cost, and complexity boundaries that do not depend on shared-runner speed. CI does not claim latency, throughput, or load evidence while no representative running candidate and controlled measurement environment exist.
 - Resilience and recovery: restart, worker loss, timeout, cancellation, uncertain response, backup restore, rollback, and roll-forward.
 - Packaging and staging: clean build, immutable images, manifest, SBOM, migration, health, smoke, offline profile, and exact-candidate recovery.
 
@@ -306,8 +306,10 @@ Security/privacy:
 
 Performance/resources:
 
-- define workload, data scale, concurrency, warm-up, measurement window, hardware/environment, thresholds, and abort limits before execution;
-- do not invent representative thresholds before representative runtime behavior exists.
+- run deterministic resource and policy-boundary tests in CI because their oracle is independent of shared-runner timing;
+- cover at/below/above each applicable limit and fail when an applicable suite is empty;
+- do not use shared-runner wall-clock microbenchmarks as a release gate or label resource declarations as latency, throughput, or load evidence;
+- activate real performance testing only when a representative candidate can run under a controlled, recorded environment with defined workload, data scale, concurrency, warm-up, measurement window, thresholds, variance, and abort limits.
 
 Resilience/recovery:
 

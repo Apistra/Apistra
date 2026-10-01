@@ -6,6 +6,8 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Split the CI quality matrix into explicit executable stages and limited CI-TS-12 to deterministic resource and complexity contracts until representative performance infrastructure exists.
+
 ### Added
 
 - BuildBySpec planning baseline covering product scope, decisions, arc42 architecture, security, delivery/CI, test architecture, design, traceability, and gates.

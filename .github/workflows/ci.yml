@@ -107,12 +107,26 @@ jobs:
           corepack enable
           corepack prepare pnpm@${PNPM_VERSION} --activate
           pnpm install --frozen-lockfile
-      - name: CI-TS-04 through CI-TS-07, CI-TS-11, CI-TS-12 and CI-TS-14 Python matrix
-        run: uv run --project backend pytest backend/tests
-      - name: CI-TS-04 and CI-TS-14 web tests
+      - name: CI-TS-04 Python unit tests
+        run: uv run --project backend pytest --no-cov backend/tests/unit
+      - name: CI-TS-04 web unit tests
         run: pnpm test:web
-      - name: CI-TS-06 and CI-TS-16 Softwaretest.it adapter tests
+      - name: CI-TS-05 component tests
+        run: uv run --project backend pytest --no-cov backend/tests/component
+      - name: CI-TS-06 schema and consumer contract tests
+        run: uv run --project backend pytest --no-cov backend/tests/contract
+      - name: CI-TS-06 Softwaretest.it adapter contracts
         run: python -m unittest discover -s engineering/softwaretest/tests -v
+      - name: CI-TS-07 integration tests
+        run: uv run --project backend pytest --no-cov backend/tests/integration -m "not migration"
+      - name: CI-TS-11 migration tests
+        run: uv run --project backend pytest --no-cov backend/tests/integration -m migration
+      - name: CI-TS-12 deterministic resource-limit contracts
+        run: uv run --project backend pytest --no-cov backend/tests/resource
+      - name: CI-TS-14 UI accessibility and visual contracts
+        run: pnpm test:web
+      - name: Aggregate backend coverage gate
+        run: uv run --project backend pytest backend/tests
 
   security:
     name: Security and supply chain
@@ -142,6 +156,7 @@ jobs:
 
   package:
     name: Package candidate
+    needs: [contract-static, architecture, tests, security]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
