@@ -52,6 +52,6 @@ No document in this baseline is implementation evidence. No capability is implem
 - Versioning and changelog policy: DEFINED; no product release exists
 - Design direction: DECIDED, design evidence still PENDING
 - Independent expectation review: PENDING
-- CAP-00 implementation: IMPLEMENTED; version 0.5 is hosted verified, version 0.6 still needs current candidate evidence, and product-owner review/human acceptance are recorded; the authenticated Softwaretest.it receipt remains open
-- Business implementation: BLOCKED until CAP-00 and Softwaretest.it publishing readiness pass
+- CAP-00 implementation: ACCEPTED; revision 0.6 hosted evidence, product-owner review, human acceptance, and candidate-bound Softwaretest.it receipts are recorded
+- Business implementation: BLOCKED until the separate CAP-01 test-definition publication/read-back gate passes
 - Business workorder path contracts: COMPLETE AS PROPOSAL for all 133 workorders; qualified architecture review remains PENDING, with CAP-16 and CAP-17 new-root decisions BLOCKING

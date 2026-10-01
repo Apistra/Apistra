@@ -209,7 +209,7 @@ Every executed test or gate must bind:
 - GATE-EXP-01: PENDING
 - GATE-DES-01: PENDING
 - GATE-CAP00-READY: REVIEWED; HUMAN ACCEPTANCE RECORDED
-- GATE-CAP00-DONE: BLOCKED
+- GATE-CAP00-DONE: VERIFIED; HUMAN ACCEPTANCE RECORDED
 - GATE-WO-READY: BLOCKED
 - GATE-WO-DONE: BLOCKED
 - GATE-CAP-DONE: BLOCKED
@@ -221,11 +221,11 @@ Every executed test or gate must bind:
 - Detailed Apistra-owned runtime architecture and slice expectations still require qualified review before CAP-06 workorders become READY; ownership is decided by ADR-020
 - Authentication is decided by ADR-021; CAP-01 security defaults and tests still require qualified review before affected workorders become READY
 - ADR-019 repository layout is approved and implemented; the remaining pattern ADRs still require qualified architecture review
-- Public Softwaretest.it OpenAPI contract is verified; authorised project/cycle binding and write/read round-trip are pending
+- Softwaretest.it guide 1.1.0 and the authorised CAP-00 project/cycle/report/receipt round-trip are verified by run 36875393087
 - Visual reference sources and rendered previews exist, but product-owner approval, logo production assets and rights evidence, accessibility measurement, detailed interaction states, and Softwaretest.it manual UI tests are pending
 - Architecture, behavioural, contract, security, supply-chain, packaging, staging, recovery, fixture, and reporting-outbox tooling exists; GitHub Actions run 36618729112 accepted the committed candidate, and product-owner independent review was recorded on 2026-09-30
 - GitHub Actions run 36618729112 built the clean committed immutable candidate and passed staging health, controlled failure, and unchanged-image recovery
-- Product-owner human bootstrap acceptance was recorded on 2026-09-30; its final immutable-candidate binding remains coupled to the missing Softwaretest.it receipt
+- Product-owner human bootstrap acceptance was recorded on 2026-09-30; run 36875393087 supplies the final immutable-candidate reporting binding without a material product-behaviour change
 - Live branch protection is active for `test`, `staging`, and `main`; mandatory independent approvals remain deferred until a second qualified maintainer is available
 - The official AGPLv3 text remains effective for already published revisions; ADR-022 approves the future source-available model, while rights-holder details, transition commit, notices, commercial terms, dependency compatibility, and legal review remain pending before licence-file changes
 

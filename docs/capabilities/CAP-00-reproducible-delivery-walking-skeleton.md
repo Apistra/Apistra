@@ -1,16 +1,16 @@
 # CAP-00 — Reproducible Delivery Walking Skeleton
 
 Version: 0.2-draft
-Status: IMPLEMENTED; acceptance gates remain
+Status: ACCEPTED; production approval not granted
 Release: 0.0
 Assurance: EXTENDED
 
 ## Control summary
 
 **Result:** A maintainer can build, verify, stage, diagnose, and recover an immutable minimal Apistra candidate without business functionality.
-**Evidence:** Implementation, hosted CI, independent review, and the human acceptance decision exist; formal completion is still blocked on external reporting evidence and final candidate binding.
-**Main blocker:** The authenticated Softwaretest.it write/read round-trip and atomic receipt remain blocking.
-**Next step:** After the provider fix, publish and read back the unchanged final candidate results, retain the receipt, and complete the candidate-bound gate package.
+**Evidence:** Implementation, hosted CI, isolated staging/recovery, independent review, human acceptance, and candidate-bound Softwaretest.it receipts are recorded.
+**Main blocker:** None for CAP-00; production approval remains explicitly outside this capability acceptance.
+**Next step:** Publish and verify the separate CAP-01 test-definition package before selecting the first CAP-01 implementation workorder as READY.
 
 ## Goal and value
 
@@ -107,7 +107,7 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-Independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30 in [the CAP-00 review record](../testing/cap00-review-and-acceptance.md). The authenticated Softwaretest.it round-trip and final candidate-bound receipt remain blocking. Live branch protection is active on `test`, `staging`, and `main` with a solo-maintainer-safe review policy.
+Independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30 in [the CAP-00 review record](../testing/cap00-review-and-acceptance.md). GitHub Actions run 36875393087 completed the authenticated Softwaretest.it round-trip for the immutable candidate with a COMPLETE/PASSED readback and confirmed create, entries, and finalize receipts. Live branch protection is active on `test`, `staging`, and `main` with a solo-maintainer-safe review policy.
 
 No implementing agent may resolve a blocking decision implicitly.
 

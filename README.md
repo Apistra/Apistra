@@ -25,7 +25,7 @@ The current BuildBySpec planning package starts at [docs/planning/README.md](doc
 
 Granular product slices are maintained as [one file per capability](docs/capabilities/README.md) and [one execution contract per workorder](docs/workorders/README.md).
 
-The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. Branch protection, independent review, and explicit human acceptance are recorded; the final CAP-00 gate still requires the authorised Softwaretest.it round-trip and receipt bound to the unchanged final candidate.
+The planning documents describe intended behaviour and delivery gates. The current CAP-00 implementation is technical evidence, not a released product. Branch protection, independent review, explicit human acceptance, and the candidate-bound Softwaretest.it round-trip are recorded. CAP-00 is accepted; CAP-01 product implementation and production approval have not begun.
 
 The operational test rules are defined in the [Test Concept](docs/testing/test-concept.md); the system test structure remains in the [Test Architecture](docs/planning/06-test-architecture.md).
 

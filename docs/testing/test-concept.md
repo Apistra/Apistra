@@ -10,7 +10,7 @@ Assurance profile: EXTENDED
 
 **Relationship to the test architecture:** The system-centred test architecture defines what must be tested and how risks map to system structures and processes. This test concept defines who performs which testing activities, when they occur, which gates apply, and what evidence is required.
 
-**Current position:** CAP-00 automated suites and candidate verification are implemented and hosted-verified. Business-capability tests, complete manual process packages, browser/screen-reader measurement, and the authenticated Softwaretest.it round-trip remain pending.
+**Current position:** CAP-00 automated suites, candidate verification, staging/recovery, human acceptance, and authenticated Softwaretest.it reporting are hosted-verified. Business-capability tests, their definition publication, complete manual process execution, and browser/screen-reader measurement remain pending.
 
 **Next responsible step:** Complete CAP-00 external acceptance, then apply this concept to CAP-01 expectation review and test-definition workorders before implementation READY.
 

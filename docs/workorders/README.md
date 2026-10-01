@@ -13,13 +13,13 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 
 ## CAP-00
 
-- [WO-CAP-00-01 — Establish repository governance and planning checks](CAP-00/WO-CAP-00-01.md) — BLOCKED; product-owner review is recorded, while hosted repair/change-impact evidence remains open
-- [WO-CAP-00-02 — Create the monorepo walking skeleton](CAP-00/WO-CAP-00-02.md) — BLOCKED; product-owner review is recorded, while revision 0.6 evidence revalidation remains open
-- [WO-CAP-00-03 — Package immutable container candidates](CAP-00/WO-CAP-00-03.md) — BLOCKED; implementation and hosted evidence require 0.6 change-impact revalidation
-- [WO-CAP-00-04 — Establish isolated local staging and recovery](CAP-00/WO-CAP-00-04.md) — BLOCKED; human acceptance is recorded, while implementation evidence requires 0.6 change-impact revalidation
-- [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — BLOCKED; partial implementation exists, authenticated round-trip is absent
-- [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — BLOCKED; implementation exists, 0.6 evidence/approval remains open
-- [WO-CAP-00-07 — Complete bootstrap candidate gate](CAP-00/WO-CAP-00-07.md) — BLOCKED; human acceptance is recorded, while the external receipt and final candidate binding remain open
+- [WO-CAP-00-01 — Establish repository governance and planning checks](CAP-00/WO-CAP-00-01.md) — DONE; protected repository and hosted checks verified
+- [WO-CAP-00-02 — Create the monorepo walking skeleton](CAP-00/WO-CAP-00-02.md) — DONE; complete revision 0.6 workflow verified
+- [WO-CAP-00-03 — Package immutable container candidates](CAP-00/WO-CAP-00-03.md) — DONE; immutable candidate and external binding verified
+- [WO-CAP-00-04 — Establish isolated local staging and recovery](CAP-00/WO-CAP-00-04.md) — DONE; staging, failure, and recovery verified
+- [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — DONE; authenticated round-trip and receipts verified
+- [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — DONE; fixture contracts and negative proofs verified
+- [WO-CAP-00-07 — Complete bootstrap candidate gate](CAP-00/WO-CAP-00-07.md) — DONE; CAP-00 evidence and human acceptance package complete
 
 ## CAP-01
 

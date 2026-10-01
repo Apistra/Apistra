@@ -1,11 +1,11 @@
 # WO-CAP-00-02 — Create the monorepo walking skeleton
 
 Version: 0.6-draft
-Status: BLOCKED
-Status reason: revision 0.6 change-impact evidence revalidation remains incomplete
+Status: DONE
+Status reason: the revision 0.6 walking skeleton passed the complete protected test workflow
 Implementation state: IMPLEMENTED
-Evidence state: STALE — hosted run 36637376129 passed revision 0.5; revision 0.6 requires change-impact revalidation
-Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30; DONE remains evidence-gated
+Evidence state: VERIFIED — GitHub Actions run 36875393087 revalidated the accepted walking skeleton and candidate
+Approval state: REVIEWED — CAP-00 product-owner review recorded 2026-09-30 and remains applicable
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
