@@ -207,11 +207,17 @@ def main() -> int:
             reports = get_json(
                 f"{base_url}/api/v1/projects/{project_id}/ci-reports", token
             )
+            steering = get_json(
+                f"{base_url}/api/v1/projects/{project_id}/steering/export", token
+            )
             if not isinstance(cycles.get("results"), list):
                 print("Authenticated cycle listing has an unexpected shape")
                 return 1
             if not isinstance(reports.get("results"), list):
                 print("Authenticated CI-report listing has an unexpected shape")
+                return 1
+            if not isinstance(steering.get("items"), list):
+                print("Authenticated Steering export has an unexpected shape")
                 return 1
         print("Softwaretest.it contract preflight passed.")
         return 0

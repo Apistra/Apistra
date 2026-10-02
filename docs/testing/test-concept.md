@@ -155,7 +155,7 @@ Production testing is NOT DEFINED. It requires an approved environment, data, ac
 - Resilience and recovery: restart, worker loss, timeout, cancellation, uncertain response, backup restore, rollback, and roll-forward.
 - Packaging and staging: clean build, immutable images, manifest, SBOM, migration, health, smoke, offline profile, and exact-candidate recovery.
 
-The CI-stage identifiers CI-TS-01 through CI-TS-18 and their canonical scopes remain defined in `docs/planning/05-delivery-ci-contract.md`.
+The CI-stage identifiers CI-TS-01 through CI-TS-19 and their canonical scopes remain defined in `docs/planning/05-delivery-ci-contract.md`.
 
 ## 8. Test design techniques
 
@@ -341,7 +341,8 @@ Exploratory sessions have a charter, scope, risk, time box, environment, tester,
 
 - Verify the authoritative OpenAPI contract before every new class of write.
 - Use minimum project-scoped credentials and never place tokens or passwords in definitions or evidence.
-- Publish requirements, capabilities, processes, BDD scenarios, manual cases, ordered steps, and CI mappings idempotently.
+- Import canonical Capabilities and Workorders through the separate Steering interface with stable source revisions; publish requirements, process/test assignments, BDD scenarios, manual cases, ordered steps, and CI mappings through their own resources.
+- Validate the complete Steering manifest locally on every branch. Trusted branches require one payload-bound import receipt and complete export field comparison; IDs embedded in test or CI payloads are not a Steering import.
 - Read back fields and step order; creation success alone is insufficient.
 - Keep definition publication distinct from execution: a definition publisher must not create runs or results, and its receipt records this zero-result invariant.
 - Report every CI result/status and bind it to commit, candidate, suite, stage, test, attempt, environment, and evidence.
@@ -382,10 +383,14 @@ Implemented and hosted-verified:
 - repository/contract checks, static analysis, architecture rules and negative fixtures;
 - Python and web tests with configured coverage thresholds;
 - health/component, schema, fixture, secret-scan, dependency-audit, packaging, Compose staging, marker, controlled failure, and recovery checks;
-- public Softwaretest.it OpenAPI preflight, adapter tests, result bundle, and dry-run outbox.
+- public Softwaretest.it OpenAPI preflight, Steering/definition/reporting adapter tests, result bundle, and separate dry-run outboxes;
 - protected-branch configuration and authenticated Softwaretest.it CI-result reporting;
 - independent CAP-00 review, manual CAP00-MAN-001 execution, and human bootstrap acceptance;
 - CAP-01 definition publisher, six released manual definitions, exact field-/ordered-step read-back, and unchanged idempotent replay with zero execution results.
+
+Implemented locally and pending authenticated protected-branch evidence:
+
+- the separate CI-TS-19 Capability/Workorder Steering manifest, payload-bound import, receipt validation, complete export field comparison, drift failure, and redacted failure receipt.
 
 Still pending for CAP-01 acceptance:
 

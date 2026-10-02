@@ -9,7 +9,7 @@ Status: DRAFT
 - No branch automatically deploys to any environment.
 - Every promotion is a pull request with required evidence and human approval.
 - Local staging is a real isolated Docker Compose profile, not a development server.
-- Product code cannot begin before CAP-00 proves the delivery path and Softwaretest.it publishing readiness.
+- Product code cannot begin before CAP-00 proves the delivery path and Softwaretest.it Steering/publishing readiness.
 - Every capability ends with a local staging acceptance workorder.
 - A production environment is not yet defined.
 
@@ -183,6 +183,14 @@ CI-TS-18 — Python code conventions
 - Fail-closed controls: a retained conforming fixture passes, retained overused-string and magic-number fixtures fail with their exact expected rule identifiers, and an explicit scan rejects blanket `noqa`, `type: ignore`, Ruff, or Pylint disable-all directives
 - Current CI job: `Contract and static checks`, using only dependencies pinned in `backend/uv.lock`
 
+CI-TS-19 — Softwaretest.it Steering source synchronization
+- Trigger: every Capability, Workorder, Steering publisher, API contract, or CI change; authenticated mutation only on trusted `test`, `staging`, and `main` pushes
+- Scope: every canonical `docs/capabilities/CAP-*.md` and `docs/workorders/CAP-*/WO-CAP-*.md` source
+- Oracle: unique/non-empty local manifest, explicit source revision and status mapping, one payload-bound idempotent import, matching receipt payload checksum, exact full-export field comparison, and retained remote item/content checksums
+- Fail-closed controls: unknown mandatory state, duplicate ID, missing source class, version conflict, partial export, field drift, invalid checksum, missing credential/scope, or unredacted failure evidence fails the stage
+- Runtime boundary: Softwaretest.it remains an engineering system; this stage cannot alter or become a dependency of Apistra runtime behavior
+- Retry: a Steering-only failure replays only the unchanged manifest with its existing idempotency key and never reruns product tests
+
 Pipeline mapping rule:
 - Each executable stage has its own named workflow step or job and an explicit command. A combined test command must not be presented as evidence for stages for which it discovered no applicable tests.
 - Focused Python stage commands disable the global coverage plugin because a single slice cannot cover the complete backend. A subsequent aggregate `pytest backend/tests` run is the only repository-wide coverage oracle and remains blocking.
@@ -195,7 +203,7 @@ For the same candidate:
 - Retry only failed, cancelled, or technically invalid stages.
 - Reuse successful independent stages when suite, inputs, configuration, and relevant candidate parts have matching fingerprints.
 - Record every attempt.
-- A Softwaretest.it-only failure retries CI-TS-16 without rerunning tests.
+- A Softwaretest.it test-reporting failure retries only CI-TS-16; a Steering failure retries only CI-TS-19. Neither reruns product tests.
 
 After a repair commit:
 
@@ -222,7 +230,7 @@ CAP-00 contains no business behaviour. It must prove:
 - structured logging, basic metrics, correlation, and deployment marker
 - SBOM and baseline supply-chain checks
 - automated result artefacts
-- Softwaretest.it preflight, publishing manifest, example result upload, round-trip, or an explicit blocking finding without invented endpoints
+- Softwaretest.it preflight, canonical Capability/Workorder Steering manifest and round-trip, test publishing manifest, example result upload, or an explicit blocking finding without invented endpoints
 - manual deployment of the exact digest to local staging
 - tested rollback or roll-forward recovery
 - retained evidence with commit, digest, stage attempts, environment, and recovery result
@@ -242,8 +250,9 @@ Before a write:
 Required logical resources:
 
 - Apistra project
+- Canonical Capability and Workorder Steering items, imported separately from test/result payloads
 - Versioned release or capability test plan
-- Capabilities and processes
+- Capability assignments and processes for test management
 - Automated and manual test definitions
 - Ordered manual steps
 - Test runs, attempts, statuses, evidence, and defects

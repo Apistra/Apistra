@@ -29,7 +29,7 @@ RELEASE_VERSION_PATTERN = re.compile(
     r"(?:-(?:alpha|beta|rc)\.(0|[1-9]\d*))?$"
 )
 EXPECTED_WORKORDER_COUNTS = {
-    "CAP-00": 7,
+    "CAP-00": 8,
     "CAP-01": 5,
     "CAP-02": 7,
     "CAP-03": 7,
@@ -786,11 +786,21 @@ def _validate_capability_dependencies(
         )
     if len(acceptance_ids) == 1:
         acceptance_id = next(iter(acceptance_ids))
-        expected_dependencies = known_workorders - {acceptance_id}
+        expected_dependencies = {
+            workorder_id
+            for workorder_id in known_workorders
+            if workorder_id < acceptance_id
+        }
         if dependencies_by_workorder[acceptance_id] != expected_dependencies:
             errors.append(
-                f"{directory}: acceptance {acceptance_id} must depend on every other workorder"
+                f"{directory}: acceptance {acceptance_id} must depend on every preceding workorder"
             )
+        errors.extend(
+            f"{directory}: post-acceptance {workorder_id} must be operational-governance"
+            for workorder_id, delivery_class in classes.items()
+            if workorder_id > acceptance_id
+            and delivery_class != "operational-governance"
+        )
     return errors
 
 
