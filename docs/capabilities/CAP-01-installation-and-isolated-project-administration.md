@@ -1,16 +1,16 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 1.0
-Status: FINAL ACCEPTANCE PREPARATION; NOT ACCEPTED
+Version: 1.1
+Status: FINAL ACCEPTANCE READY; NOT ACCEPTED
 Release: 0.1
 Assurance: EXTENDED
 
 ## Control summary
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
-**Evidence:** WO-CAP-01-01 through WO-CAP-01-04 are DONE and represented on protected `test`. Their owned implementation, CI, staging/recovery, and authenticated Softwaretest.it definition-publication evidence is complete. No unchanged final candidate result, manual execution, candidate-bound reporting receipt, independent implementation review, or human capability acceptance is claimed yet.
+**Evidence:** WO-CAP-01-01 through WO-CAP-01-04 are DONE and represented on protected `test`. Protected run `36926072188` passed the complete automated gate, including candidate packaging, isolated staging/recovery, and the authenticated Softwaretest.it round-trip. No unchanged final-candidate manual result, independent implementation review, or human capability acceptance is claimed yet.
 **Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
-**Next step:** Integrate the current Python-convention and fixture-layout change into protected `test`, freeze one immutable candidate, then execute WO-CAP-01-05 on a separate feature branch.
+**Next step:** Review the WO-CAP-01-05 feature candidate, execute all six manual cases against that exact candidate using the published execution guide, confirm its Softwaretest.it receipts, and record explicit human acceptance.
 
 ## Goal and value
 
