@@ -1,10 +1,10 @@
 # WO-CAP-01-05 — Accept CAP-01 on local staging
 
-Version: 0.7-draft
-Status: DRAFT
-Status reason: prerequisite workorders are DONE, but the current convention and fixture-layout change is not integrated into protected `test` and no immutable acceptance candidate is frozen
-Implementation state: ACCEPTANCE EXECUTION NOT STARTED
-Evidence state: PREREQUISITE EVIDENCE COMPLETE; CANDIDATE-BOUND ACCEPTANCE NOT EXECUTED
+Version: 0.8-ready
+Status: READY
+Status reason: all prerequisite workorders are DONE, protected `test` passed the complete automated gate, and deterministic local acceptance tooling is available; candidate-bound manual execution and human acceptance are intentionally pending
+Implementation state: ACCEPTANCE TOOLING COMPLETE; HUMAN EXECUTION NOT STARTED
+Evidence state: PROTECTED BASELINE COMPLETE; FINAL CANDIDATE EVIDENCE NOT EXECUTED
 Approval state: ACCEPTANCE PLAN APPROVED; CAPABILITY NOT APPROVED
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: DEFINITIONS PUBLISHED AND VERIFIED BY WO-CAP-01-04; candidate-bound execution receipts remain required
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-01-05
-- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -38,10 +38,13 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 ## Context and current behavior
 
 WO-CAP-01-01 through WO-CAP-01-04 are DONE, including authenticated
-Softwaretest.it definition publication and read-back. The current Python
-convention and fixture-layout change still has to enter protected `test` before
-the acceptance candidate can be frozen. Unchanged-candidate staging evidence,
-manual execution results, candidate-bound Softwaretest.it receipts, independent
+Softwaretest.it definition publication and read-back. The Python-convention and
+fixture-layout change is integrated into protected `test` at commit
+`ca34c15b64ce235c1d5584dc6f0e57004a62a2df`. Protected run `36926072188`
+passed architecture, security and supply-chain, contract/static, test,
+candidate-package, isolated staging/recovery, and authenticated Softwaretest.it
+round-trip gates. The manual acceptance runner and execution guide are
+implemented. Unchanged final-candidate manual results, independent
 implementation review, and human capability acceptance do not yet exist.
 
 ## Target result
@@ -72,7 +75,7 @@ One immutable capability candidate is fully tested, manually deployed to the nam
 
 Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
 
-Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence. Current protected-baseline integration is recorded separately in the context above.
 
 Observed existing paths within the bounded change area:
 
@@ -80,13 +83,12 @@ Observed existing paths within the bounded change area:
 - EXISTING: `docs/capabilities/CAP-01-installation-and-isolated-project-administration.md`
 - EXISTING: `CHANGELOG.md`
 - EXISTING: `deploy/compose/`
+- EXISTING: `backend/tests/unit/`
 - EXISTING: `tools/staging/`
-- EXISTING: `docs/testing/`
-- EXISTING: `tests/manual/`
+- EXISTING: `docs/testing/manual/PRC-01/`
 
 Planned additions to the bounded change area after READY:
 
-- PLANNED: `docs/testing/manual/PRC-01/`
 - PLANNED: `tests/manual/CAP-01/`
 - PLANNED: `artifacts/acceptance/CAP-01/`
 
@@ -142,7 +144,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.8, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -157,6 +159,8 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Full capability CI and BDD matrix on the unchanged candidate; no selective reuse substitutes for this final run.
 - Every published `MT-*` case for PRC-01 executed on staging with atomic step results.
 - Recovery and rollback/roll-forward drill appropriate to the capability's state and external effects.
+
+Execution procedure: [CAP-01 manual acceptance execution guide](../../testing/manual/PRC-01/execution-guide.md).
 
 ## BDD and manual tests
 
