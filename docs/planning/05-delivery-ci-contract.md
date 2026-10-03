@@ -186,7 +186,7 @@ CI-TS-18 — Python code conventions
 CI-TS-19 — Softwaretest.it Steering source synchronization
 - Trigger: every Capability, Workorder, Steering publisher, API contract, or CI change; authenticated mutation only on trusted `test`, `staging`, and `main` pushes
 - Scope: every canonical `docs/capabilities/CAP-*.md` and `docs/workorders/CAP-*/WO-CAP-*.md` source
-- Oracle: unique/non-empty local manifest, explicit source revision and status mapping, one payload-bound idempotent import, matching receipt payload checksum, exact full-export field comparison, and retained remote item/content checksums
+- Oracle: unique/non-empty local manifest, explicit source revision and status mapping, deterministic ordered imports of at most 100 items with independent payload-bound idempotency, a matching checksum and item count for every receipt, one exact full-export field comparison, and retained remote item/content checksums
 - Fail-closed controls: unknown mandatory state, duplicate ID, missing source class, version conflict, partial export, field drift, invalid checksum, missing credential/scope, or unredacted failure evidence fails the stage
 - Runtime boundary: Softwaretest.it remains an engineering system; this stage cannot alter or become a dependency of Apistra runtime behavior
 - Retry: a Steering-only failure replays only the unchanged manifest with its existing idempotency key and never reruns product tests
