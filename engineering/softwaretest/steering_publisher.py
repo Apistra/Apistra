@@ -46,13 +46,26 @@ STATUS_BLOCKED = "BLOCKED"
 STATUS_UNKNOWN = "UNKNOWN"
 STATUS_OPEN = "OPEN"
 STATUS_APPROVED = "APPROVED"
-STATUS_PENDING_UPLOAD = "PENDING_UPLOAD"
-STATUS_CLEAN = "CLEAN"
+STATUS_EVIDENCE_MISSING = "MISSING"
+STATUS_EVIDENCE_PARTIAL = "PARTIAL"
+STATUS_EVIDENCE_CURRENT = "CURRENT"
+STATUS_EVIDENCE_FAILED = "FAILED"
+STATUS_EVIDENCE_STALE = "STALE"
 STATUS_PENDING = "PENDING"
 STATUS_CONFIRMED = "CONFIRMED"
 CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
 SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
+STEERING_EVIDENCE_STATUSES = frozenset(
+    {
+        STATUS_EVIDENCE_MISSING,
+        STATUS_EVIDENCE_PARTIAL,
+        STATUS_EVIDENCE_CURRENT,
+        STATUS_EVIDENCE_FAILED,
+        STATUS_EVIDENCE_STALE,
+        STATUS_UNKNOWN,
+    }
+)
 MAX_IMPORT_ITEMS = 100
 MAX_TITLE_LENGTH = 240
 MAX_CRITERION_LENGTH = 300
@@ -193,9 +206,17 @@ def _approval_status(status: str, approval: str) -> str:
 
 def _evidence_status(evidence: str) -> str:
     normalised = evidence.upper()
-    if normalised.startswith("VERIFIED") or "COMPLETE FOR THIS WORKORDER" in normalised:
-        return STATUS_CLEAN
-    return STATUS_PENDING_UPLOAD
+    if not normalised or normalised.startswith("NOT EXECUTED"):
+        return STATUS_EVIDENCE_MISSING
+    if "FAILED" in normalised:
+        return STATUS_EVIDENCE_FAILED
+    if "STALE" in normalised:
+        return STATUS_EVIDENCE_STALE
+    if "NOT EXECUTED" in normalised:
+        return STATUS_EVIDENCE_PARTIAL
+    if "VERIFIED" in normalised or "COMPLETE FOR THIS WORKORDER" in normalised:
+        return STATUS_EVIDENCE_CURRENT
+    return STATUS_UNKNOWN
 
 
 def _transmission_status(text: str) -> str:

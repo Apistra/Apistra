@@ -280,7 +280,7 @@ jobs:
         run: >-
           python engineering/softwaretest/steering_publisher.py
           --apply
-          --command-revision steering-contract-v2
+          --command-revision steering-contract-v3
       - name: CI-TS-06 publish and verify CAP-01 manual definitions
         env:
           SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
