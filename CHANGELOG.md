@@ -17,6 +17,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 ### Added
 
 - A separate fail-closed CI-TS-19 Softwaretest.it Steering publisher for all 19 capabilities and 141 workorders, with stable source revisions, payload-bound idempotency, redacted receipts, and complete export field readback.
+
 - A fail-closed CI-TS-18 Python convention gate with strict product-code type checking, expanded Ruff checks, selected repeated-string and magic-number rules, blanket-suppression detection, and retained positive and negative proof fixtures.
 - A fail-closed CI-TS-17 cyclomatic-complexity gate with a hard maximum of 10 for Python and TypeScript/TSX/JavaScript, including retained positive and negative analyser fixtures.
 - Guarded CAP-01 local-staging fixture application with deterministic Atlas and
@@ -63,6 +64,10 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Softwaretest.it CI guide 1.1 contract validation, direct cycle-bound report publication, and structured missing-cycle remediation evidence without an inferred automation-resource prerequisite.
 - Complete Softwaretest.it report batches with an explicit required-stage result and canonical UTC-millisecond timestamps for exact field-level readback.
 - Verified the protected Softwaretest.it create/import/finalize/readback flow with one stage, sixteen tests, and three confirmed command receipts against the immutable `test` candidate.
+
+### Fixed
+
+- Split Softwaretest.it Steering publication into deterministic imports of at most 100 items while preserving independent idempotency, per-batch receipts, and one complete export readback.
 
 ### Changed
 

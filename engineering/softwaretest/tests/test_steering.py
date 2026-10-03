@@ -70,7 +70,7 @@ class SteeringPublisherTests(unittest.TestCase):
             steering.STATUS_OPEN,
         )
 
-    def test_publish_uses_one_idempotent_import_and_full_export_readback(self) -> None:
+    def test_publish_uses_bounded_imports_and_full_export_readback(self) -> None:
         manifest = steering.build_manifest(
             observed_at_provider=lambda _path: OBSERVED_AT
         )
@@ -81,10 +81,10 @@ class SteeringPublisherTests(unittest.TestCase):
             if method == "POST":
                 return {
                     "receipt_id": "receipt-1",
-                    "accepted_items": len(manifest["payload"]["items"]),
+                    "accepted_items": len(payload["items"]),
                     "historical_items": 0,
                     "replayed": False,
-                    "payload_sha256": manifest["payload_sha256"],
+                    "payload_sha256": steering.payload_sha256(payload),
                 }
             return {
                 "contract_version": "1.0",
@@ -111,10 +111,51 @@ class SteeringPublisherTests(unittest.TestCase):
             requester=fake_request,
         )
         self.assertTrue(receipt["verified"])
-        self.assertEqual(len(calls), 2)
-        self.assertEqual(calls[0][2], "POST")
-        self.assertTrue(calls[0][3].startswith("apistra-steering-import-"))
-        self.assertTrue(calls[1][0].endswith("/steering/export"))
+        self.assertEqual(receipt["batch_count"], 2)
+        self.assertEqual(len(calls), 3)
+        imports = [call for call in calls if call[2] == "POST"]
+        self.assertEqual([len(call[4]["items"]) for call in imports], [100, 60])
+        self.assertEqual(len({call[3] for call in imports}), 2)
+        self.assertTrue(
+            all(call[3].startswith("apistra-steering-import-") for call in imports)
+        )
+        imported_ids = [
+            item["external_id"] for call in imports for item in call[4]["items"]
+        ]
+        expected_ids = [item["external_id"] for item in manifest["payload"]["items"]]
+        self.assertEqual(imported_ids, expected_ids)
+        self.assertTrue(calls[2][0].endswith("/steering/export"))
+
+    def test_second_batch_failure_retains_completed_batch_evidence(self) -> None:
+        manifest = steering.build_manifest(
+            observed_at_provider=lambda _path: OBSERVED_AT
+        )
+        post_count = 0
+
+        def failing_request(_url, _token, *, method="GET", payload=None, **_kwargs):
+            nonlocal post_count
+            if method != "POST":
+                self.fail("export must not run after a failed import")
+            post_count += 1
+            if post_count == 2:
+                raise OSError("second batch rejected")
+            return {
+                "accepted_items": len(payload["items"]),
+                "payload_sha256": steering.payload_sha256(payload),
+            }
+
+        with self.assertRaises(steering.SteeringPublishError) as raised:
+            steering.publish_manifest(
+                base_url="https://softwaretest.it",
+                project_id="project-1",
+                token="secret",
+                manifest=manifest,
+                command_revision="test-v2",
+                requester=failing_request,
+            )
+        self.assertEqual(raised.exception.phase, "import")
+        self.assertEqual(raised.exception.batch_number, 2)
+        self.assertEqual(len(raised.exception.completed_batches), 1)
 
     def test_export_drift_fails_the_roundtrip(self) -> None:
         manifest = steering.build_manifest(

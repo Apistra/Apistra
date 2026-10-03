@@ -1,6 +1,6 @@
 # WO-CAP-00-08 — Publish canonical Steering sources
 
-Version: 0.7-draft
+Version: 0.8-draft
 Status: BLOCKED
 Status reason: implementation and local verification can complete on the feature branch, but the authenticated import receipt and export readback require the protected softwaretest environment after promotion to test
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; canonical Steering import and export verification are this workorder's result
 - Delivery class: operational-governance
 - Owned verification group: TST-WO-CAP-00-08
-- Specification revision: 0.7-draft
+- Specification revision: 0.8-draft
 
 ## Risk profile and escalation
 
@@ -54,7 +54,7 @@ One deterministic manifest represents every canonical `docs/capabilities/CAP-*.m
 - Parse stable IDs, source versions, titles, goals, non-goals, risks, explicit states, dependencies, criteria, next steps, source paths, and source observation times from canonical Markdown.
 - Reject unknown implementation states, duplicate IDs, invalid versions, empty source classes, unsupported field sizes, or non-reproducible observation timestamps.
 - Write a lossless local outbox by default and require `--apply` for remote mutation.
-- Import once with a payload-bound idempotency key, retain the redacted receipt, and compare every submitted item field through complete export readback.
+- Import deterministic ordered batches of at most 100 items with independent payload-bound idempotency keys, retain every redacted receipt, and compare every submitted item field through one complete export readback.
 - Add the confirmed operations and scope to public-contract preflight and add a separate protected CI-TS-19 step.
 - Document retry, evidence, secret, and runtime-independence boundaries.
 
@@ -120,13 +120,13 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 ## Acceptance criteria
 
 1. The local manifest contains every canonical Capability and Workorder exactly once, preserves raw-source and payload hashes, and rejects an empty or duplicate scope.
-2. A simulated import proves a single payload-bound write, receipt validation, full export readback, and failure on a changed field or count.
+2. A simulated import proves ordered API-sized payload-bound writes, receipt validation for every batch, one full export readback, and failure on a changed field or count.
 3. Public preflight verifies all confirmed Steering operations, and CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
 4. A trusted-branch run accepts all submitted items, returns a matching payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
 
 ## Acceptance examples and test oracles
 
-- **Positive oracle:** the current repository produces 19 Capability and 141 Workorder items with unique IDs; an exact export verifies with no mismatch.
+- **Positive oracle:** the current repository produces 19 Capability and 141 Workorder items with unique IDs; imports are partitioned as 100 plus 60 items and an exact export verifies with no mismatch.
 - **Negative oracle:** an unknown document status, duplicate ID, missing source class, changed exported title, invalid checksum, or partial item set fails closed.
 - **Idempotency oracle:** replaying the unchanged payload uses the same key and creates no duplicate current item; changed content requires a source revision increase and a new payload-bound key.
 - **Security oracle:** no receipt, outbox, error, or log contains the bearer token.
@@ -166,7 +166,7 @@ Not applicable to product deployment: this workorder neither builds nor deploys 
 
 - Local outbox: `artifacts/softwaretest-steering-outbox.json`
 - Authenticated receipt: `artifacts/softwaretest-steering-receipt.json`
-- The receipt records project, source, command revision, payload checksum, remote receipt, export state checksum, item IDs/revisions/content checksums, and verification result.
+- The receipt records project, source, command revision, complete payload checksum, all batch checksums and remote receipts, export state checksum, item IDs/revisions/content checksums, and verification result.
 - Documentation records the exact API observation date and the distinction between Steering, test definitions, executions, and CI reports.
 
 ## Definition of Done

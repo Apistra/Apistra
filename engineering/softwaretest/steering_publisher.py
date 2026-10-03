@@ -53,6 +53,7 @@ STATUS_CONFIRMED = "CONFIRMED"
 CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
 SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
+MAX_IMPORT_ITEMS = 100
 MAX_TITLE_LENGTH = 240
 MAX_CRITERION_LENGTH = 300
 MAX_GOAL_LENGTH = 10_000
@@ -75,6 +76,24 @@ SNAPSHOT_PATTERN = re.compile(
 
 ObservedAtProvider = Callable[[Path], str]
 Requester = Callable[..., dict[str, Any]]
+
+
+class SteeringPublishError(RuntimeError):
+    """Retain safe progress evidence when a batched publish fails."""
+
+    def __init__(
+        self,
+        phase: str,
+        cause: Exception,
+        completed_batches: list[dict[str, Any]],
+        *,
+        batch_number: int | None = None,
+    ) -> None:
+        super().__init__(str(cause))
+        self.phase = phase
+        self.cause = cause
+        self.completed_batches = completed_batches
+        self.batch_number = batch_number
 
 
 def _metadata(text: str, name: str, *, required: bool = True) -> str:
@@ -460,6 +479,71 @@ def stable_key(command_revision: str, manifest_hash: str) -> str:
     return f"apistra-steering-import-{digest}"
 
 
+def import_payloads(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    """Split an ordered manifest into API-sized, independently replayable writes."""
+    payload = manifest[FIELD_PAYLOAD]
+    items = payload[FIELD_ITEMS]
+    return [
+        {
+            "contract_version": payload["contract_version"],
+            FIELD_SOURCE: payload[FIELD_SOURCE],
+            FIELD_ITEMS: items[offset : offset + MAX_IMPORT_ITEMS],
+        }
+        for offset in range(0, len(items), MAX_IMPORT_ITEMS)
+    ]
+
+
+def _validate_import_receipt(
+    receipt: dict[str, Any], batch_payload: dict[str, Any]
+) -> None:
+    expected_hash = payload_sha256(batch_payload)
+    mismatches = []
+    if receipt.get(FIELD_PAYLOAD_SHA256) != expected_hash:
+        mismatches.append("receipt payload_sha256 differs")
+    if receipt.get("accepted_items") != len(batch_payload[FIELD_ITEMS]):
+        mismatches.append("receipt accepted_items differs")
+    if mismatches:
+        raise ValueError("; ".join(mismatches))
+
+
+def _publish_batches(
+    *,
+    import_url: str,
+    token: str,
+    manifest: dict[str, Any],
+    command_revision: str,
+    requester: Requester,
+) -> list[dict[str, Any]]:
+    completed: list[dict[str, Any]] = []
+    for batch_number, batch_payload in enumerate(import_payloads(manifest), 1):
+        batch_hash = payload_sha256(batch_payload)
+        try:
+            remote_receipt = requester(
+                import_url,
+                token,
+                method=HTTP_POST,
+                key=stable_key(command_revision, batch_hash),
+                payload=batch_payload,
+            )
+            _validate_import_receipt(remote_receipt, batch_payload)
+        except (ApiError, OSError, ValueError) as error:
+            raise SteeringPublishError(
+                "import",
+                error,
+                completed,
+                batch_number=batch_number,
+            ) from error
+        completed.append(
+            {
+                "batch_number": batch_number,
+                "item_count": len(batch_payload[FIELD_ITEMS]),
+                FIELD_PAYLOAD_SHA256: batch_hash,
+                "remote_receipt": remote_receipt,
+            }
+        )
+    return completed
+
+
 def publish_manifest(
     *,
     base_url: str,
@@ -470,30 +554,29 @@ def publish_manifest(
     requester: Requester = request_json,
 ) -> dict[str, Any]:
     root = f"{base_url}/api/v1/projects/{project_id}/steering"
-    remote_receipt = requester(
-        f"{root}/imports",
-        token,
-        method=HTTP_POST,
-        key=stable_key(command_revision, manifest[FIELD_PAYLOAD_SHA256]),
-        payload=manifest[FIELD_PAYLOAD],
+    remote_receipts = _publish_batches(
+        import_url=f"{root}/imports",
+        token=token,
+        manifest=manifest,
+        command_revision=command_revision,
+        requester=requester,
     )
-    exported = requester(f"{root}/export", token)
+    try:
+        exported = requester(f"{root}/export", token)
+    except (ApiError, OSError, ValueError) as error:
+        raise SteeringPublishError("export", error, remote_receipts) from error
     mismatches = verify_export(manifest, exported)
-    if remote_receipt.get(FIELD_PAYLOAD_SHA256) != manifest[FIELD_PAYLOAD_SHA256]:
-        mismatches.append("receipt payload_sha256 differs")
-    if remote_receipt.get("accepted_items") != len(
-        manifest[FIELD_PAYLOAD][FIELD_ITEMS]
-    ):
-        mismatches.append("receipt accepted_items differs")
     if mismatches:
-        raise ValueError("steering readback mismatch: " + "; ".join(mismatches))
+        error = ValueError("steering readback mismatch: " + "; ".join(mismatches))
+        raise SteeringPublishError("export_verification", error, remote_receipts)
     return {
         "verified": True,
         "project_id": project_id,
         FIELD_SOURCE: SOURCE,
         "command_revision": command_revision,
         FIELD_PAYLOAD_SHA256: manifest[FIELD_PAYLOAD_SHA256],
-        "remote_receipt": remote_receipt,
+        "batch_count": len(remote_receipts),
+        "remote_receipts": remote_receipts,
         "export_state_sha256": exported.get("state_sha256", ""),
         FIELD_ITEMS: [
             {
@@ -516,7 +599,8 @@ def write_failure_receipt(
     command_revision: str,
     error: Exception,
 ) -> None:
-    problem = error.errors if isinstance(error, ApiError) else {}
+    cause = error.cause if isinstance(error, SteeringPublishError) else error
+    problem = cause.errors if isinstance(cause, ApiError) else {}
     payload = {
         "verified": False,
         "project_id": project_id,
@@ -524,11 +608,15 @@ def write_failure_receipt(
         "command_revision": command_revision,
         FIELD_PAYLOAD_SHA256: manifest_hash,
         "failure": {
-            "error_type": type(error).__name__,
-            "detail": str(error),
+            "error_type": type(cause).__name__,
+            "detail": str(cause),
             "problem": problem,
         },
     }
+    if isinstance(error, SteeringPublishError):
+        payload["failure"]["phase"] = error.phase
+        payload["failure"]["batch_number"] = error.batch_number
+        payload["completed_batches"] = error.completed_batches
     write_json_atomic(path, redact(payload, (token,)))
 
 
@@ -537,7 +625,7 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--outbox", type=Path, default=DEFAULT_OUTBOX)
     parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
-    parser.add_argument("--command-revision", default="steering-contract-v1")
+    parser.add_argument("--command-revision", default="steering-contract-v2")
     args = parser.parse_args()
     manifest = build_manifest()
     write_json_atomic(args.outbox, manifest)
@@ -565,7 +653,7 @@ def main() -> int:
         write_json_atomic(args.receipt, redact(receipt, (token,)))
         print("Softwaretest.it steering round-trip passed.")
         return 0
-    except (ApiError, OSError, ValueError) as error:
+    except (ApiError, OSError, SteeringPublishError, ValueError) as error:
         write_failure_receipt(
             args.receipt,
             project_id=project_id,
