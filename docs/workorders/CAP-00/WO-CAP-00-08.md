@@ -1,6 +1,6 @@
 # WO-CAP-00-08 — Publish canonical Steering sources
 
-Version: 0.8-draft
+Version: 0.9-draft
 Status: BLOCKED
 Status reason: implementation and local verification can complete on the feature branch, but the authenticated import receipt and export readback require the protected softwaretest environment after promotion to test
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; canonical Steering import and export verification are this workorder's result
 - Delivery class: operational-governance
 - Owned verification group: TST-WO-CAP-00-08
-- Specification revision: 0.8-draft
+- Specification revision: 0.9-draft
 
 ## Risk profile and escalation
 
@@ -53,6 +53,7 @@ One deterministic manifest represents every canonical `docs/capabilities/CAP-*.m
 
 - Parse stable IDs, source versions, titles, goals, non-goals, risks, explicit states, dependencies, criteria, next steps, source paths, and source observation times from canonical Markdown.
 - Reject unknown implementation states, duplicate IDs, invalid versions, empty source classes, unsupported field sizes, or non-reproducible observation timestamps.
+- Map source evidence explicitly to the Steering-domain states `MISSING`, `PARTIAL`, `CURRENT`, `FAILED`, `STALE`, and `UNKNOWN`; do not reuse the unrelated file-scan evidence enum currently exposed by the OpenAPI component-name collision.
 - Write a lossless local outbox by default and require `--apply` for remote mutation.
 - Import deterministic ordered batches of at most 100 items with independent payload-bound idempotency keys, retain every redacted receipt, and compare every submitted item field through one complete export readback.
 - Add the confirmed operations and scope to public-contract preflight and add a separate protected CI-TS-19 step.
@@ -120,7 +121,7 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 ## Acceptance criteria
 
 1. The local manifest contains every canonical Capability and Workorder exactly once, preserves raw-source and payload hashes, and rejects an empty or duplicate scope.
-2. A simulated import proves ordered API-sized payload-bound writes, receipt validation for every batch, one full export readback, and failure on a changed field or count.
+2. A simulated import proves ordered API-sized payload-bound writes, Steering-domain evidence mapping, receipt validation for every batch, one full export readback, and failure on a changed field or count.
 3. Public preflight verifies all confirmed Steering operations, and CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
 4. A trusted-branch run accepts all submitted items, returns a matching payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
 

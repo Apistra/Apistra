@@ -51,9 +51,32 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(items["CAP-00"]["implementation_status"], "IMPLEMENTED")
         self.assertEqual(items["CAP-01"]["implementation_status"], "IMPLEMENTED")
         self.assertEqual(items["CAP-01"]["approval_status"], "OPEN")
+        self.assertEqual(items["CAP-01"]["evidence_status"], "MISSING")
+        self.assertEqual(items["WO-CAP-00-06"]["evidence_status"], "CURRENT")
         self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "BLOCKED")
         self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "OPEN")
+        self.assertEqual(items["WO-CAP-00-08"]["evidence_status"], "MISSING")
         self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "PENDING")
+
+    def test_evidence_mapping_uses_the_steering_domain_enum(self) -> None:
+        examples = {
+            "NOT EXECUTED": "MISSING",
+            "LOCAL TESTS PASSED; NOT EXECUTED": "PARTIAL",
+            "VERIFIED — trusted run": "CURRENT",
+            "LOCAL AND HOSTED OWNED MATRIX VERIFIED": "CURRENT",
+            "FAILED — receipt mismatch": "FAILED",
+            "STALE — candidate changed": "STALE",
+            "UNCLASSIFIED SOURCE TEXT": "UNKNOWN",
+        }
+        for source, expected in examples.items():
+            with self.subTest(source=source):
+                self.assertEqual(steering._evidence_status(source), expected)
+
+        manifest = steering.build_manifest(
+            observed_at_provider=lambda _path: OBSERVED_AT
+        )
+        statuses = {item["payload"]["evidence_status"] for item in manifest["sources"]}
+        self.assertLessEqual(statuses, steering.STEERING_EVIDENCE_STATUSES)
 
     def test_invalid_status_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "unsupported implementation status"):
