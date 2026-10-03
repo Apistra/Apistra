@@ -49,6 +49,8 @@ class SteeringPublisherTests(unittest.TestCase):
             for source in manifest["sources"]
         }
         self.assertEqual(items["CAP-00"]["implementation_status"], "IMPLEMENTED")
+        self.assertEqual(items["CAP-01"]["implementation_status"], "IMPLEMENTED")
+        self.assertEqual(items["CAP-01"]["approval_status"], "OPEN")
         self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "BLOCKED")
         self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "OPEN")
         self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "PENDING")
@@ -56,6 +58,17 @@ class SteeringPublisherTests(unittest.TestCase):
     def test_invalid_status_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "unsupported implementation status"):
             steering._implementation_status("MAYBE")
+
+    def test_final_acceptance_ready_keeps_approval_open(self) -> None:
+        source_status = "FINAL ACCEPTANCE READY; NOT ACCEPTED"
+        self.assertEqual(
+            steering._implementation_status(source_status),
+            steering.STATUS_IMPLEMENTED,
+        )
+        self.assertEqual(
+            steering._approval_status(source_status, ""),
+            steering.STATUS_OPEN,
+        )
 
     def test_publish_uses_one_idempotent_import_and_full_export_readback(self) -> None:
         manifest = steering.build_manifest(

@@ -52,6 +52,7 @@ STATUS_PENDING = "PENDING"
 STATUS_CONFIRMED = "CONFIRMED"
 CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
+SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
 MAX_TITLE_LENGTH = 240
 MAX_CRITERION_LENGTH = 300
 MAX_GOAL_LENGTH = 10_000
@@ -138,7 +139,9 @@ def _source_revision(version: str) -> int:
 
 def _implementation_status(status: str) -> str:
     normalised = status.upper()
-    if normalised.startswith(("DONE", "ACCEPTED")):
+    if normalised.startswith(
+        ("DONE", "ACCEPTED", SOURCE_STATUS_FINAL_ACCEPTANCE_READY)
+    ):
         return STATUS_IMPLEMENTED
     if "BLOCKED" in normalised:
         return STATUS_BLOCKED
