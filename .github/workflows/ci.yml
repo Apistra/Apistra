@@ -96,7 +96,7 @@ jobs:
             echo "Blanket Python suppression detected"
             exit 1
           fi
-      - name: CI-TS-06 and CI-TS-16 public Softwaretest.it contract preflight
+      - name: CI-TS-06, CI-TS-16 and CI-TS-19 public Softwaretest.it contract preflight
         run: python engineering/softwaretest/preflight.py
 
   architecture:
@@ -148,6 +148,8 @@ jobs:
       APISTRA_TEST_DATABASE_URL: postgresql://postgres:apistra-ci-only@127.0.0.1:5432/apistra
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
@@ -172,6 +174,7 @@ jobs:
       - name: CI-TS-06 Softwaretest.it adapter contracts
         run: |
           python -m unittest discover -s engineering/softwaretest/tests -v
+          python engineering/softwaretest/steering_publisher.py
           python engineering/softwaretest/definition_publisher.py
       - name: CI-TS-07 integration tests
         run: uv run --project backend pytest --no-cov backend/tests/integration -m "not migration"
@@ -255,6 +258,8 @@ jobs:
     environment: softwaretest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -268,6 +273,14 @@ jobs:
           SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
           SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
         run: python engineering/softwaretest/preflight.py --require-reporting
+      - name: CI-TS-19 publish and verify Capability/Workorder Steering sources
+        env:
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: >-
+          python engineering/softwaretest/steering_publisher.py
+          --apply
+          --command-revision steering-contract-v1
       - name: CI-TS-06 publish and verify CAP-01 manual definitions
         env:
           SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
@@ -297,5 +310,7 @@ jobs:
           if-no-files-found: error
           path: |
             artifacts/softwaretest-roundtrip-receipt.json
+            artifacts/softwaretest-steering-outbox.json
+            artifacts/softwaretest-steering-receipt.json
             artifacts/softwaretest-cap01-definition-outbox.json
             artifacts/softwaretest-cap01-definition-receipt.json

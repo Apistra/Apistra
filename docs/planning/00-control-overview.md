@@ -11,7 +11,7 @@ Apistra is planned as a public build-in-public platform for designing, testing, 
 
 ## 2. Change from the prior state
 
-Version 0.6 separates workflow status from implementation, evidence, and approval state in all 140 workorders; replaces generated test aliases with one canonical semantic test-ID catalogue; assigns workorder-specific ARCH/SEC applicability; defines ARCH-015 for explicit versioned policy decisions; and makes the repository validator enforce those contracts and the dependency graph. The 133 business workorders now also contain literal observed and planned repository path boundaries derived from ADR-019 and the observed `be7e84d` checkout instead of a shared placeholder.
+Version 0.7 preserves the version 0.6 execution contract across all 141 workorders and adds a separate, fail-closed Softwaretest.it Steering handover for the 19 canonical capabilities and 141 canonical workorders. Workflow status remains separate from implementation, evidence, and approval state; test IDs remain canonical and semantic; workorder-specific ARCH/SEC applicability and the dependency graph remain validator-enforced. The 133 business workorders continue to contain literal observed and planned repository path boundaries derived from ADR-019 and the observed `be7e84d` checkout instead of a shared placeholder.
 
 ## 3. Status by control dimension
 

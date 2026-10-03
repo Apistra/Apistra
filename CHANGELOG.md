@@ -16,6 +16,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Added
 
+- A separate fail-closed CI-TS-19 Softwaretest.it Steering publisher for all 19 capabilities and 141 workorders, with stable source revisions, payload-bound idempotency, redacted receipts, and complete export field readback.
 - A fail-closed CI-TS-18 Python convention gate with strict product-code type checking, expanded Ruff checks, selected repeated-string and magic-number rules, blanket-suppression detection, and retained positive and negative proof fixtures.
 - A fail-closed CI-TS-17 cyclomatic-complexity gate with a hard maximum of 10 for Python and TypeScript/TSX/JavaScript, including retained positive and negative analyser fixtures.
 - Guarded CAP-01 local-staging fixture application with deterministic Atlas and
@@ -36,7 +37,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Digest-pinned PostgreSQL and an idempotent migration gate in isolated candidate staging, plus
   real PostgreSQL integration coverage in CI.
 - BuildBySpec planning baseline covering product scope, decisions, arc42 architecture, security, delivery/CI, test architecture, design, traceability, and gates.
-- Nineteen granular capability contracts and 140 individual workorder contracts for the 0.x roadmap.
+- Nineteen granular capability contracts and 141 individual workorder contracts for the 0.x roadmap.
 - Architecture decision and pattern catalogue with executable Python and TypeScript boundary tests and retained negative fixtures.
 - CAP-00 health-only web, API, and worker walking skeleton.
 - Immutable container-candidate builder with manifest, checksums, dependency inventory, and SPDX SBOM.
@@ -70,7 +71,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 - Workorder validation now supports controlled 0.x DRAFT, READY, and DONE revisions while requiring
   the specification binding to match, with retained negative status and path fixtures.
 - Capability roadmap and workorder catalogue now act as indexes to one canonical file per capability and workorder.
-- All 140 workorders now use the version 0.6 execution contract with exact workflow status, separate implementation/evidence/approval state, delivery classes, explicit outcomes, examples and counterexamples, canonical test references, workorder-specific architecture/security applicability, dependency graphs, and evidence invalidation rules.
+- All 141 workorders use the version 0.6 execution contract with exact workflow status, separate implementation/evidence/approval state, delivery classes, explicit outcomes, examples and counterexamples, canonical test references, workorder-specific architecture/security applicability, dependency graphs, and evidence invalidation rules; version 0.7 adds the separate Steering publication gate.
 - Repository contract validation now checks the complete planning catalogue, exact status fields, canonical test IDs, defined ARCH/SEC references, dependency existence and cycles, delivery-class ordering, READY/DONE preconditions, membership, local links, and obsolete generic boilerplate.
 - Repository contract validation now also proves allocated manual-case file identity, required sections, consecutive atomic steps, per-step data/oracles, logged-out entry, and a retained failing counterexample.
 - Repository contract validation now rejects business-workorder path placeholders, unsafe or missing observed paths, path entries outside approved roots, and missing CAP-16/CAP-17 new-root architecture blockers; a retained failing path fixture proves the check is active.

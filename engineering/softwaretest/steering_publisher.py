@@ -1,0 +1,584 @@
+"""Publish canonical Capability and Workorder sources to Softwaretest.it."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import os
+import re
+import subprocess
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+
+from publisher import (
+    ApiError,
+    canonical_datetime,
+    payload_sha256,
+    redact,
+    request_json,
+    write_json_atomic,
+)
+
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_CAPABILITY_DIR = ROOT / "docs/capabilities"
+DEFAULT_WORKORDER_DIR = ROOT / "docs/workorders"
+DEFAULT_OUTBOX = ROOT / "artifacts/softwaretest-steering-outbox.json"
+DEFAULT_RECEIPT = ROOT / "artifacts/softwaretest-steering-receipt.json"
+SOURCE = "apistra-spec-to-workorders"
+CONTRACT_VERSION = "1.0"
+CANONICAL_BRANCH = "test"
+REPOSITORY_URL = "https://github.com/Apistra/Apistra"
+HTTP_POST = "POST"
+TYPE_CAPABILITY = "CAPABILITY"
+TYPE_WORKORDER = "WORKORDER"
+FIELD_EXTERNAL_ID = "external_id"
+FIELD_TITLE = "title"
+FIELD_CONTENT_SHA256 = "content_sha256"
+FIELD_PAYLOAD = "payload"
+FIELD_SOURCE = "source"
+FIELD_ITEMS = "items"
+FIELD_PAYLOAD_SHA256 = "payload_sha256"
+STATUS_PLANNED = "PLANNED"
+STATUS_IN_PROGRESS = "IN_PROGRESS"
+STATUS_IMPLEMENTED = "IMPLEMENTED"
+STATUS_BLOCKED = "BLOCKED"
+STATUS_UNKNOWN = "UNKNOWN"
+STATUS_OPEN = "OPEN"
+STATUS_APPROVED = "APPROVED"
+STATUS_PENDING_UPLOAD = "PENDING_UPLOAD"
+STATUS_CLEAN = "CLEAN"
+STATUS_PENDING = "PENDING"
+STATUS_CONFIRMED = "CONFIRMED"
+CRITERION_PASSED = "PASSED"
+CRITERION_UNKNOWN = "UNKNOWN"
+SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
+MAX_TITLE_LENGTH = 240
+MAX_CRITERION_LENGTH = 300
+MAX_GOAL_LENGTH = 10_000
+MAX_NON_GOAL_LENGTH = 1_000
+MAX_DELTA_LENGTH = 10_000
+MAX_NEXT_STEP_LENGTH = 500
+VERSION_MAJOR_SCALE = 1_000_000
+VERSION_MINOR_SCALE = 1_000
+CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+HEADING_PATTERN = re.compile(
+    r"^# (?P<id>CAP-\d{2}|WO-CAP-\d{2}-\d{2}) — (?P<title>.+)$"
+)
+VERSION_PATTERN = re.compile(r"^(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))?")
+IDENTIFIER_PATTERN = re.compile(r"\b(?:WO-)?CAP-\d{2}(?:-\d{2})?\b")
+NUMBERED_ITEM_PATTERN = re.compile(r"^\d+\.\s+(.+)$")
+SNAPSHOT_PATTERN = re.compile(
+    r"implementation snapshot:\s*`([0-9a-f]{7,40})`",
+    re.IGNORECASE,
+)
+
+ObservedAtProvider = Callable[[Path], str]
+Requester = Callable[..., dict[str, Any]]
+
+
+def _metadata(text: str, name: str, *, required: bool = True) -> str:
+    match = re.search(rf"^{re.escape(name)}:\s*(.+)$", text, re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    if required:
+        raise ValueError(f"missing metadata: {name}")
+    return ""
+
+
+def _section(text: str, *headings: str) -> str:
+    for heading in headings:
+        pattern = re.compile(
+            rf"^## {re.escape(heading)}\s*$\n(?P<body>.*?)(?=^## |\Z)",
+            re.MULTILINE | re.DOTALL,
+        )
+        match = pattern.search(text)
+        if match:
+            return match.group("body").strip()
+    return ""
+
+
+def _normalise(value: str) -> str:
+    return " ".join(line.strip() for line in value.splitlines() if line.strip())
+
+
+def _bullet_items(section: str) -> list[str]:
+    return [
+        line.removeprefix("- ").strip()
+        for line in section.splitlines()
+        if line.startswith("- ")
+    ]
+
+
+def _numbered_items(section: str) -> list[str]:
+    items: list[str] = []
+    current = ""
+    for raw_line in section.splitlines():
+        line = raw_line.strip()
+        match = NUMBERED_ITEM_PATTERN.match(line)
+        if match:
+            if current:
+                items.append(current)
+            current = match.group(1).strip()
+        elif line and current:
+            current = f"{current} {line}"
+    if current:
+        items.append(current)
+    return items
+
+
+def _source_revision(version: str) -> int:
+    match = VERSION_PATTERN.match(version)
+    if not match:
+        raise ValueError(f"unsupported source version: {version}")
+    major = int(match.group("major"))
+    minor = int(match.group("minor"))
+    patch = int(match.group("patch") or 0)
+    return major * VERSION_MAJOR_SCALE + minor * VERSION_MINOR_SCALE + patch + 1
+
+
+def _implementation_status(status: str) -> str:
+    normalised = status.upper()
+    if normalised.startswith(
+        ("DONE", "ACCEPTED", SOURCE_STATUS_FINAL_ACCEPTANCE_READY)
+    ):
+        return STATUS_IMPLEMENTED
+    if "BLOCKED" in normalised:
+        return STATUS_BLOCKED
+    if (
+        normalised.startswith("IN_PROGRESS")
+        or "FINAL ACCEPTANCE PREPARATION" in normalised
+    ):
+        return STATUS_IN_PROGRESS
+    if normalised.startswith(("DRAFT", "READY")):
+        return STATUS_PLANNED
+    raise ValueError(f"unsupported implementation status: {status}")
+
+
+def _approval_status(status: str, approval: str) -> str:
+    combined = f"{status}; {approval}".upper()
+    if any(
+        marker in combined
+        for marker in ("NOT APPROVED", "NOT YET APPROVED", "NOT ACCEPTED", "REMAINS")
+    ):
+        return STATUS_OPEN
+    if any(
+        marker in combined
+        for marker in ("HUMAN ACCEPTED", "IMPLEMENTATION AUTHORISED", "APPROVED")
+    ):
+        return STATUS_APPROVED
+    if status.upper().startswith("ACCEPTED"):
+        return STATUS_APPROVED
+    return STATUS_UNKNOWN
+
+
+def _evidence_status(evidence: str) -> str:
+    normalised = evidence.upper()
+    if normalised.startswith("VERIFIED") or "COMPLETE FOR THIS WORKORDER" in normalised:
+        return STATUS_CLEAN
+    return STATUS_PENDING_UPLOAD
+
+
+def _transmission_status(text: str) -> str:
+    mapping = re.search(r"^- Softwaretest\.it mapping:\s*(.+)$", text, re.MULTILINE)
+    if not mapping:
+        return STATUS_UNKNOWN
+    value = mapping.group(1).upper()
+    if "NOT PUBLISHED" in value or "PARTIAL" in value:
+        return STATUS_PENDING
+    if "PUBLISHED" in value or "TESTCASES" in value:
+        return STATUS_CONFIRMED
+    return STATUS_UNKNOWN
+
+
+def _dependencies(text: str, external_id: str) -> list[str]:
+    relevant = "\n".join(
+        (
+            _section(text, "Prerequisites"),
+            _section(text, "Actors and prerequisites"),
+            _section(text, "Dependencies and follow-up"),
+        )
+    )
+    return sorted(set(IDENTIFIER_PATTERN.findall(relevant)) - {external_id})
+
+
+def _delta(text: str) -> str:
+    match = re.search(r"^- Delta:\s*(.+)$", text, re.MULTILINE)
+    return match.group(1).strip() if match else ""
+
+
+def _next_step(text: str) -> str:
+    match = re.search(r"^\*\*Next step:\*\*\s*(.+)$", text, re.MULTILINE)
+    return match.group(1).strip() if match else ""
+
+
+def _candidate(text: str) -> str:
+    match = SNAPSHOT_PATTERN.search(text)
+    return match.group(1) if match else ""
+
+
+def git_observed_at(path: Path) -> str:
+    relative_path = path.relative_to(ROOT).as_posix()
+    command = ("git", "log", "-1", "--format=%cI", "--", relative_path)
+    # The executable and every option are fixed; only the repository-relative path varies.
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    observed_at = completed.stdout.strip()
+    if not observed_at:
+        raise ValueError(f"no Git observation timestamp for {relative_path}")
+    return canonical_datetime(observed_at)
+
+
+def _criteria(
+    text: str, external_id: str, implementation_status: str
+) -> list[dict[str, Any]]:
+    titles = _numbered_items(_section(text, "Acceptance criteria"))
+    status = (
+        CRITERION_PASSED
+        if implementation_status == STATUS_IMPLEMENTED
+        else CRITERION_UNKNOWN
+    )
+    return [
+        {
+            FIELD_EXTERNAL_ID: f"{external_id}-AC-{index:02d}",
+            FIELD_TITLE: title,
+            "status": status,
+            "required": True,
+            "due_now": True,
+            "exception_allowed": False,
+            "gate": "",
+            "reason": "",
+        }
+        for index, title in enumerate(titles, 1)
+    ]
+
+
+def _source_url(relative_path: str) -> str:
+    return f"{REPOSITORY_URL}/blob/{CANONICAL_BRANCH}/{relative_path}"
+
+
+def _validate_lengths(item: dict[str, Any]) -> None:
+    limits = {
+        FIELD_TITLE: MAX_TITLE_LENGTH,
+        "goal": MAX_GOAL_LENGTH,
+        "delta": MAX_DELTA_LENGTH,
+        "next_step": MAX_NEXT_STEP_LENGTH,
+    }
+    for field, limit in limits.items():
+        if len(item[field]) > limit:
+            raise ValueError(f"{item[FIELD_EXTERNAL_ID]} {field} exceeds API limit")
+    if any(len(value) > MAX_NON_GOAL_LENGTH for value in item["non_goals"]):
+        raise ValueError(f"{item[FIELD_EXTERNAL_ID]} non-goal exceeds API limit")
+    if any(
+        len(value[FIELD_TITLE]) > MAX_CRITERION_LENGTH for value in item["criteria"]
+    ):
+        raise ValueError(f"{item[FIELD_EXTERNAL_ID]} criterion exceeds API limit")
+
+
+def parse_source(path: Path, observed_at: str) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    heading = HEADING_PATTERN.match(text.splitlines()[0])
+    if not heading:
+        raise ValueError(f"invalid steering source heading: {path}")
+    external_id = heading.group("id")
+    source_type = TYPE_WORKORDER if external_id.startswith("WO-") else TYPE_CAPABILITY
+    relative_path = path.relative_to(ROOT).as_posix()
+    status = _metadata(text, "Status")
+    implementation_status = _implementation_status(status)
+    goal = _section(text, "Target result", "Goal and value")
+    item = {
+        FIELD_EXTERNAL_ID: external_id,
+        "source_revision": _source_revision(_metadata(text, "Version")),
+        "type": source_type,
+        FIELD_TITLE: heading.group(FIELD_TITLE).strip(),
+        "source_url": _source_url(relative_path),
+        "goal": _normalise(goal),
+        "non_goals": _bullet_items(
+            _section(text, "Non-goals", "Non-goals and prohibited side effects")
+        ),
+        "risk_profile": _metadata(text, "Assurance"),
+        "delta": _delta(text),
+        "dependencies": _dependencies(text, external_id),
+        "candidate": _candidate(text),
+        "environment": "",
+        "implementation_status": implementation_status,
+        "evidence_status": _evidence_status(
+            _metadata(text, "Evidence state", required=False)
+        ),
+        "transmission_status": _transmission_status(text),
+        "approval_status": _approval_status(
+            status,
+            _metadata(text, "Approval state", required=False),
+        ),
+        "responsible_role": "",
+        "next_step": _next_step(text),
+        "due_gate": "",
+        "observed_at": canonical_datetime(observed_at),
+        "confirmed_at": None,
+        "criteria": _criteria(text, external_id, implementation_status),
+        "decisions": [],
+    }
+    _validate_lengths(item)
+    return {
+        "source_path": relative_path,
+        "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        FIELD_CONTENT_SHA256: payload_sha256(item),
+        FIELD_PAYLOAD: item,
+    }
+
+
+def build_manifest(
+    capability_dir: Path = DEFAULT_CAPABILITY_DIR,
+    workorder_dir: Path = DEFAULT_WORKORDER_DIR,
+    observed_at_provider: ObservedAtProvider = git_observed_at,
+) -> dict[str, Any]:
+    paths = [
+        *sorted(capability_dir.glob("CAP-*.md")),
+        *sorted(workorder_dir.glob("CAP-*/WO-CAP-*.md")),
+    ]
+    sources = [parse_source(path, observed_at_provider(path)) for path in paths]
+    payload = {
+        "contract_version": CONTRACT_VERSION,
+        FIELD_SOURCE: SOURCE,
+        FIELD_ITEMS: [source[FIELD_PAYLOAD] for source in sources],
+    }
+    manifest = {
+        "schema_version": CONTRACT_VERSION,
+        FIELD_SOURCE: SOURCE,
+        "capability_count": sum(
+            source[FIELD_PAYLOAD]["type"] == TYPE_CAPABILITY for source in sources
+        ),
+        "workorder_count": sum(
+            source[FIELD_PAYLOAD]["type"] == TYPE_WORKORDER for source in sources
+        ),
+        "sources": sources,
+        FIELD_PAYLOAD: payload,
+        FIELD_PAYLOAD_SHA256: payload_sha256(payload),
+    }
+    validate_manifest(manifest)
+    return manifest
+
+
+def validate_manifest(manifest: dict[str, Any]) -> None:
+    sources = manifest["sources"]
+    identifiers = [source[FIELD_PAYLOAD][FIELD_EXTERNAL_ID] for source in sources]
+    if not identifiers:
+        raise ValueError("steering manifest is empty")
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("steering source IDs must be unique")
+    if manifest["capability_count"] < 1 or manifest["workorder_count"] < 1:
+        raise ValueError("capability and workorder scopes must both be non-empty")
+    payload_items = manifest[FIELD_PAYLOAD][FIELD_ITEMS]
+    if len(payload_items) != len(sources):
+        raise ValueError("steering source and payload counts differ")
+
+
+def _requested_fields(item: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(item)
+
+
+def _compare_mapping(
+    expected: dict[str, Any], actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if not isinstance(actual, dict):
+        mismatches.append(f"{path}: expected object")
+        return
+    for field, value in expected.items():
+        if field not in actual:
+            mismatches.append(f"{path}.{field}: missing")
+            continue
+        _compare_requested(value, actual[field], f"{path}.{field}", mismatches)
+
+
+def _compare_sequence(
+    expected: list[Any], actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if not isinstance(actual, list):
+        mismatches.append(f"{path}: expected array")
+        return
+    if len(expected) != len(actual):
+        mismatches.append(f"{path}: item count differs")
+        return
+    for index, value in enumerate(expected):
+        _compare_requested(value, actual[index], f"{path}[{index}]", mismatches)
+
+
+def _compare_requested(
+    expected: Any, actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if isinstance(expected, dict):
+        _compare_mapping(expected, actual, path, mismatches)
+        return
+    if isinstance(expected, list):
+        _compare_sequence(expected, actual, path, mismatches)
+        return
+    if expected != actual:
+        mismatches.append(f"{path}: value differs")
+
+
+def verify_export(manifest: dict[str, Any], exported: dict[str, Any]) -> list[str]:
+    mismatches: list[str] = []
+    remote_items = {
+        item.get(FIELD_EXTERNAL_ID): item
+        for item in exported.get(FIELD_ITEMS, [])
+        if item.get(FIELD_SOURCE) == SOURCE
+    }
+    expected_items = manifest[FIELD_PAYLOAD][FIELD_ITEMS]
+    if len(remote_items) != len(expected_items):
+        mismatches.append("item count differs")
+    for expected in expected_items:
+        external_id = expected[FIELD_EXTERNAL_ID]
+        actual = remote_items.get(external_id)
+        if not actual:
+            mismatches.append(f"{external_id}: missing")
+            continue
+        for field in _requested_fields(expected):
+            if field not in actual:
+                mismatches.append(f"{external_id}.{field}: missing")
+                continue
+            _compare_requested(
+                expected[field],
+                actual[field],
+                f"{external_id}.{field}",
+                mismatches,
+            )
+        if not CONTENT_HASH_PATTERN.fullmatch(
+            str(actual.get(FIELD_CONTENT_SHA256, ""))
+        ):
+            mismatches.append(f"{external_id}.content_sha256: invalid")
+    return mismatches
+
+
+def stable_key(command_revision: str, manifest_hash: str) -> str:
+    value = f"{command_revision}:{manifest_hash}"
+    digest = hashlib.sha256(value.encode()).hexdigest()[:24]
+    return f"apistra-steering-import-{digest}"
+
+
+def publish_manifest(
+    *,
+    base_url: str,
+    project_id: str,
+    token: str,
+    manifest: dict[str, Any],
+    command_revision: str,
+    requester: Requester = request_json,
+) -> dict[str, Any]:
+    root = f"{base_url}/api/v1/projects/{project_id}/steering"
+    remote_receipt = requester(
+        f"{root}/imports",
+        token,
+        method=HTTP_POST,
+        key=stable_key(command_revision, manifest[FIELD_PAYLOAD_SHA256]),
+        payload=manifest[FIELD_PAYLOAD],
+    )
+    exported = requester(f"{root}/export", token)
+    mismatches = verify_export(manifest, exported)
+    if remote_receipt.get(FIELD_PAYLOAD_SHA256) != manifest[FIELD_PAYLOAD_SHA256]:
+        mismatches.append("receipt payload_sha256 differs")
+    if remote_receipt.get("accepted_items") != len(
+        manifest[FIELD_PAYLOAD][FIELD_ITEMS]
+    ):
+        mismatches.append("receipt accepted_items differs")
+    if mismatches:
+        raise ValueError("steering readback mismatch: " + "; ".join(mismatches))
+    return {
+        "verified": True,
+        "project_id": project_id,
+        FIELD_SOURCE: SOURCE,
+        "command_revision": command_revision,
+        FIELD_PAYLOAD_SHA256: manifest[FIELD_PAYLOAD_SHA256],
+        "remote_receipt": remote_receipt,
+        "export_state_sha256": exported.get("state_sha256", ""),
+        FIELD_ITEMS: [
+            {
+                FIELD_EXTERNAL_ID: item[FIELD_EXTERNAL_ID],
+                "source_revision": item["source_revision"],
+                FIELD_CONTENT_SHA256: item[FIELD_CONTENT_SHA256],
+            }
+            for item in exported[FIELD_ITEMS]
+            if item.get(FIELD_SOURCE) == SOURCE
+        ],
+    }
+
+
+def write_failure_receipt(
+    path: Path,
+    *,
+    project_id: str,
+    token: str,
+    manifest_hash: str,
+    command_revision: str,
+    error: Exception,
+) -> None:
+    problem = error.errors if isinstance(error, ApiError) else {}
+    payload = {
+        "verified": False,
+        "project_id": project_id,
+        FIELD_SOURCE: SOURCE,
+        "command_revision": command_revision,
+        FIELD_PAYLOAD_SHA256: manifest_hash,
+        "failure": {
+            "error_type": type(error).__name__,
+            "detail": str(error),
+            "problem": problem,
+        },
+    }
+    write_json_atomic(path, redact(payload, (token,)))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--outbox", type=Path, default=DEFAULT_OUTBOX)
+    parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
+    parser.add_argument("--command-revision", default="steering-contract-v1")
+    args = parser.parse_args()
+    manifest = build_manifest()
+    write_json_atomic(args.outbox, manifest)
+    if not args.apply:
+        print(
+            "Steering manifest validated: "
+            f"{manifest['capability_count']} capabilities and "
+            f"{manifest['workorder_count']} workorders."
+        )
+        return 0
+    project_id = os.getenv("SOFTWARETEST_PROJECT_ID", "")
+    token = os.getenv("SOFTWARETEST_TOKEN", "")
+    if not project_id or not token:
+        print("BLOCKED: SOFTWARETEST_PROJECT_ID and SOFTWARETEST_TOKEN are required")
+        return 2
+    base_url = os.getenv("SOFTWARETEST_BASE_URL", "https://softwaretest.it").rstrip("/")
+    try:
+        receipt = publish_manifest(
+            base_url=base_url,
+            project_id=project_id,
+            token=token,
+            manifest=manifest,
+            command_revision=args.command_revision,
+        )
+        write_json_atomic(args.receipt, redact(receipt, (token,)))
+        print("Softwaretest.it steering round-trip passed.")
+        return 0
+    except (ApiError, OSError, ValueError) as error:
+        write_failure_receipt(
+            args.receipt,
+            project_id=project_id,
+            token=token,
+            manifest_hash=manifest[FIELD_PAYLOAD_SHA256],
+            command_revision=args.command_revision,
+            error=error,
+        )
+        print(
+            f"Softwaretest.it steering round-trip failed safely: {type(error).__name__}"
+        )
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

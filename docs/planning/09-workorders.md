@@ -1,15 +1,15 @@
 # Workorder Catalogue
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
 
 ## Control summary
 
 **Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
-**Change:** Version 0.6 adds an exact status model, separated implementation/evidence/approval states, canonical semantic test IDs, workorder-specific ARCH/SEC applicability, and a validator-enforced dependency graph to the strengthened execution contracts.
-**Current position:** 140 workorder contracts exist. All seven CAP-00 workorders are DONE; all business workorders remain DRAFT until their own prerequisite gates and expectation reviews pass.
-**Main blocker:** CAP-01 test-definition publication and field-/step-order readback. Its architecture, security, design, path, BDD, fixture-definition, and expectation decisions are approved.
-**Next step:** Execute the CAP-01 publication workorder, then mark only an independently executable first CAP-01 implementation workorder READY.
+**Change:** Version 0.7 adds a distinct Softwaretest.it Steering publication workorder and CI gate while preserving the version 0.6 execution contract, status model, semantic test IDs, architecture/security applicability, and dependency graph.
+**Current position:** 141 workorder contracts exist. Seven CAP-00 workorders are DONE and WO-CAP-00-08 is BLOCKED only on its authenticated trusted-branch receipt; all business workorders remain DRAFT until their own prerequisite gates and expectation reviews pass.
+**Main blocker:** The complete Capability/Workorder Steering manifest still requires authenticated import and complete export readback on the protected `test` branch. Local schema, parser, mapping, idempotency, checksum, drift, and redaction proofs are implemented.
+**Next step:** Promote WO-CAP-00-08 through protected CI, retain its import/export receipt, and then update its evidence state without changing the already accepted CAP-00 product candidate.
 
 The [canonical workorder index](../workorders/README.md) links every file and its current status.
 

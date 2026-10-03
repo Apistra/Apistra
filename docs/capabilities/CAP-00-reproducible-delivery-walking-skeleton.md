@@ -1,16 +1,16 @@
 # CAP-00 — Reproducible Delivery Walking Skeleton
 
-Version: 0.2-draft
-Status: ACCEPTED; production approval not granted
+Version: 0.3
+Status: ACCEPTED; steering integration evidence pending; production approval not granted
 Release: 0.0
 Assurance: EXTENDED
 
 ## Control summary
 
 **Result:** A maintainer can build, verify, stage, diagnose, and recover an immutable minimal Apistra candidate without business functionality.
-**Evidence:** Implementation, hosted CI, isolated staging/recovery, independent review, human acceptance, and candidate-bound Softwaretest.it receipts are recorded.
-**Main blocker:** None for CAP-00; production approval remains explicitly outside this capability acceptance.
-**Next step:** Publish and verify the separate CAP-01 test-definition package before selecting the first CAP-01 implementation workorder as READY.
+**Evidence:** The accepted walking-skeleton evidence remains recorded; WO-CAP-00-08 adds the separate canonical Steering handover without changing product runtime behavior.
+**Main blocker:** The authenticated Capability/Workorder Steering import and export readback require the protected `softwaretest` environment on a trusted branch.
+**Next step:** Merge WO-CAP-00-08 through `test` and retain its Softwaretest.it import receipt and complete export comparison.
 
 ## Goal and value
 
@@ -100,6 +100,7 @@ A maintainer can build, verify, stage, diagnose, and recover an immutable minima
 - [WO-CAP-00-05](../workorders/CAP-00/WO-CAP-00-05.md)
 - [WO-CAP-00-06](../workorders/CAP-00/WO-CAP-00-06.md)
 - [WO-CAP-00-07](../workorders/CAP-00/WO-CAP-00-07.md)
+- [WO-CAP-00-08](../workorders/CAP-00/WO-CAP-00-08.md)
 
 ## Staging and gate
 

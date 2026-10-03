@@ -1,11 +1,11 @@
 # Workorder Catalogue
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
 
 Each file is one execution contract. A file is not implementation permission: its Status, prerequisites, expectation review, and gates remain binding.
 
-Version 0.6 assigns every workorder a delivery class, one owned verification group, explicit positive/negative/boundary oracles, expectation sources, counterexamples, and a dependency graph. Workorder numbers are stable identifiers, not execution order: the declared prerequisites govern readiness, and test-definition publication may intentionally precede lower-numbered implementation work.
+Version 0.7 adds the separately gated Softwaretest.it Steering handover while preserving the version 0.6 execution contract. Every workorder has a delivery class, one owned verification group, explicit positive/negative/boundary oracles, expectation sources, counterexamples, and a dependency graph. Workorder numbers are stable identifiers, not execution order: the declared prerequisites govern readiness, and publication work may intentionally precede lower-numbered implementation work.
 
 Only `DRAFT`, `BLOCKED`, `READY`, and `DONE` are valid workflow statuses. Implementation, evidence, and approval are recorded separately. Behavioural scenarios and manual package namespaces are governed by the [canonical test-ID catalogue](../testing/test-id-catalog.md); individual manual cases are allocated only by the owning publication workorder.
 
@@ -20,6 +20,7 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 - [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — DONE; authenticated round-trip and receipts verified
 - [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — DONE; fixture contracts and negative proofs verified
 - [WO-CAP-00-07 — Complete bootstrap candidate gate](CAP-00/WO-CAP-00-07.md) — DONE; CAP-00 evidence and human acceptance package complete
+- [WO-CAP-00-08 — Publish canonical Steering sources](CAP-00/WO-CAP-00-08.md) — BLOCKED; implementation and local proof complete, authenticated trusted-branch receipt pending
 
 ## CAP-01
 
