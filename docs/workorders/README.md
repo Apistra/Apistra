@@ -1,6 +1,6 @@
 # Workorder Catalogue
 
-Version: 0.7-draft
+Version: 0.8-draft
 Status: DRAFT
 
 Each file is one execution contract. A file is not implementation permission: its Status, prerequisites, expectation review, and gates remain binding.
@@ -32,13 +32,13 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 
 ## CAP-02
 
-- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — READY; implemented on feature branch, protected CI and independent implementation review pending
-- [WO-CAP-02-02 — Implement model and embedding endpoint catalogue](CAP-02/WO-CAP-02-02.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
-- [WO-CAP-02-03 — Implement versioned agents and explicit fallback](CAP-02/WO-CAP-02-03.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
-- [WO-CAP-02-04 — Implement governed tool contracts and approval classification](CAP-02/WO-CAP-02-04.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
-- [WO-CAP-02-05 — Implement configurable limits and budget decisions](CAP-02/WO-CAP-02-05.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — DONE; protected implementation, candidate/staging, reporting, and human review verified
+- [WO-CAP-02-02 — Implement model and embedding endpoint catalogue](CAP-02/WO-CAP-02-02.md) — READY; predecessor, design/review, path, and publication gates verified
+- [WO-CAP-02-03 — Implement versioned agents and explicit fallback](CAP-02/WO-CAP-02-03.md) — DRAFT; predecessor WO-CAP-02-02 pending
+- [WO-CAP-02-04 — Implement governed tool contracts and approval classification](CAP-02/WO-CAP-02-04.md) — DRAFT; predecessor WO-CAP-02-03 pending
+- [WO-CAP-02-05 — Implement configurable limits and budget decisions](CAP-02/WO-CAP-02-05.md) — DRAFT; predecessor WO-CAP-02-04 pending
 - [WO-CAP-02-06 — Publish and verify CAP-02 test definitions](CAP-02/WO-CAP-02-06.md) — DONE; protected publication and exact readback verified in run 37212285531
-- [WO-CAP-02-07 — Accept CAP-02 on local staging](CAP-02/WO-CAP-02-07.md) — DRAFT; final unchanged-candidate acceptance workorder
+- [WO-CAP-02-07 — Accept CAP-02 on local staging](CAP-02/WO-CAP-02-07.md) — DRAFT; implementation workorders WO-CAP-02-02 through WO-CAP-02-05 pending
 
 ## CAP-03
 

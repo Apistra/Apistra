@@ -6,6 +6,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Completed WO-CAP-02-01 after PR #31, protected merge `dfa8319`, green run 37216514042, authenticated Steering/definition/receipt readback, and explicit product-owner implementation approval; WO-CAP-02-02 is now READY without implying CAP-02 acceptance or production approval.
 - Added the WO-CAP-02-01 encrypted project secret-reference slice with AES-256-GCM envelopes, operator-file key configuration, opaque versioned APIs, project isolation, idempotency, safe audit evidence, PostgreSQL migration, DSN-006 administration UI, and executable architecture/security/contract tests.
 - Closed WO-CAP-02-06 from protected run 37212285531 after authenticated publication and exact readback of all CAP-02 test definitions.
 - Approved the CAP-02 design and independent expectation/architecture/security review, added five stable BDD scenarios, eight atomic manual definitions, deterministic secret-free fixture descriptors, package-aware Softwaretest.it publication with exact ordered-step readback, and the protected CI handover required by WO-CAP-02-06.

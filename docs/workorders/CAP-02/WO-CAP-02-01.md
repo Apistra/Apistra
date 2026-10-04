@@ -1,11 +1,11 @@
 # WO-CAP-02-01 — Implement encrypted project secret references
 
-Version: 0.9-ready
-Status: READY
-Status reason: WO-CAP-02-06 publication/readback and all planning, design, architecture, security, and path gates are satisfied
-Implementation state: IMPLEMENTED ON FEATURE BRANCH; INDEPENDENT IMPLEMENTATION REVIEW PENDING
-Evidence state: LOCAL AUTOMATED GATES PASS; PROTECTED CI PENDING
-Approval state: APPROVED FOR EXECUTION; NOT YET DONE
+Version: 0.10-done
+Status: DONE
+Status reason: PR #31 merged the reviewed implementation to `test`; protected run 37216514042 passed the complete automated, candidate, staging/recovery, Steering, definition, and receipt-readback gates
+Implementation state: COMPLETE ON PROTECTED `test` AT `dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a`
+Evidence state: VERIFIED FOR THIS WORKORDER — protected run 37216514042 and product-owner review
+Approval state: INDEPENDENT IMPLEMENTATION REVIEW COMPLETE; HUMAN WORKORDER APPROVAL COMPLETE; CAPABILITY ACCEPTANCE REMAINS WITH WO-CAP-02-07
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-01
-- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.10-done; completion evidence is bound to merge `dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a` and protected run 37216514042
 
 ## Risk profile and escalation
 
@@ -37,14 +37,15 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-The feature branch implements the first CAP-02 product slice below the approved
-`catalog` boundary: AES-256-GCM envelopes, opaque project references,
+PR #31 implemented the first CAP-02 product slice below the approved `catalog`
+boundary: AES-256-GCM envelopes, opaque project references,
 project/version/idempotency enforcement, safe audit data, PostgreSQL migration,
-versioned HTTP contract, and DSN-006. Local evidence contains 102 passing
-backend tests with 90.24% coverage, 17 passing web tests, strict Python typing,
-Ruff/complexity, Python and TypeScript architecture gates, and PostgreSQL
-migration/persistence coverage. Protected CI and independent implementation
-review remain required before DONE.
+versioned HTTP contract, and DSN-006. The product owner independently reviewed
+and approved the implementation, then merged it to protected `test` as
+`dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a` on 2026-10-04. Protected run
+37216514042 passed contracts/static analysis, architecture, tests, security and
+supply-chain checks, immutable candidate packaging, isolated staging/recovery,
+Steering and CAP-01/CAP-02 definition round-trips, and final receipt readback.
 
 ## Target result
 
@@ -172,12 +173,24 @@ UI scope is DSN-006 from design revision 0.4 after its explicit product approval
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
 - **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
+## Steering criterion evidence
+
+- WO-CAP-02-01-AC-01: status=PASSED; due_now=true; gate=WO-CAP-02-01 completion; reason=The protected candidate stores project secrets only as AES-256-GCM envelopes and exposes opaque references through the versioned contract.
+- WO-CAP-02-01-AC-02: status=PASSED; due_now=true; gate=WO-CAP-02-01 completion; reason=Automated negative tests cover plaintext redaction, foreign-project access, revoked references, safe diagnostics, and unknown key failure.
+- WO-CAP-02-01-AC-03: status=PASSED; due_now=true; gate=WO-CAP-02-01 completion; reason=Project ownership, optimistic version checks, idempotency, and attributable safe audit records passed the protected matrix.
+- WO-CAP-02-01-AC-04: status=PASSED; due_now=true; gate=WO-CAP-02-01 completion; reason=The versioned API contract, PostgreSQL migration, compatibility tests, candidate staging, and recovery passed protected run 37216514042.
+
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-003, REQ-004, REQ-005, REQ-013, REQ-014, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: A project secret is stored and consumed only through an encrypted opaque reference.
 - Counterexample: Plaintext, foreign-project, revoked, or unresolvable secret references never reach logs, exports, diagnostics, or downstream adapters.
 - Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+
+The product owner confirmed the independent implementation review and approved
+the exact merged result on 2026-10-04. This closes only WO-CAP-02-01; manual
+CAP-02 execution, capability acceptance, release promotion, and production
+approval remain with their later gates.
 
 ## Required tests
 

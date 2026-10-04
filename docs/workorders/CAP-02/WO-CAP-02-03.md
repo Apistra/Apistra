@@ -1,11 +1,11 @@
 # WO-CAP-02-03 — Implement versioned agents and explicit fallback
 
-Version: 0.7-draft
+Version: 0.8-draft
 Status: DRAFT
-Status reason: CAP-00 and CAP-01 are accepted; CAP-02 design/review and WO-CAP-02-06 publication gates remain open
+Status reason: CAP-02 design/review and publication gates are complete, but required predecessor WO-CAP-02-02 is not DONE
 Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Evidence state: PREREQUISITE EVIDENCE PARTIAL; IMPLEMENTATION NOT EXECUTED
+Approval state: EXPECTATION REVIEW COMPLETE; EXECUTION BLOCKED BY PREDECESSOR
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-03
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-03
-- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -173,7 +173,7 @@ UI scope is DSN-022 from design revision 0.4 after its explicit product approval
 
 ## BDD and manual tests
 
-WO-CAP-02-06 must define and publish BDD-AGENT-001 and manual case MT-PRC-01-010 before this workorder becomes READY. Execution remains with WO-CAP-02-07.
+WO-CAP-02-06 defined, published, and exactly read back BDD-AGENT-001 and manual case MT-PRC-01-010. Execution remains with WO-CAP-02-07; WO-CAP-02-02 must become DONE before this workorder can become READY.
 
 ## Softwaretest.it and CI reporting
 

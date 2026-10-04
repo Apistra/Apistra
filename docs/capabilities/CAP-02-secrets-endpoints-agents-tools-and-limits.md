@@ -1,19 +1,21 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.5
-Status: IN_PROGRESS; WO-CAP-02-06 is DONE and WO-CAP-02-01 is implemented pending protected CI and implementation review
+Version: 0.6
+Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 are DONE, and WO-CAP-02-02 is READY
 Release: 0.1
 Assurance: EXTENDED
 
 ## Control summary
 
 **Result:** An Administrator can safely configure protected secrets, provider-neutral endpoints, versioned agents, governed tools, and enforceable operating limits.
-**Evidence:** Protected run 37212285531 verified test-definition publication;
-WO-CAP-02-01 has local automated evidence but no protected-CI or human
-implementation-review evidence yet.
-**Main blocker:** WO-CAP-02-01 must pass protected CI and independent
-implementation review before it can become DONE.
-**Next step:** Review and merge the WO-CAP-02-01 feature branch into `test`.
+**Evidence:** Protected run 37212285531 verified test-definition publication.
+PR #31 and protected run 37216514042 verify the reviewed WO-CAP-02-01
+implementation, immutable candidate, isolated staging/recovery, Steering,
+definition, and receipt round-trips.
+**Main blocker:** CAP-02 still requires WO-CAP-02-02 through WO-CAP-02-05 and
+the unchanged-candidate acceptance workorder WO-CAP-02-07.
+**Next step:** Implement WO-CAP-02-02 on its own feature branch without
+expanding beyond the approved endpoint catalogue/probe and DSN-005 scope.
 
 ## Goal and value
 
@@ -159,6 +161,8 @@ Design revision 0.4 was approved and the independent expectation,
 architecture, and security comparison was confirmed complete by the product
 owner on 2026-10-04. The eight atomic manual cases and five BDD scenarios were
 published and exactly read back in protected run 37212285531. WO-CAP-02-06 is
-DONE. WO-CAP-02-01 is the active implementation slice; later implementation
-workorders remain DRAFT until their declared predecessor is complete.
+DONE. WO-CAP-02-01 is also DONE after protected run 37216514042 and explicit
+product-owner implementation approval. WO-CAP-02-02 is READY; later
+implementation workorders remain DRAFT until their declared predecessor is
+complete.
 
