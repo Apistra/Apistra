@@ -53,7 +53,7 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(items["CAP-01"]["implementation_status"], "IMPLEMENTED")
         self.assertEqual(items["CAP-01"]["approval_status"], "APPROVED")
         self.assertEqual(items["CAP-01"]["evidence_status"], "CURRENT")
-        self.assertEqual(items["CAP-02"]["implementation_status"], "PLANNED")
+        self.assertEqual(items["CAP-02"]["implementation_status"], "IN_PROGRESS")
         self.assertEqual(items["WO-CAP-00-06"]["evidence_status"], "CURRENT")
         self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "IMPLEMENTED")
         self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "APPROVED")
@@ -163,7 +163,7 @@ class SteeringPublisherTests(unittest.TestCase):
             if item["implementation_status"] == "IMPLEMENTED"
             and item["approval_status"] == "OPEN"
         }
-        self.assertEqual(active, set())
+        self.assertEqual(active, {"CAP-02"})
         self.assertEqual(waiting_review, set())
 
     def test_invalid_or_cross_source_criterion_evidence_fails_closed(self) -> None:

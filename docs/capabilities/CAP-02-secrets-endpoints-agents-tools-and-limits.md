@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
 Version: 0.5
-Status: IN PROGRESS; WO-CAP-02-06 is DONE and WO-CAP-02-01 is implemented pending protected CI and implementation review
+Status: IN_PROGRESS; WO-CAP-02-06 is DONE and WO-CAP-02-01 is implemented pending protected CI and implementation review
 Release: 0.1
 Assurance: EXTENDED
 
