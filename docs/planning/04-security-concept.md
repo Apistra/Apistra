@@ -286,6 +286,44 @@ SEC-015 — Audit critical decisions
 SEC-016 — Safe callback delivery
 - Callbacks are allowlisted, signed, replay-resistant, bounded, and SSRF-protected.
 
+### 13.1 CAP-02 control profile
+
+The following controls refine, but do not replace, the binding SEC rules for
+CAP-02:
+
+- `SEC-002/CAP02-v1`: AES-256-GCM envelopes follow ADR-024. Unique nonces and
+  authenticated installation/project/secret/version context are mandatory.
+  The operator key is read only from a protected runtime file or container
+  secret. Plaintext persistence, fallback encryption keys in configuration,
+  secret read-back, and secret-bearing diagnostics are prohibited.
+- `SEC-001/CAP02-v1`: secret references, endpoints, agent versions, tools, and
+  policies are project-scoped at every repository and use-case boundary. A
+  valid reference from another project is indistinguishable from an unknown
+  reference and never proves its existence.
+- `SEC-004/CAP02-v1`: endpoint probes follow ADR-025. Destination policy and
+  every resolved address are checked before credential resolution and before
+  connect. Redirects are disabled. Explicit local/on-premise rules may allow an
+  exact private or loopback destination; cloud metadata and administrative
+  link-local addresses remain forbidden.
+- `SEC-007/CAP02-v1`: probes and policy evaluation have explicit timeout,
+  response-size, request-count, concurrency, token, and cost bounds. A limit
+  denial is deterministic, side-effect free, versioned, and audited.
+- `SEC-003/CAP02-v1`: tools declare `READ`, `WRITE`, or `ADMINISTRATIVE` effect
+  class. `WRITE` and `ADMINISTRATIVE` require approval unless the exact action,
+  scope, project, and tool version are permitted by an active versioned policy.
+  Timeout or missing policy never approves.
+- `SEC-015/CAP02-v1`: create, update, revoke, rotate, validation, version
+  publication, approval-classification, and limit decisions emit one safe audit
+  event with actor, project, resource identifier, result, policy/version,
+  timestamp, and correlation ID but no secret or provider response body.
+
+Required negative controls include secret canary scans across database-facing
+DTOs, API responses, logs, exports, fixtures, screenshots, and evidence;
+foreign-project and revoked-reference use; tampered envelope/AAD; repeated
+nonce fixture rejection; DNS rebinding and redirect attempts; private-target
+access without an exact profile rule; provider error-body redaction; timeout;
+and exact limit boundaries below, at, and above each configured threshold.
+
 ## 14. Security verification
 
 Required automated or authorised tests include:

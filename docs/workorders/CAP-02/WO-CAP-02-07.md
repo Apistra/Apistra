@@ -1,8 +1,8 @@
 # WO-CAP-02-07 — Accept CAP-02 on local staging
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Status reason: CAP-00 and CAP-01 are accepted; all CAP-02 implementation, publication, and acceptance prerequisites remain open
 Implementation state: NOT STARTED
 Evidence state: NOT EXECUTED
 Approval state: NOT APPROVED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-02-07
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; CAP-02 has no product candidate. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
 
 ## Target result
 
@@ -67,7 +67,9 @@ One immutable capability candidate is fully tested, manually deployed to the nam
 
 Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
 
-Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+Repository observation: 2026-09-30 at commit `be7e84d`.
+
+Readiness review observation: 2026-10-04 at commit `d83810d181374171abc7118b37a5090b6c71bb7f`. EXISTING means the literal path was observed at the repository path-contract baseline and rechecked for this readiness revision; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
 
 Observed existing paths within the bounded change area:
 
@@ -81,7 +83,7 @@ Observed existing paths within the bounded change area:
 
 Planned additions to the bounded change area after READY:
 
-- PLANNED: `docs/testing/manual/PRC-01/`
+- PLANNED: `docs/testing/manual/PRC-01/CAP-02/`
 - PLANNED: `tests/manual/CAP-02/`
 - PLANNED: `artifacts/acceptance/CAP-02/`
 
@@ -93,7 +95,7 @@ Path boundary: The EXISTING and PLANNED paths together form the upper bound afte
 
 ## Stop conditions
 
-- CAP-00 or another prerequisite is not accepted
+- CAP-00 or CAP-01 acceptance is invalidated, or another named prerequisite is not satisfied
 - A required ADR, schema, identity, project boundary, design state, authorised test target, or Softwaretest.it resource is missing
 - The observed repository contradicts this workorder
 - Acceptance would require an unlisted external mutation, destructive test, or production deployment
@@ -137,7 +139,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -155,7 +157,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-Execute the complete applicable scenario set (BDD-ENDPOINT-001, BDD-LIMIT-001) and every published `MT-PRC-01-NNN` case in `MTP-PRC-01`. Missing, unallocated, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
+Execute BDD-SECRET-001, BDD-ENDPOINT-001, BDD-AGENT-001, BDD-TOOL-001, and BDD-LIMIT-001 plus MT-PRC-01-007 through MT-PRC-01-014. The accepted CAP-01 cases remain regression inputs selected by change impact; they are not silently counted as CAP-02 acceptance. Missing, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
 
 ## Softwaretest.it and CI reporting
 

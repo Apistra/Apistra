@@ -1,7 +1,7 @@
 # Apistra Visual Planning Artefacts
 
-Version: 0.3
-Status: DSN-001 THROUGH DSN-004 APPROVED; OTHER DESIGN REFERENCES IN_REVIEW
+Version: 0.4
+Status: DSN-001 THROUGH DSN-004 APPROVED; CAP-02 REFERENCES IN_REVIEW; OTHER DESIGN REFERENCES IN_REVIEW
 
 This package supplies the maintainable visual sources that complement the textual BuildBySpec planning baseline.
 
@@ -51,6 +51,7 @@ The BPMN files are the canonical process definitions. The adjacent SVG and PNG f
 - DSN-010 — workflow editor desktop
 - DSN-016 — run trace desktop
 - DSN-018 — human approval desktop and mobile
+- DSN-005/006/019/022/023 — CAP-02 administration desktop and mobile
 
 The dark technical direction reuses the product-owner-selected research reference and existing logo. It is not a new logo or unrelated visual direction.
 
@@ -60,3 +61,7 @@ The product owner approved revision 0.3 for DSN-001 through DSN-004 on
 2026-09-30. No approval is inferred for other design references. Accessibility
 measurement, Softwaretest.it publication, implementation, and candidate-bound
 visual evidence remain separate later gates.
+
+The product owner confirmed the CAP-02 information/security baseline on
+2026-10-04. The generated CAP-02 desktop/mobile references remain IN_REVIEW
+until their explicit visual/product approval; this file does not grant it.

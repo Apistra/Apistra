@@ -27,6 +27,8 @@ No document in this baseline is implementation evidence. No capability is implem
 - 10-traceability-and-gates.md — requirement-to-evidence mappings and release gates
 - 11-architecture-decisions-and-patterns.md — concrete ADRs, pattern scope, prohibitions, and verification
 - 12-repository-path-contract.md — observed repository roots, planned capability package mapping, workorder path boundaries, and unresolved new-root decisions
+- 13-cap01-readiness-review.md — accepted CAP-01 readiness and expectation-review record
+- 14-cap02-readiness-review.md — CAP-02 decision, design, path, test-allocation, and gate review
 - ../../VERSIONING.md — product version authority, compatibility meaning, and release procedure
 - ../../CHANGELOG.md — curated history of user-visible, contract, security, and operational changes
 
@@ -53,5 +55,6 @@ No document in this baseline is implementation evidence. No capability is implem
 - Design direction: DECIDED, design evidence still PENDING
 - Independent expectation review: PENDING
 - CAP-00 implementation: ACCEPTED; revision 0.6 hosted evidence, product-owner review, human acceptance, and candidate-bound Softwaretest.it receipts are recorded
-- Business implementation: BLOCKED until the separate CAP-01 test-definition publication/read-back gate passes
-- Business workorder path contracts: COMPLETE AS PROPOSAL for all 133 workorders; qualified architecture review remains PENDING, with CAP-16 and CAP-17 new-root decisions BLOCKING
+- CAP-01 business implementation and acceptance: COMPLETE
+- CAP-02 planning: IN_REVIEW; product baseline confirmed, design approval, independent review, and test-definition publication still PENDING
+- Business workorder path contracts: CAP-01 approved; CAP-02 ownership confirmed and under qualified review; later capabilities remain proposals, with CAP-16 and CAP-17 new-root decisions BLOCKING

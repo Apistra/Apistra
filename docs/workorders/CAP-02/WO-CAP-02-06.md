@@ -1,8 +1,8 @@
 # WO-CAP-02-06 — Publish and verify CAP-02 test definitions
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Status reason: CAP-00 and CAP-01 are accepted; design approval and independent expectation comparison remain open
 Implementation state: NOT STARTED
 Evidence state: NOT EXECUTED
 Approval state: NOT APPROVED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-02-06
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; the existing publisher is CAP-01-specific and cannot yet publish a separate CAP-02 definition set. The readiness review at `../../planning/14-cap02-readiness-review.md` records the exact delta.
 
 ## Target result
 
@@ -67,7 +67,9 @@ The complete PRC-01 capability test package is versioned locally, idempotently p
 
 Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
 
-Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+Repository observation: 2026-09-30 at commit `be7e84d`.
+
+Readiness review observation: 2026-10-04 at commit `d83810d181374171abc7118b37a5090b6c71bb7f`. EXISTING means the literal path was observed at the repository path-contract baseline and rechecked for this readiness revision; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
 
 Observed existing paths within the bounded change area:
 
@@ -81,7 +83,7 @@ Observed existing paths within the bounded change area:
 
 Planned additions to the bounded change area after READY:
 
-- PLANNED: `docs/testing/manual/PRC-01/`
+- PLANNED: `docs/testing/manual/PRC-01/CAP-02/`
 - PLANNED: `tests/bdd/features/cap_02/`
 - PLANNED: `tools/fixtures/cap_02/`
 
@@ -93,7 +95,7 @@ Path boundary: The EXISTING and PLANNED paths together form the upper bound afte
 
 ## Stop conditions
 
-- CAP-00 or another prerequisite is not accepted
+- CAP-00 or CAP-01 acceptance is invalidated, or another named prerequisite is not satisfied
 - A required ADR, schema, identity, project boundary, design state, authorised test target, or Softwaretest.it resource is missing
 - The observed repository contradicts this workorder
 - Acceptance would require an unlisted external mutation, destructive test, or production deployment
@@ -137,7 +139,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
 - **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -155,7 +157,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 
 ## BDD and manual tests
 
-This workorder owns definition and publication of the catalog-listed scenarios (BDD-ENDPOINT-001, BDD-LIMIT-001) and manual package `MTP-PRC-01`. Individual manual cases use `MT-PRC-01-NNN`, receive concrete atomic steps before READY, and are recorded in the published package and its traceability index. Execution remains with the owning implementation workorder or WO-CAP-02-07 as explicitly assigned in each definition.
+This workorder owns definition and publication of BDD-SECRET-001, BDD-ENDPOINT-001, BDD-AGENT-001, BDD-TOOL-001, BDD-LIMIT-001 and the CAP-02 extension of `MTP-PRC-01` (`MT-PRC-01-007` through `MT-PRC-01-014`). The existing six CAP-01 definitions remain immutable and are not republished as CAP-02 results. Execution remains with WO-CAP-02-07.
 
 ## Softwaretest.it and CI reporting
 

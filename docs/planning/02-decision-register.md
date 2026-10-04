@@ -189,6 +189,47 @@ independent environment, run, fixture, and reset confirmations, and emits a
 secret-free receipt. This decision does not introduce user-management UI,
 additional release-0.1 roles, or production fixture execution.
 
+### ADR-024 — Versioned authenticated secret envelopes
+
+Status: DECIDED FOR CAP-02
+
+Project secrets are encrypted with AES-256-GCM from the established Python
+`cryptography` library. The active master key is operator-provided through a
+protected file or container secret and is never persisted in PostgreSQL, the
+repository, an image, an API payload, or evidence. Each stored envelope carries
+an explicit format version, key identifier, unique 96-bit nonce, ciphertext,
+and authentication tag. Authenticated associated data binds installation,
+project, secret identifier, and secret version so an envelope cannot be moved
+to another owner or version without detection.
+
+Secret values are accepted only through the protected write path and are never
+returned after submission. Domain and public contracts expose opaque project-
+scoped references. Decryption occurs only immediately before an authorised
+adapter call. Rotation introduces a new active key while retaining explicitly
+configured previous decryption keys until a bounded, auditable re-encryption
+operation has completed. Invented cryptography, deterministic nonces, silent
+fallback to plaintext, and automatic deletion of old keys are prohibited.
+
+### ADR-025 — Credential-safe endpoint validation
+
+Status: DECIDED FOR CAP-02
+
+Saving an endpoint performs schema and policy validation without network I/O.
+An explicit `Test connection` action invokes a provider-specific, read-only
+probe through the endpoint adapter. URL, destination profile, DNS resolution,
+redirect policy, timeout, response-size limit, and project ownership are
+validated before the referenced credential is resolved. Redirects are not
+followed. Credentials remain server-side, response bodies are discarded after
+bounded parsing, and the UI/API receives only a stable normalised outcome.
+
+Network access is deny-by-default. An Administrator may explicitly allow an
+exact private or loopback destination for an on-premise/local profile; cloud
+metadata and administrative link-local destinations remain forbidden. Every
+DNS resolution and connection target must remain within the approved rule, so
+rebinding cannot escape the configured destination. A provider without a safe
+read-only probe can report `PROBE_NOT_SUPPORTED`; it must not use a generative
+request as an implicit validation call.
+
 ## Explicitly deferred decisions
 
 - Managed hosting provider and region model

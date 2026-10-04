@@ -11,7 +11,7 @@ UTF8 = "utf-8"
 DELIVERY_CAPABILITY_ACCEPTANCE = "capability-acceptance"
 DELIVERY_TEST_PUBLICATION = "test-definition-and-publication"
 INITIAL_VERSION = "0.1.0"
-EXPECTED_CANONICAL_BDD_COUNT = 47
+EXPECTED_CANONICAL_BDD_COUNT = 50
 EXPECTED_MANUAL_TEST_PROCESS_COUNT = 14
 
 EXPECTED_FLOW = ["feature/*", "test", "staging", "main"]
@@ -645,13 +645,17 @@ def validate_manual_test_case(path: Path, text: str) -> list[str]:
 def validate_manual_test_definitions(root: Path, test_catalog: str) -> list[str]:
     errors: list[str] = []
     manual_root = root / "docs/testing/manual"
-    catalogue_ids = set(MT_ID_PATTERN.findall(test_catalog))
+    allocation_section = test_catalog.split("Allocated `MTP-PRC-01` definitions:", 1)[
+        -1
+    ].split("Reserved for the CAP-02 definition/publication workorder", 1)[0]
+    catalogue_ids = set(MT_ID_PATTERN.findall(allocation_section))
+    known_ids = set(MT_ID_PATTERN.findall(test_catalog))
     case_files = sorted(manual_root.glob("PRC-*/MT-PRC-??-???.md"))
     file_ids = {path.stem for path in case_files}
 
     for test_id in sorted(catalogue_ids - file_ids):
         errors.append(f"{manual_root}: allocated manual case {test_id} has no file")
-    for test_id in sorted(file_ids - catalogue_ids):
+    for test_id in sorted(file_ids - known_ids):
         errors.append(f"{manual_root}: manual case file {test_id} is not allocated")
     for path in case_files:
         errors.extend(validate_manual_test_case(path, path.read_text(encoding=UTF8)))
@@ -670,7 +674,7 @@ def _validate_test_catalogue(
         errors.append(f"{test_catalog_path}: must declare the 0.7 draft authority")
     if len(canonical_bdd_ids) != EXPECTED_CANONICAL_BDD_COUNT:
         errors.append(
-            f"{test_catalog_path}: expected 47 canonical BDD IDs, observed {len(canonical_bdd_ids)}"
+            f"{test_catalog_path}: expected {EXPECTED_CANONICAL_BDD_COUNT} canonical BDD IDs, observed {len(canonical_bdd_ids)}"
         )
     if canonical_mtp_ids != {
         f"MTP-PRC-{number:02d}"

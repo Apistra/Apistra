@@ -10,10 +10,9 @@ from __future__ import annotations
 import base64
 import html
 import math
-from pathlib import Path
 import textwrap
 import xml.etree.ElementTree as ET
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent
@@ -117,13 +116,17 @@ def add_wrapped(
 
 def svg_from_ops(width, height, ops, title, description):
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+        (
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+            f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">'
+        ),
         f'<title id="title">{esc(title)}</title>',
         f'<desc id="desc">{esc(description)}</desc>',
         "<defs>",
-        f'<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" '
-        f'orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="{BORDER}"/></marker>',
+        (
+            f'<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" '
+            f'orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="{BORDER}"/></marker>'
+        ),
         "</defs>",
         f'<rect width="{width}" height="{height}" fill="{BG}"/>',
     ]
@@ -1000,7 +1003,7 @@ def q(prefix, tag):
 
 
 def write_bpmn(process_id, spec, path):
-    width, height, _ops, positions, lane_top, lane_h = bpmn_preview(process_id, spec)
+    width, _height, _ops, positions, lane_top, lane_h = bpmn_preview(process_id, spec)
     definitions = ET.Element(
         q("bpmn", "definitions"),
         {
@@ -1477,6 +1480,173 @@ def information_architecture():
     return w, h, ops
 
 
+def cap02_administration_ui(width=1440, height=900, mobile=False):
+    """Render the CAP-02 administration reference without implying implementation."""
+    if mobile:
+        w, h = width, height
+        ops = [
+            rect(0, 0, w, h, BG, BG, 0),
+            rect(0, 0, w, 66, CHROME, BORDER, 0),
+            rect(10, 9, 148, 46, TEXT, TEXT, 7),
+            image_op(15, 12, 130, 40, LOGO),
+            text(20, 104, "AI configuration", 21, TEXT, "600"),
+            text(20, 129, "Project Analyst · Agents", 12, MUTED),
+        ]
+        x, y, content_w = 16, 158, w - 32
+        tabs = ["Secrets", "Endpoints", "Agents", "Tools", "Limits"]
+        tab_w = (content_w - 16) / 3
+        for index, label in enumerate(tabs):
+            row, column = divmod(index, 3)
+            tx = x + column * (tab_w + 8)
+            ty = y + row * 44
+            selected = label == "Agents"
+            ops.append(
+                rect(
+                    tx,
+                    ty,
+                    tab_w,
+                    36,
+                    SURFACE_3 if selected else SURFACE,
+                    CYAN if selected else BORDER,
+                    7,
+                )
+            )
+            ops.append(
+                text(
+                    tx + tab_w / 2,
+                    ty + 23,
+                    label,
+                    11,
+                    TEXT if selected else MUTED,
+                    "600" if selected else "normal",
+                    "middle",
+                )
+            )
+        y += 102
+    else:
+        w, h = width, height
+        ops = app_chrome(
+            "AI configuration",
+            "Project Analyst · versioned and project-scoped",
+            w,
+            h,
+            "Agents",
+        )
+        x, y, content_w = 245, 90, w - 285
+        tabs = ["Secrets", "Endpoints", "Agents", "Tools", "Limits & policies"]
+        tab_w = 170
+        for index, label in enumerate(tabs):
+            tx = x + index * (tab_w + 10)
+            selected = label == "Agents"
+            ops.append(
+                rect(
+                    tx,
+                    y,
+                    tab_w,
+                    38,
+                    SURFACE_3 if selected else SURFACE,
+                    CYAN if selected else BORDER,
+                    7,
+                )
+            )
+            ops.append(
+                text(
+                    tx + tab_w / 2,
+                    y + 24,
+                    label,
+                    12,
+                    TEXT if selected else MUTED,
+                    "600" if selected else "normal",
+                    "middle",
+                )
+            )
+        y += 66
+
+    ops.append(text(x, y + 24, "Agent versions", 19, TEXT, "600"))
+    subtitle = (
+        "Immutable versions retain exact endpoint, prompt, tool and policy references."
+    )
+    if mobile:
+        add_wrapped(ops, x, y + 49, subtitle, 48, 12, MUTED, 17)
+    else:
+        ops.append(text(x, y + 49, subtitle, 12, MUTED))
+    button_w = 138 if not mobile else content_w
+    button_x = x + content_w - button_w
+    button_y = y + 88 if mobile else y + 2
+    ops.append(rect(button_x, button_y, button_w, 38, CYAN, CYAN, 7))
+    ops.append(
+        text(
+            button_x + button_w / 2,
+            button_y + 24,
+            "Create agent" if not mobile else "Create agent version",
+            12,
+            BG,
+            "600",
+            "middle",
+        )
+    )
+    list_y = y + (144 if mobile else 78)
+    cards = [
+        ("Research Analyst", "v3 · Primary: local-llm · Fallback: none", GREEN),
+        (
+            "Document Classifier",
+            "v5 · Primary: openai-prod · Fallback: local-llm",
+            CYAN,
+        ),
+    ]
+    for title_value, detail, accent in cards:
+        card_h = 92 if mobile else 78
+        ops.append(rect(x, list_y, content_w, card_h, SURFACE, BORDER, 9))
+        ops.append(rect(x, list_y, 5, card_h, accent, accent, 3))
+        ops.append(text(x + 20, list_y + 29, title_value, 14, TEXT, "600"))
+        add_wrapped(
+            ops,
+            x + 20,
+            list_y + 55,
+            detail,
+            44 if mobile else 90,
+            11,
+            MUTED,
+            17,
+        )
+        list_y += card_h + 12
+
+    panel_y = list_y + 10
+    ops.append(
+        rect(x, panel_y, content_w, 286 if mobile else 230, SURFACE_2, BORDER, 9)
+    )
+    ops.append(text(x + 20, panel_y + 30, "Create immutable version", 15, TEXT, "600"))
+    fields = [
+        ("Primary endpoint", "local-llm"),
+        ("Fallback endpoint", "No fallback"),
+        ("Tool set", "research-readonly@2"),
+        ("Limits policy", "interactive-default@4"),
+    ]
+    fy = panel_y + 63
+    for index, (label, value) in enumerate(fields):
+        if mobile:
+            ops.append(text(x + 20, fy, label, 10, MUTED, "600"))
+            ops.append(rect(x + 20, fy + 10, content_w - 40, 34, SURFACE, BORDER, 6))
+            ops.append(text(x + 32, fy + 32, value, 11, TEXT))
+            fy += 52
+        else:
+            column = index % 2
+            row = index // 2
+            fx = x + 20 + column * ((content_w - 52) / 2 + 12)
+            field_w = (content_w - 52) / 2
+            field_y = panel_y + 62 + row * 72
+            ops.append(text(fx, field_y, label, 10, MUTED, "600"))
+            ops.append(rect(fx, field_y + 10, field_w, 36, SURFACE, BORDER, 6))
+            ops.append(text(fx + 12, field_y + 33, value, 11, TEXT))
+    footer_y = min(h - 76, panel_y + (310 if mobile else 250))
+    footer = "Secret values are write-only. Connection tests return normalised outcomes only."
+    if mobile:
+        add_wrapped(ops, x, footer_y, footer, 48, 11, AMBER, 16)
+    else:
+        ops.append(text(x, footer_y, footer, 11, AMBER))
+    return w, h, ops
+
+
 def design_system():
     w, h = 1440, 900
     ops = [
@@ -1613,6 +1783,8 @@ def generate():
 
     design_items = {
         "information-architecture": information_architecture(),
+        "cap02-administration-desktop": cap02_administration_ui(),
+        "cap02-administration-mobile": cap02_administration_ui(390, 1160, True),
         "workflow-editor-desktop": workflow_editor_ui(),
         "run-trace-desktop": run_trace_ui(),
         "human-approval-desktop": approval_ui(),
