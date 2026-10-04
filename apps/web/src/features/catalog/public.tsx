@@ -56,6 +56,7 @@ export function SecretReferencesApp({ projectId }: { projectId: string }) {
       <nav aria-label="Project navigation">
         <a href={`/projects/${projectId}`}>Overview</a>
         <a aria-current="page" href={`/projects/${projectId}/secrets`}>Secrets</a>
+        <a href={`/projects/${projectId}/endpoints`}>Endpoints</a>
         <a href="/audit">Audit</a>
       </nav>
       <div className="workspace-content">

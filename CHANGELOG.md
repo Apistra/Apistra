@@ -6,6 +6,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Implemented WO-CAP-02-02 on its feature branch with project-scoped generative and embedding endpoint definitions, offline idempotent save, optimistic probe versioning, credential-safe deny-by-default egress and DNS-rebinding controls, pinned read-only OpenAI-compatible model discovery, normalized safe outcomes, PostgreSQL persistence/migration, versioned OpenAPI, audit events, and DSN-005; protected CI, independent review, merge, and human approval remain pending.
 - Completed WO-CAP-02-01 after PR #31, protected merge `dfa8319`, green run 37216514042, authenticated Steering/definition/receipt readback, and explicit product-owner implementation approval; WO-CAP-02-02 is now READY without implying CAP-02 acceptance or production approval.
 - Added the WO-CAP-02-01 encrypted project secret-reference slice with AES-256-GCM envelopes, operator-file key configuration, opaque versioned APIs, project isolation, idempotency, safe audit evidence, PostgreSQL migration, DSN-006 administration UI, and executable architecture/security/contract tests.
 - Closed WO-CAP-02-06 from protected run 37212285531 after authenticated publication and exact readback of all CAP-02 test definitions.

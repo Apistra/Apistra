@@ -9,7 +9,9 @@ from fastapi import Cookie, FastAPI, Header, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from apistra.entrypoints.api.endpoints import register_endpoint_routes
 from apistra.modules.catalog.application import SecretService
+from apistra.modules.catalog.application.endpoints import EndpointService
 from apistra.modules.catalog.domain import SecretError, SecretErrorCode, SecretReference
 from apistra.modules.identity.domain import SessionContext
 from apistra.modules.projects.application import ProjectService
@@ -252,10 +254,12 @@ def register_catalog_routes(
     authenticate: Authenticate,
     projects: ProjectService,
     secrets: SecretService,
+    endpoints: EndpointService,
 ) -> None:
     _register_collection_routes(application, authenticate, projects, secrets)
     _register_replace_route(application, authenticate, secrets)
     _register_revoke_route(application, authenticate, secrets)
+    register_endpoint_routes(application, authenticate, projects, endpoints)
 
 
 def _expected_version(if_match: str | None) -> int | None:

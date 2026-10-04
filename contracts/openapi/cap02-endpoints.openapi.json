@@ -1,0 +1,65 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Apistra CAP-02 model endpoints", "version": "0.1.0" },
+  "paths": {
+    "/api/v1/projects/{project_id}/endpoints": { "get": {}, "post": {} },
+    "/api/v1/projects/{project_id}/endpoints/{endpoint_id}:test": { "post": {} }
+  },
+  "components": {
+    "schemas": {
+      "EndpointCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "purpose",
+          "provider_protocol",
+          "base_url",
+          "model_identifier",
+          "secret_reference_id",
+          "network_profile"
+        ],
+        "properties": {
+          "name": { "type": "string", "minLength": 2, "maxLength": 64 },
+          "purpose": { "type": "string", "enum": ["GENERATIVE", "EMBEDDING"] },
+          "provider_protocol": { "type": "string", "enum": ["OPENAI_COMPATIBLE"] },
+          "base_url": { "type": "string", "minLength": 1, "maxLength": 2048 },
+          "model_identifier": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "secret_reference_id": { "type": "string", "format": "uuid" },
+          "network_profile": { "type": "string", "enum": ["CLOUD", "ON_PREMISE", "LOCAL"] }
+        }
+      },
+      "ModelEndpoint": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id", "project_id", "name", "purpose", "provider_protocol", "base_url",
+          "model_identifier", "secret_reference_id", "network_profile", "status",
+          "version", "last_probe_outcome", "created_at", "updated_at"
+        ],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "project_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "purpose": { "type": "string", "enum": ["GENERATIVE", "EMBEDDING"] },
+          "provider_protocol": { "type": "string", "enum": ["OPENAI_COMPATIBLE"] },
+          "base_url": { "type": "string" },
+          "model_identifier": { "type": "string" },
+          "secret_reference_id": { "type": "string", "format": "uuid" },
+          "network_profile": { "type": "string", "enum": ["CLOUD", "ON_PREMISE", "LOCAL"] },
+          "status": { "type": "string", "enum": ["UNVERIFIED", "VERIFIED"] },
+          "version": { "type": "integer", "minimum": 1 },
+          "last_probe_outcome": {
+            "type": ["string", "null"],
+            "enum": [
+              "CONNECTION_VERIFIED", "CONNECTION_FAILED", "DESTINATION_BLOCKED",
+              "AUTHENTICATION_FAILED", "TIMED_OUT", "PROBE_NOT_SUPPORTED", null
+            ]
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

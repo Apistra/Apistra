@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.6
-Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 are DONE, and WO-CAP-02-02 is READY
+Version: 0.7
+Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 are DONE, and WO-CAP-02-02 is implemented locally with protected CI and independent review pending
 Release: 0.1
 Assurance: EXTENDED
 
@@ -12,10 +12,13 @@ Assurance: EXTENDED
 PR #31 and protected run 37216514042 verify the reviewed WO-CAP-02-01
 implementation, immutable candidate, isolated staging/recovery, Steering,
 definition, and receipt round-trips.
+WO-CAP-02-02 has local static, architecture, contract, PostgreSQL, backend,
+frontend, and coverage evidence on `feature/cap02-endpoint-catalogue`; this is
+not protected merge or capability evidence.
 **Main blocker:** CAP-02 still requires WO-CAP-02-02 through WO-CAP-02-05 and
 the unchanged-candidate acceptance workorder WO-CAP-02-07.
-**Next step:** Implement WO-CAP-02-02 on its own feature branch without
-expanding beyond the approved endpoint catalogue/probe and DSN-005 scope.
+**Next step:** Run protected CI and complete the independent implementation
+review for WO-CAP-02-02, then obtain explicit human approval before DONE.
 
 ## Goal and value
 
@@ -162,7 +165,8 @@ architecture, and security comparison was confirmed complete by the product
 owner on 2026-10-04. The eight atomic manual cases and five BDD scenarios were
 published and exactly read back in protected run 37212285531. WO-CAP-02-06 is
 DONE. WO-CAP-02-01 is also DONE after protected run 37216514042 and explicit
-product-owner implementation approval. WO-CAP-02-02 is READY; later
+product-owner implementation approval. WO-CAP-02-02 is implemented locally
+and awaits protected CI plus independent implementation review. Later
 implementation workorders remain DRAFT until their declared predecessor is
 complete.
 

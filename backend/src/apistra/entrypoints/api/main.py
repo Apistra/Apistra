@@ -12,11 +12,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from apistra.entrypoints.api.catalog import register_catalog_routes
 from apistra.entrypoints.api.composition import (
+    build_endpoint_service,
     build_identity_service,
     build_project_service,
     build_secret_service,
 )
 from apistra.modules.catalog.application import SecretService
+from apistra.modules.catalog.application.endpoints import EndpointService
 from apistra.modules.identity.application import IdentityService, OperationResult
 from apistra.modules.identity.domain import (
     IdentityError,
@@ -41,6 +43,11 @@ FIELD_ID = "id"
 FIELD_STATUS = "status"
 FIELD_CREATED_AT = "created_at"
 FIELD_CORRELATION_ID = "correlation_id"
+FIELD_EVENT_TYPE = "event_type"
+FIELD_ACTOR = "actor"
+FIELD_SUBJECT_ID = "subject_id"
+FIELD_PROJECT_ID = "project_id"
+FIELD_PROJECT_KEY = "project_key"
 MINIMUM_USERNAME_LENGTH = 3
 MAXIMUM_USERNAME_LENGTH = 128
 MINIMUM_PASSWORD_LENGTH = 12
@@ -385,6 +392,7 @@ def _register_audit_route(
     identity: IdentityService,
     projects: ProjectService,
     secrets: SecretService,
+    endpoints: EndpointService,
 ) -> None:
     @application.get("/api/v1/audit-events", tags=["audit"], response_model=None)
     def list_audit_events(
@@ -398,14 +406,14 @@ def _register_audit_route(
         identity_events: list[dict[str, object]] = [
             {
                 FIELD_ID: str(event.id),
-                "event_type": event.event_type,
+                FIELD_EVENT_TYPE: event.event_type,
                 FIELD_CREATED_AT: event.created_at.isoformat(),
                 FIELD_CORRELATION_ID: event.correlation_id,
-                "actor": event.actor_username,
-                "subject_id": str(event.subject_id) if event.subject_id else None,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.subject_id) if event.subject_id else None,
                 "installation_id": event.details.get("installation_id"),
-                "project_id": None,
-                "project_key": None,
+                FIELD_PROJECT_ID: None,
+                FIELD_PROJECT_KEY: None,
             }
             for event in identity.audit_events(administrator_id)
         ]
@@ -415,13 +423,13 @@ def _register_audit_route(
         project_events: list[dict[str, object]] = [
             {
                 FIELD_ID: str(event.id),
-                "event_type": event.event_type,
+                FIELD_EVENT_TYPE: event.event_type,
                 FIELD_CREATED_AT: event.created_at.isoformat(),
                 FIELD_CORRELATION_ID: event.correlation_id,
-                "actor": event.actor_username,
-                "subject_id": str(event.project_id),
-                "project_id": str(event.project_id),
-                "project_key": event.project_key,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.project_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: event.project_key,
             }
             for event in project_event_result.value
         ]
@@ -431,18 +439,34 @@ def _register_audit_route(
         secret_events: list[dict[str, object]] = [
             {
                 FIELD_ID: str(event.id),
-                "event_type": event.event_type,
+                FIELD_EVENT_TYPE: event.event_type,
                 FIELD_CREATED_AT: event.created_at.isoformat(),
                 FIELD_CORRELATION_ID: event.correlation_id,
-                "actor": event.actor_username,
-                "subject_id": str(event.secret_reference_id),
-                "project_id": str(event.project_id),
-                "project_key": None,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.secret_reference_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: None,
             }
             for event in secret_event_result.value
         ]
+        endpoint_event_result = endpoints.audit_events(administrator_id)
+        if endpoint_event_result.value is None:
+            raise RuntimeError("Successful endpoint audit query returned no collection.")
+        endpoint_events: list[dict[str, object]] = [
+            {
+                FIELD_ID: str(event.id),
+                FIELD_EVENT_TYPE: event.event_type,
+                FIELD_CREATED_AT: event.created_at.isoformat(),
+                FIELD_CORRELATION_ID: event.correlation_id,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.endpoint_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: None,
+            }
+            for event in endpoint_event_result.value
+        ]
         events = sorted(
-            [*identity_events, *project_events, *secret_events],
+            [*identity_events, *project_events, *secret_events, *endpoint_events],
             key=lambda event: (
                 str(event[FIELD_CREATED_AT]),
                 str(event[FIELD_ID]),
@@ -570,6 +594,7 @@ def create_app(
     identity_service: IdentityService | None = None,
     project_service: ProjectService | None = None,
     secret_service: SecretService | None = None,
+    endpoint_service: EndpointService | None = None,
 ) -> FastAPI:
     configured_settings = runtime_settings
 
@@ -579,6 +604,7 @@ def create_app(
     identity = identity_service or build_identity_service(current_settings())
     projects = project_service or build_project_service(current_settings())
     secrets = secret_service or build_secret_service(current_settings())
+    endpoints = endpoint_service or build_endpoint_service(current_settings(), secrets)
     application = FastAPI(
         title="Apistra API",
         version=current_settings().version,
@@ -589,7 +615,7 @@ def create_app(
     _register_identity_creation_routes(application, identity, current_settings)
     _register_identity_session_routes(application, identity, current_settings)
     _register_project_collection_routes(application, identity, projects)
-    _register_audit_route(application, identity, projects, secrets)
+    _register_audit_route(application, identity, projects, secrets, endpoints)
     _register_project_read_route(application, identity, projects)
     _register_project_update_route(application, identity, projects)
     _register_project_archive_route(application, identity, projects)
@@ -600,6 +626,7 @@ def create_app(
         ),
         projects,
         secrets,
+        endpoints,
     )
 
     return application

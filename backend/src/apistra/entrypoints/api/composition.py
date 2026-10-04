@@ -4,10 +4,18 @@ import os
 from datetime import timedelta
 
 from apistra.modules.catalog.adapters.crypto import AesGcmSecretCipher
+from apistra.modules.catalog.adapters.endpoint_memory import InMemoryEndpointStore
+from apistra.modules.catalog.adapters.endpoint_postgres import PostgresEndpointStore
 from apistra.modules.catalog.adapters.memory import InMemorySecretStore
 from apistra.modules.catalog.adapters.postgres import PostgresSecretStore
+from apistra.modules.catalog.adapters.probe import (
+    DenyByDefaultDestinationPolicy,
+    OpenAiCompatibleEndpointProbe,
+)
 from apistra.modules.catalog.application import SecretService
+from apistra.modules.catalog.application.endpoints import EndpointService
 from apistra.modules.catalog.ports import SecretStore
+from apistra.modules.catalog.ports.endpoints import EndpointStore
 from apistra.modules.identity.adapters.memory import InMemoryIdentityStore
 from apistra.modules.identity.adapters.postgres import PostgresIdentityStore
 from apistra.modules.identity.adapters.security import (
@@ -24,6 +32,7 @@ from apistra.modules.projects.ports import ProjectStore
 from apistra.platform.runtime import RuntimeSettings
 
 EPHEMERAL_SECRET_KEY_BYTES = 32
+LOCAL_ENVIRONMENTS = {"local", "test"}
 
 
 def build_identity_service(settings: RuntimeSettings) -> IdentityService:
@@ -31,7 +40,7 @@ def build_identity_service(settings: RuntimeSettings) -> IdentityService:
 
     if settings.database_url:
         store: IdentityStore = PostgresIdentityStore(settings.database_url)
-    elif settings.environment in {"local", "test"}:
+    elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemoryIdentityStore()
     else:
         raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
@@ -49,7 +58,7 @@ def build_project_service(settings: RuntimeSettings) -> ProjectService:
 
     if settings.database_url:
         store: ProjectStore = PostgresProjectStore(settings.database_url)
-    elif settings.environment in {"local", "test"}:
+    elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemoryProjectStore()
     else:
         raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
@@ -69,7 +78,7 @@ def build_secret_service(settings: RuntimeSettings) -> SecretService:
             settings.secret_active_key_id,
             settings.secret_key_ring_file,
         )
-    elif settings.environment in {"local", "test"}:
+    elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemorySecretStore()
         cipher = AesGcmSecretCipher(
             settings.secret_active_key_id,
@@ -78,3 +87,21 @@ def build_secret_service(settings: RuntimeSettings) -> SecretService:
     else:
         raise RuntimeError("Persistent database and secret master-key file are required")
     return SecretService(store, cipher, UtcClock(), settings.installation_id)
+
+
+def build_endpoint_service(settings: RuntimeSettings, secrets: SecretService) -> EndpointService:
+    """Compose endpoint persistence and the deny-by-default probe boundary."""
+
+    if settings.database_url:
+        store: EndpointStore = PostgresEndpointStore(settings.database_url)
+    elif settings.environment in LOCAL_ENVIRONMENTS:
+        store = InMemoryEndpointStore()
+    else:
+        raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
+    return EndpointService(
+        store,
+        secrets,
+        DenyByDefaultDestinationPolicy(),
+        OpenAiCompatibleEndpointProbe(),
+        UtcClock(),
+    )
