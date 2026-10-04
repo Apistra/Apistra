@@ -1,11 +1,11 @@
 # WO-CAP-00-08 — Publish canonical Steering sources
 
-Version: 0.10-draft
-Status: BLOCKED
-Status reason: implementation and local verification can complete on the feature branch, but the authenticated import receipt and export readback require the protected softwaretest environment after promotion to test
+Version: 0.11-done
+Status: DONE
+Status reason: GitHub Actions run 37182972206 verified the authenticated import receipts and complete export readback; the product owner reviewed and approved the result on 2026-10-04
 Implementation state: COMPLETE
-Evidence state: NOT EXECUTED
-Approval state: IMPLEMENTATION AUTHORISED; RESULT NOT YET APPROVED
+Evidence state: VERIFIED — trusted test run 37182972206 and retained redacted receipt
+Approval state: REVIEWED AND HUMAN ACCEPTED — product-owner decision recorded 2026-10-04
 Capability: [CAP-00](../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-07
 - Capability contract: ../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md
 - CI test group: TST-WO-CAP-00-08 and CI-TS-19
-- Softwaretest.it mapping: NOT PUBLISHED; canonical Steering import and export verification are this workorder's result
+- Softwaretest.it mapping: PUBLISHED; run 37182972206 imported 160 sources and verified the complete export without drift
 - Delivery class: operational-governance
 - Owned verification group: TST-WO-CAP-00-08
-- Specification revision: 0.10-draft
+- Specification revision: 0.11-done
 
 ## Risk profile and escalation
 
@@ -36,7 +36,7 @@ Stop if the observed OpenAPI contract changes, the token lacks the confirmed pro
 
 ## Context and current behavior
 
-The repository publishes manual test definitions and CI results and now attempts the canonical Steering import. Runs 37121411402, 37125594799, and 37135598429 successively exposed an undocumented batch limit, an OpenAPI enum collision, and a non-reproducible server receipt hash. Guide 1.2.0 and the OpenAPI now resolve the first two contract gaps; Apistra still needs the versioned guide preflight, historical-count reconciliation, and a contract-honest server-hash policy before the authenticated gate can pass.
+Runs 37121411402, 37125594799, and 37135598429 successively exposed an undocumented batch limit, an OpenAPI enum collision, and a non-reproducible server receipt hash. The integration was corrected against Guide 1.2.0. Trusted `test` run 37182972206 then accepted 100 plus 60 sources, retained both redacted receipts, and verified every submitted field through the complete export readback.
 
 ## Target result
 
@@ -127,6 +127,13 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 3. Public preflight verifies Guide 1.2.0 and matching OpenAPI Steering operations, limits, enums, scopes, headers, and recovery rules; CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
 4. A trusted-branch run accounts for every submitted item as accepted or historical, retains a well-formed remote payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
 
+## Steering criterion evidence
+
+- WO-CAP-00-08-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=Run 37182972206 generated and verified the unique 19-Capability and 141-Workorder manifest with source and content hashes.
+- WO-CAP-00-08-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=The hosted adapter suite passed batching, status mapping, receipt reconciliation, export readback, and retained negative cases.
+- WO-CAP-00-08-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=The public contract preflight and separate CI-TS-19 step passed in run 37182972206 against Guide 1.2.0.
+- WO-CAP-00-08-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=Run 37182972206 accepted 100 plus 60 sources and verified the complete export with no unexplained drift.
+
 ## Acceptance examples and test oracles
 
 - **Positive oracle:** the current repository produces 19 Capability and 141 Workorder items with unique IDs; imports are partitioned as 100 plus 60 items and an exact export verifies with no mismatch.
@@ -181,7 +188,7 @@ Not applicable to product deployment: this workorder neither builds nor deploys 
 
 ## Workorder completion versus capability acceptance
 
-DONE proves only that the canonical planning sources are represented and verified in the external Steering view. It does not alter the already recorded human acceptance of the CAP-00 product candidate, approve a later capability, or grant production approval. Until the authenticated receipt exists, CAP-00 remains an accepted baseline with this separate Steering evidence dimension pending.
+DONE proves only that the canonical planning sources are represented and verified in the external Steering view. It does not alter the already recorded human acceptance of the CAP-00 product candidate, approve a later capability, or grant production approval. The authenticated receipts and complete export comparison are retained from run 37182972206.
 
 ## Events, rework, and cost
 

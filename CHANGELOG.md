@@ -69,6 +69,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Fixed
 
+- Closed WO-CAP-00-08 from the verified trusted-branch Steering receipts and product-owner approval, and added strict source-authored criterion evidence so completed CAP-00 gates render as passed without making future criteria prematurely due.
 - Corrected the Softwaretest.it Steering projection so explanatory blocker text cannot activate draft capabilities, completed item reviews remain distinct from later capability/production gates, criterion success is never inferred from item implementation, future criteria are not marked due without an explicit criterion-level due gate, and mapping changes advance source revisions monotonically.
 - Aligned the fail-closed Softwaretest.it preflight with Guide 1.2.0 and its Steering/OpenAPI limits, enums, scopes, operations, and recovery contract.
 - Reconciled Steering receipts across accepted and historical items, retained rejected remote receipts, and stopped guessing the undocumented server-checksum preimage while preserving exact complete-export verification.
