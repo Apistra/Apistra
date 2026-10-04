@@ -101,6 +101,7 @@ class SteeringPublisherTests(unittest.TestCase):
 
     def test_source_revision_includes_projection_contract_revision(self) -> None:
         self.assertEqual(steering._source_revision("0.3"), 300_102)
+        self.assertEqual(steering._source_revision("0.10-ready"), 1_000_102)
         self.assertEqual(steering._source_revision("1.1"), 100_100_102)
         self.assertGreater(
             steering._source_revision("0.4"),
@@ -524,6 +525,31 @@ class SteeringPublisherTests(unittest.TestCase):
             receipt = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(receipt["failed_receipt"]["payload_sha256"], "a" * 64)
             self.assertEqual(receipt["failed_receipt"]["diagnostic"], "[REDACTED]")
+
+    def test_safe_failure_summary_exposes_only_protocol_metadata(self) -> None:
+        cause = steering.ApiError(
+            409,
+            {
+                "code": "REVISION_CONTENT_CONFLICT",
+                "detail": "private-token must not be logged",
+                "request_id": "request-1",
+            },
+        )
+        error = steering.SteeringPublishError(
+            "import",
+            cause,
+            [],
+            batch_number=1,
+        )
+
+        summary = steering.safe_failure_summary(error)
+
+        self.assertEqual(
+            summary,
+            "SteeringPublishError phase=import batch=1 http=409 "
+            "code=REVISION_CONTENT_CONFLICT request_id=request-1",
+        )
+        self.assertNotIn("private-token", summary)
 
 
 if __name__ == "__main__":

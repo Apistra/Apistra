@@ -1,6 +1,6 @@
 # WO-CAP-02-03 — Implement versioned agents and explicit fallback
 
-Version: 0.9-ready
+Version: 0.10-ready
 Status: READY
 Status reason: the bounded agent-version slice is implemented and locally verified, but remains READY until protected CI, independent implementation review, merge, and human approval complete the workorder
 Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED TO PROTECTED `test`
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-03
-- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.10-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
