@@ -2,7 +2,7 @@
 
 Version: 0.6
 Date: 2026-10-04
-Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06, WO-CAP-02-01, AND WO-CAP-02-02 DONE; WO-CAP-02-03 READY
+Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE; WO-CAP-02-01 AND WO-CAP-02-02 DONE; WO-CAP-02-03 READY
 Assurance: EXTENDED (`secrets`, `authorization`, `architecture_boundary`)
 Baseline commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
 Capability revision: CAP-02 0.4
