@@ -6,6 +6,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Accepted CAP-01 and completed WO-CAP-01-05 from the exact local-staging fix candidate, tree-equivalent protected `test` merge, green CI run 37192774502, successful direct defect retests, authenticated closure of all linked defects, and explicit product-owner approval. The unused `NOT_STARTED` repeat remains documented as a Softwaretest.it reporting exception rather than being rewritten.
 - Compare Softwaretest.it Steering read-back timestamps as timezone-aware RFC 3339 instants while retaining strict comparison for every non-temporal field.
 
 - Split the CI quality matrix into explicit executable stages and limited CI-TS-12 to deterministic resource and boundary-load contracts until representative performance infrastructure exists.
@@ -107,6 +108,6 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Known limitations
 
-- CAP-01 implementation is in sequential review and is not capability-accepted; CAP-02 through
-  CAP-18 remain planning contracts only.
+- Softwaretest.it currently projects direct defect retests separately from the normal repeat-run path; CAP-01 therefore retains one unused `NOT_STARTED` APISTRA-TC-000006 repeat while all linked defects are CLOSED/FIXED and the product owner has accepted the direct-retest evidence.
+- CAP-02 through CAP-18 remain planning contracts only.
 - No production environment or automatic deployment path exists.

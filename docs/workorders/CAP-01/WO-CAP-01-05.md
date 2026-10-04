@@ -1,11 +1,11 @@
 # WO-CAP-01-05 — Accept CAP-01 on local staging
 
-Version: 0.8-ready
-Status: READY
-Status reason: all prerequisite workorders are DONE, protected `test` passed the complete automated gate, and deterministic local acceptance tooling is available; candidate-bound manual execution and human acceptance are intentionally pending
-Implementation state: ACCEPTANCE TOOLING COMPLETE; HUMAN EXECUTION NOT STARTED
-Evidence state: PROTECTED BASELINE COMPLETE; FINAL CANDIDATE EVIDENCE NOT EXECUTED
-Approval state: ACCEPTANCE PLAN APPROVED; CAPABILITY NOT APPROVED
+Version: 0.9-done
+Status: DONE
+Status reason: the exact fix tree passed local-staging acceptance and protected test CI; all three linked defects are CLOSED/FIXED after successful direct retests, and the product owner accepted CAP-01 on 2026-10-04
+Implementation state: COMPLETE
+Evidence state: VERIFIED — candidate, fixtures, protected CI, manual runs, direct retests, and defect closure reconciled
+Approval state: REVIEWED AND HUMAN ACCEPTED — production approval remains ungranted
 Capability: [CAP-01](../../capabilities/CAP-01-installation-and-isolated-project-administration.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-01-installation-and-isolated-project-administration.md
 - CI test group: TST-WO-CAP-01-05
-- Softwaretest.it mapping: DEFINITIONS PUBLISHED AND VERIFIED BY WO-CAP-01-04; candidate-bound execution receipts remain required
+- Softwaretest.it mapping: DEFINITIONS PUBLISHED; EXECUTION AND DIRECT DEFECT-RETEST EVIDENCE VERIFIED WITH DOCUMENTED PLATFORM EXCEPTION
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-01-05
-- Specification revision: 0.8-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-done; acceptance evidence is bound to the candidate and platform state recorded below
 
 ## Risk profile and escalation
 
@@ -38,14 +38,22 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 ## Context and current behavior
 
 WO-CAP-01-01 through WO-CAP-01-04 are DONE, including authenticated
-Softwaretest.it definition publication and read-back. The Python-convention and
-fixture-layout change is integrated into protected `test` at commit
-`ca34c15b64ce235c1d5584dc6f0e57004a62a2df`. Protected run `36926072188`
-passed architecture, security and supply-chain, contract/static, test,
-candidate-package, isolated staging/recovery, and authenticated Softwaretest.it
-round-trip gates. The manual acceptance runner and execution guide are
-implemented. Unchanged final-candidate manual results, independent
-implementation review, and human capability acceptance do not yet exist.
+Softwaretest.it definition publication and read-back. Candidate
+`e522266b8d113ddd8e6807669fb3f3abf88e3eae` was run in isolated local staging as
+`cap01-retest-e522266-01`. PR #25 merged that exact tree to protected `test` as
+`e348ee5f3b6ef8f11fbcc37e417093540176c66d`; protected run `37192774502` passed
+all six jobs, including candidate packaging, staging/recovery, Steering,
+definition publication, and result reporting. The product owner reviewed the
+code and confirmed successful direct retests. Softwaretest.it reports
+APISTRA-D0001 through APISTRA-D0003 as CLOSED/FIXED at revision 5.
+
+Softwaretest.it's alternate direct defect-retest path does not create the same
+RetestDocument/run status as the normal repeat workflow. Consequently the unused
+second APISTRA-TC-000006 run remains `NOT_STARTED`. The product owner explicitly
+decided on 2026-10-04 that the successful direct retests plus closure of every
+linked defect are authoritative for this acceptance. The stale display is
+retained as a documented platform exception and is not rewritten as a passed
+run.
 
 ## Target result
 
@@ -139,6 +147,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 3. The same digests are staged manually; migration, health, smoke, observability, controlled failure, recovery, and all assigned manual cases pass with confirmed reporting.
 4. An authorised human accepts the exact capability/candidate/environment evidence package; no production approval is inferred.
 
+## Steering criterion evidence
+
+- WO-CAP-01-05-AC-01: status=PASSED; due_now=true; gate=WO-CAP-01-05 completion; reason=WO-CAP-01-01 through WO-CAP-01-04 are DONE and no expired CAP-01 prerequisite remains.
+- WO-CAP-01-05-AC-02: status=PASSED; due_now=true; gate=WO-CAP-01-05 completion; reason=Candidate e522266 and its tree-equivalent protected merge e348ee5 passed the complete automated, package, staging/recovery, and reporting matrix in run 37192774502.
+- WO-CAP-01-05-AC-03: status=PASSED; due_now=true; gate=WO-CAP-01-05 completion; reason=The exact local-staging candidate and deterministic fixtures were exercised; five cases have normal passed final runs and the sixth used the accepted direct defect-retest path with all linked defects CLOSED/FIXED.
+- WO-CAP-01-05-AC-04: status=PASSED; due_now=true; gate=WO-CAP-01-05 completion; reason=The product owner reviewed the code and evidence, confirmed successful direct retests, accepted the documented platform exception, and accepted CAP-01 on 2026-10-04 without granting production approval.
+
 ## Acceptance examples and test oracles
 
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
@@ -153,6 +168,9 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Counterexample: A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - The planning derivation and human confirmation are recorded in ../../planning/13-cap01-readiness-review.md; candidate-bound implementation review remains mandatory before capability acceptance.
 
+Candidate-bound code review and final human acceptance are recorded in
+[the CAP-01 acceptance record](../../testing/manual/PRC-01/acceptance-record.md).
+
 ## Required tests
 
 - TST-WO-CAP-01-05: gate completeness, candidate/digest equality, evidence freshness, and receipt validation.
@@ -164,7 +182,7 @@ Execution procedure: [CAP-01 manual acceptance execution guide](../../testing/ma
 
 ## BDD and manual tests
 
-Execute the complete applicable scenario set (BDD-AUTH-001, BDD-PROJ-001) and every published `MT-PRC-01-NNN` case in `MTP-PRC-01`. Missing, unallocated, stale, skipped without approved disposition, or unreported mandatory cases block this workorder.
+BDD-AUTH-001 and BDD-PROJ-001 passed in protected CI. The published `MTP-PRC-01` package was executed on local staging. Five cases have normal passed run records; the sixth used Softwaretest.it's direct defect-retest path. All three resulting defects are CLOSED/FIXED, and the product owner explicitly accepted that evidence path despite the unused repeat run remaining `NOT_STARTED`.
 
 ## Softwaretest.it and CI reporting
 
@@ -176,7 +194,7 @@ Retry only a failed/aborted/invalid stage for an unchanged candidate. After a re
 
 ## Deployment and staging evidence
 
-This workorder owns the capability staging gate. Candidate manifest, image digests, configuration, fixture version, deployment marker, health/smoke, diagnostics, recovery, Softwaretest.it receipts, and human decision must identify the same attempt.
+This workorder owns and closes the capability staging gate. Candidate `e522266`, local run `cap01-retest-e522266-01`, the tree-equivalent protected merge `e348ee5`, CI run `37192774502`, Softwaretest.it execution/defect identifiers, and the human decision are reconciled in the acceptance record.
 
 ## Documentation and evidence
 
@@ -184,6 +202,7 @@ This workorder owns the capability staging gate. Candidate manifest, image diges
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+- Final acceptance record: ../../testing/manual/PRC-01/acceptance-record.md
 
 ## Definition of Done
 
@@ -194,7 +213,7 @@ This workorder owns the capability staging gate. Candidate manifest, image diges
 
 ## Workorder completion versus capability acceptance
 
-DONE proves only this integrated result. CAP-01 remains unaccepted until every workorder is DONE, the unchanged candidate passes the full scope matrix on staging, required manual tests and Softwaretest.it reporting are confirmed, and an authorised human accepts the capability.
+DONE proves this integrated acceptance result. CAP-01 is human-accepted for the recorded candidate and environment. Release promotion and production approval remain separate and ungranted.
 
 ## Events, rework, and cost
 

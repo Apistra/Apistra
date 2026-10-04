@@ -28,7 +28,7 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 - [WO-CAP-01-02 — Implement installation and isolated project lifecycle](CAP-01/WO-CAP-01-02.md) — DONE; implementation conformance and hosted evidence verified
 - [WO-CAP-01-03 — Implement project-context enforcement and audit](CAP-01/WO-CAP-01-03.md) — DONE; implementation conformance and hosted evidence verified
 - [WO-CAP-01-04 — Publish and verify PRC-01 test definitions](CAP-01/WO-CAP-01-04.md) — DONE; all six definitions published and read back
-- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — READY; fixture application and six manual executions remain
+- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — DONE; local-staging evidence, direct retests, closed defects, and human acceptance recorded
 
 ## CAP-02
 

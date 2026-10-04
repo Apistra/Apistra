@@ -50,8 +50,8 @@ class SteeringPublisherTests(unittest.TestCase):
         }
         self.assertEqual(items["CAP-00"]["implementation_status"], "IMPLEMENTED")
         self.assertEqual(items["CAP-01"]["implementation_status"], "IMPLEMENTED")
-        self.assertEqual(items["CAP-01"]["approval_status"], "OPEN")
-        self.assertEqual(items["CAP-01"]["evidence_status"], "MISSING")
+        self.assertEqual(items["CAP-01"]["approval_status"], "APPROVED")
+        self.assertEqual(items["CAP-01"]["evidence_status"], "CURRENT")
         self.assertEqual(items["CAP-02"]["implementation_status"], "PLANNED")
         self.assertEqual(items["WO-CAP-00-06"]["evidence_status"], "CURRENT")
         self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "IMPLEMENTED")
@@ -77,6 +77,18 @@ class SteeringPublisherTests(unittest.TestCase):
             all(
                 row["status"] == "PASSED" and row["due_now"]
                 for row in items["WO-CAP-00-08"]["criteria"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "PASSED" and row["due_now"]
+                for row in items["CAP-01"]["criteria"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "PASSED" and row["due_now"]
+                for row in items["WO-CAP-01-05"]["criteria"]
             )
         )
         self.assertTrue(
@@ -150,8 +162,8 @@ class SteeringPublisherTests(unittest.TestCase):
             if item["implementation_status"] == "IMPLEMENTED"
             and item["approval_status"] == "OPEN"
         }
-        self.assertEqual(active, {"CAP-01"})
-        self.assertEqual(waiting_review, {"CAP-01"})
+        self.assertEqual(active, set())
+        self.assertEqual(waiting_review, set())
 
     def test_invalid_or_cross_source_criterion_evidence_fails_closed(self) -> None:
         malformed = """## Acceptance criteria

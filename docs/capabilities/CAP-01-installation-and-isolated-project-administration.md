@@ -1,16 +1,19 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 1.1
-Status: FINAL ACCEPTANCE READY; NOT ACCEPTED
+Version: 1.2
+Status: ACCEPTED; direct defect-retest exception recorded; production approval not granted
 Release: 0.1
 Assurance: EXTENDED
+Evidence state: VERIFIED — candidate `e522266`, equivalent merged tree `e348ee5`, protected run 37192774502, local-staging receipts, manual execution, and closed Softwaretest.it defects
+Approval state: HUMAN ACCEPTED — product-owner acceptance recorded 2026-10-04
 
 ## Control summary
 
 **Result:** An Administrator can bootstrap an offline installation, authenticate locally, and manage strictly isolated projects with attributable audit records.
-**Evidence:** WO-CAP-01-01 through WO-CAP-01-04 are DONE and represented on protected `test`. Protected run `36926072188` passed the complete automated gate, including candidate packaging, isolated staging/recovery, and the authenticated Softwaretest.it round-trip. No unchanged final-candidate manual result, independent implementation review, or human capability acceptance is claimed yet.
+**Evidence:** WO-CAP-01-01 through WO-CAP-01-05 are DONE. Fix candidate `e522266b8d113ddd8e6807669fb3f3abf88e3eae` was exercised in local staging as `cap01-retest-e522266-01`; merged `test` commit `e348ee5f3b6ef8f11fbcc37e417093540176c66d` has the same tree. Protected run `37192774502` passed the complete automated, package, staging/recovery, Steering, test-definition, and Softwaretest.it reporting gates. The product owner confirmed the direct retests and accepted CAP-01.
 **Publication gate:** CLOSED 2026-10-01; six released definitions passed exact field-/ordered-step read-back and unchanged idempotent replay.
-**Next step:** Review the WO-CAP-01-05 feature candidate, execute all six manual cases against that exact candidate using the published execution guide, confirm its Softwaretest.it receipts, and record explicit human acceptance.
+**Main blocker:** None for CAP-01. Softwaretest.it still displays the unused second APISTRA-TC-000006 run as `NOT_STARTED`; the platform's direct defect-retest path instead closed all three linked defects as `FIXED`, and the product owner explicitly accepted that path as authoritative for this capability.
+**Next step:** Select CAP-02 for readiness review. Production approval and release promotion remain separate, ungranted gates.
 
 ## Goal and value
 
@@ -87,12 +90,19 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 3. Own-project access succeeds and foreign-project access discloses nothing
 4. Critical actions are audited
 
+## Steering criterion evidence
+
+- CAP-01-AC-01: status=PASSED; due_now=true; gate=CAP-01 acceptance; reason=The single-use bootstrap behavior passed the published manual package and protected automated matrix for the accepted candidate.
+- CAP-01-AC-02: status=PASSED; due_now=true; gate=CAP-01 acceptance; reason=Revoked and expired-session behavior was corrected at e522266 and accepted after direct retest; linked defects APISTRA-D0001 and APISTRA-D0002 are CLOSED/FIXED at revision 5.
+- CAP-01-AC-03: status=PASSED; due_now=true; gate=CAP-01 acceptance; reason=Own-project creation and foreign-project non-disclosure were exercised on local staging; linked defect APISTRA-D0003 is CLOSED/FIXED at revision 5.
+- CAP-01-AC-04: status=PASSED; due_now=true; gate=CAP-01 acceptance; reason=Protected run 37192774502 passed the full automated and reporting gates, all linked defects are CLOSED/FIXED, and the product owner accepted the capability on 2026-10-04.
+
 ## Test and evidence contract
 
-- BDD-AUTH-001, BDD-PROJ-001, and MT-PRC-01-001 through MT-PRC-01-006 are defined locally and mapped to PRC-01.
-- Definition and Softwaretest.it publication are verified; fixtures, execution, behavioral results, reporting, and acceptance remain separate evidence states.
-- Deterministic fixture descriptors are implemented locally; actual staging application and verification remain capability-execution evidence.
-- The unchanged candidate runs the complete scope matrix before manual staging acceptance.
+- BDD-AUTH-001, BDD-PROJ-001, and MT-PRC-01-001 through MT-PRC-01-006 are defined, published, and mapped to PRC-01.
+- Definitions, fixtures, execution, behavioral results, reporting, defect handling, and acceptance remain separate evidence states and are reconciled in the CAP-01 acceptance record.
+- The direct Softwaretest.it defect-retest path is authoritative for this acceptance: APISTRA-D0001 through APISTRA-D0003 are CLOSED/FIXED. The unused APISTRA-TC-000006 repeat remains visibly `NOT_STARTED` as a known platform-display limitation and is not relabelled as a passed run.
+- Protected run `37192774502` proves the complete automated scope matrix for the unchanged merged tree.
 
 ## Workorders
 
@@ -104,7 +114,7 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 
 ## Staging and gate
 
-The final workorder deploys the unchanged capability candidate to isolated local staging, executes assigned automated and manual tests, verifies observability and recovery, confirms Softwaretest.it receipts, and requests human acceptance. Workorder DONE, capability acceptance, and production approval remain separate.
+The final workorder deployed the unchanged capability candidate to isolated local staging, executed the assigned automated and manual scope, verified recovery and Softwaretest.it state, and recorded human acceptance. Workorder DONE and capability acceptance do not grant production approval.
 
 ## Open decisions
 
@@ -115,7 +125,9 @@ and local fixture-definition decisions are recorded in
 The authenticated Softwaretest.it publication/read-back receipt is verified
 for manifest SHA-256
 `b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`.
-No unresolved planning decision blocks the first dependency-satisfied
-implementation workorder. Later workorders, staging execution, behavioral
-evidence, capability acceptance, and production approval are not inferred.
+The product owner confirmed successful direct retests and CAP-01 acceptance on
+2026-10-04. [The acceptance record](../testing/manual/PRC-01/acceptance-record.md)
+preserves the exact candidate, protected CI run, manual run IDs, closed defects,
+and the known Softwaretest.it retest-display exception. Production approval is
+not inferred or granted.
 

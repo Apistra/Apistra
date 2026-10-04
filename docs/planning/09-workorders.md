@@ -1,15 +1,15 @@
 # Workorder Catalogue
 
-Version: 0.7-draft
+Version: 0.8-draft
 Status: DRAFT
 
 ## Control summary
 
 **Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
-**Change:** Version 0.7 adds a distinct Softwaretest.it Steering publication workorder and CI gate while preserving the version 0.6 execution contract, status model, semantic test IDs, architecture/security applicability, and dependency graph.
-**Current position:** 141 workorder contracts exist. All eight CAP-00 workorders are DONE. CAP-01 implementation and test-definition publication workorders are DONE; WO-CAP-01-05 is READY for the unchanged-candidate fixture and six-case manual acceptance execution. CAP-02 through CAP-18 remain DRAFT until their own prerequisite gates and expectation reviews pass.
-**Main blocker:** CAP-01 acceptance requires the six published `MTP-PRC-01` manual cases to be executed and recorded on the exact local-staging candidate. CAP-00 has no remaining delivery or Steering blocker.
-**Next step:** Follow `docs/testing/manual/PRC-01/execution-guide.md`, retain the candidate/fixture receipts, record every case result in Softwaretest.it, and then request explicit CAP-01 acceptance.
+**Change:** Version 0.8 records completed WO-CAP-01-05 evidence and product-owner acceptance while preserving the explicit Softwaretest.it direct-retest reporting exception.
+**Current position:** 141 workorder contracts exist. All CAP-00 and CAP-01 workorders are DONE. CAP-02 through CAP-18 remain DRAFT until their own prerequisite gates and expectation reviews pass.
+**Main blocker:** CAP-01 has no remaining workorder blocker. Later work remains gated by each capability's own architecture, security, design, test-management, and dependency decisions.
+**Next step:** Select CAP-02 and perform its expectation/readiness review before changing any CAP-02 workorder to READY.
 
 The [canonical workorder index](../workorders/README.md) links every file and its current status.
 
