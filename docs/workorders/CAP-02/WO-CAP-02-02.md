@@ -1,11 +1,11 @@
 # WO-CAP-02-02 — Implement model and embedding endpoint catalogue
 
-Version: 0.8-ready
+Version: 0.9-ready
 Status: READY
-Status reason: CAP-00/CAP-01, WO-CAP-02-06, and WO-CAP-02-01 are complete; the approved CAP-02 expectation, architecture, security, design, path, and publication gates cover this endpoint slice
-Implementation state: NOT STARTED
-Evidence state: PREREQUISITE EVIDENCE VERIFIED; IMPLEMENTATION NOT EXECUTED
-Approval state: APPROVED FOR EXECUTION; NOT YET DONE
+Status reason: the bounded implementation and local automated evidence exist on `feature/cap02-endpoint-catalogue`; protected CI, independent implementation review, merge, and human workorder approval remain required before DONE
+Implementation state: IMPLEMENTED ON FEATURE BRANCH; REVIEW AND PROTECTED MERGE PENDING
+Evidence state: LOCAL STATIC, ARCHITECTURE, CONTRACT, BACKEND, FRONTEND, MIGRATION, POSTGRESQL, AND COVERAGE GATES VERIFIED; PROTECTED CI PENDING
+Approval state: INDEPENDENT IMPLEMENTATION REVIEW REQUIRED; HUMAN WORKORDER APPROVAL NOT YET GIVEN
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-02
-- Specification revision: 0.8-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-ready; local evidence is bound to the current feature-branch tree and must be replaced by protected candidate evidence after merge
 
 ## Risk profile and escalation
 
@@ -39,12 +39,17 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 CAP-00 and CAP-01 are accepted baselines. WO-CAP-02-06 published and verified
 BDD-ENDPOINT-001 and MT-PRC-01-009. WO-CAP-02-01 is DONE on protected `test` at
-`dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a`, so the shared `catalog` module,
-CAP-02 test roots, migration root, and DSN-006 web feature now exist. No model
-or embedding endpoint catalogue, probe adapter, endpoint persistence, DSN-005
-implementation, or WO-CAP-02-02 execution evidence exists yet. The approved
-readiness review at `../../planning/14-cap02-readiness-review.md` remains the
-expectation, architecture, security, design, and path authority for this slice.
+`dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a`. The feature branch now implements
+the provider-neutral endpoint domain/application/port boundary, memory and
+PostgreSQL adapters, a versioned migration and OpenAPI contract, authenticated
+project-scoped HTTP routes, safe audit projection, DSN-005, and focused tests.
+Save performs no DNS or network operation. Explicit testing resolves and
+approves every destination address before credential release, pins the selected
+address, rejects redirects, bounds time and response size, and confirms the
+configured model through the read-only OpenAI-compatible `/models` operation.
+The approved readiness review remains the expectation, architecture, security,
+design, and path authority. This is local implementation evidence, not DONE or
+capability acceptance.
 
 ## Target result
 
@@ -109,6 +114,23 @@ Planned additions to the bounded change area after READY:
 - EXISTING: `tests/bdd/features/cap_02/`
 - EXISTING: `backend/src/apistra/platform/database/migrations/cap_02/`
 
+Implemented paths observed on the feature branch:
+
+- `backend/src/apistra/modules/catalog/domain/endpoints.py`
+- `backend/src/apistra/modules/catalog/application/endpoints.py`
+- `backend/src/apistra/modules/catalog/ports/endpoints.py`
+- `backend/src/apistra/modules/catalog/adapters/endpoint_memory.py`
+- `backend/src/apistra/modules/catalog/adapters/endpoint_postgres.py`
+- `backend/src/apistra/modules/catalog/adapters/probe.py`
+- `backend/src/apistra/entrypoints/api/endpoints.py`
+- `backend/src/apistra/platform/database/migrations/cap_02/002_model_endpoints.sql`
+- `contracts/openapi/cap02-endpoints.openapi.json`
+- `apps/web/src/features/catalog/endpoints.tsx`
+- `apps/web/src/features/catalog/internal/endpoint-client.ts`
+- `apps/web/src/app/projects/[projectId]/endpoints/page.tsx`
+- focused tests below `backend/tests/{unit,component,contract,integration}/cap_02/`
+- `apps/web/src/features/catalog/endpoints.test.ts`
+
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
 
 Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
@@ -161,7 +183,7 @@ UI scope is DSN-005 from design revision 0.4 after its explicit product approval
 - **Positive oracle:** An Administrator registers and validates versioned model and embedding endpoints with explicit capabilities and protected credentials.
 - **Negative oracle:** Unsupported capability, invalid configuration, or unreachable endpoint produces a safe actionable result without persisting a usable endpoint.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.9-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -200,6 +222,25 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Test definitions/results, architecture/security evidence, and redacted diagnostics
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
+
+### Current feature-branch evidence
+
+- Python formatting and Ruff, strict mypy, selected flake8 conventions,
+  Import Linter, TypeScript type checking, TypeScript architecture,
+  cyclomatic-complexity, and repository-contract gates passed locally.
+- The complete backend matrix passed with `125 passed` and 90.38% aggregate
+  coverage against an isolated PostgreSQL 17.6 instance; the temporary test
+  container was removed after the run.
+- The web matrix passed with `19 passed`, 96.92% line coverage, and 100%
+  function coverage.
+- PostgreSQL migration and endpoint-store integration tests passed, including
+  idempotent creation, optimistic probe versioning, audit persistence, and the
+  secret-reference foreign key.
+- Credential-safe tests prove offline save, deny-before-decrypt, all-answer DNS
+  policy, link-local/metadata denial, bounded provider reads, redirect denial,
+  timeout normalization, exact model discovery, and safe normalized outcomes.
+- These local results do not replace protected CI, immutable candidate/staging
+  evidence, independent implementation review, or human approval.
 
 ## Definition of Done
 

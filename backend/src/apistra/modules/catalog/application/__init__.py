@@ -189,6 +189,12 @@ class SecretService:
             return self._unavailable()
         return SecretResult(value=SecretMaterial(value))
 
+    def reference_available(self, owner_id: UUID, project_id: UUID, reference_id: UUID) -> bool:
+        """Check a reference without decrypting its protected value."""
+
+        reference = self._store.get_for_project(owner_id, project_id, reference_id)
+        return reference is not None and reference.status is SecretStatus.ACTIVE
+
     def _associated_data(self, project_id: UUID, reference_id: UUID, version: int) -> bytes:
         return f"{self._installation_id}:{project_id}:{reference_id}:{version}".encode()
 

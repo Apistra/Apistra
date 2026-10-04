@@ -1,12 +1,12 @@
 # CAP-02 Readiness Review
 
-Version: 0.4
+Version: 0.5
 Date: 2026-10-04
-Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE; WO-CAP-02-01 DONE; WO-CAP-02-02 READY
+Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE; WO-CAP-02-01 DONE; WO-CAP-02-02 LOCAL IMPLEMENTATION COMPLETE, REVIEW PENDING
 Assurance: EXTENDED (`secrets`, `authorization`, `architecture_boundary`)
 Baseline commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
 Capability revision: CAP-02 0.4
-Workorder revision: WO-CAP-02-06 0.9-done; WO-CAP-02-01 1.0-done; WO-CAP-02-02 0.8-ready
+Workorder revision: WO-CAP-02-06 0.9-done; WO-CAP-02-01 0.10-done; WO-CAP-02-02 0.9-ready
 
 ## Control summary
 
@@ -30,9 +30,9 @@ and security contracts for baseline `d83810d181374171abc7118b37a5090b6c71bb7f`;
 the product owner reported it complete with no unresolved discrepancy. This is
 not capability acceptance, deployment, or production approval.
 
-**Next action:** Implement WO-CAP-02-02 on its own feature branch. Do not begin
-WO-CAP-02-03 before the endpoint slice passes its protected CI and independent
-implementation review.
+**Next action:** Review WO-CAP-02-02 independently, run protected CI, and merge
+only after approval. Do not begin WO-CAP-02-03 before the endpoint slice passes
+those gates and receives explicit human workorder approval.
 
 ## Baseline and observed delta
 
