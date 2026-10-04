@@ -11,6 +11,56 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PUBLIC_GUIDE_TIMEOUT_SECONDS = 15
+REF_KEY = "$ref"
+
+
+def _mapping(value: object) -> dict[str, object]:
+    return value if isinstance(value, dict) else {}
+
+
+def _component_schema(document: dict[str, object], name: str) -> dict[str, object]:
+    components = _mapping(document.get("components"))
+    schemas = _mapping(components.get("schemas"))
+    return _mapping(schemas.get(name))
+
+
+def _property_schema(schema: dict[str, object], name: str) -> dict[str, object]:
+    return _mapping(_mapping(schema.get("properties")).get(name))
+
+
+def _validate_steering_openapi(
+    document: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    batch = expected["steering_batch_contract"]
+    if not isinstance(batch, dict):
+        return ["Steering batch contract is not an object"]
+    import_items = _property_schema(
+        _component_schema(document, "SteeringImportRequest"), "items"
+    )
+    item = _component_schema(document, "SteeringItemImportRequest")
+    evidence = _property_schema(item, "evidence_status")
+    evidence_name = str(evidence.get(REF_KEY, "")).rsplit("/", 1)[-1]
+    evidence_values = _component_schema(document, evidence_name).get("enum")
+    limits = (
+        (import_items.get("minItems"), batch["minimum_items"]),
+        (import_items.get("maxItems"), batch["maximum_items"]),
+        (
+            _property_schema(item, "criteria").get("maxItems"),
+            batch["maximum_criteria_per_item"],
+        ),
+        (
+            _property_schema(item, "decisions").get("maxItems"),
+            batch["maximum_decisions_per_item"],
+        ),
+    )
+    if any(actual != wanted for actual, wanted in limits):
+        errors.append("Steering OpenAPI list limits changed")
+    if evidence_name != "SteeringEvidenceStatusEnum":
+        errors.append("Steering evidence schema reference changed")
+    if evidence_values != expected["steering_evidence_statuses"]:
+        errors.append("Steering evidence OpenAPI enum changed")
+    return errors
 
 
 def validate_openapi(
@@ -34,6 +84,9 @@ def validate_openapi(
     schemes = document.get("components", {}).get("securitySchemes", {})
     if contract["authentication"]["scheme"] not in schemes:
         errors.append("ProjectBearer security scheme is absent")
+    expected_guide = contract.get("integration_guide", {})
+    if isinstance(expected_guide, dict):
+        errors.extend(_validate_steering_openapi(document, expected_guide))
     return errors
 
 
@@ -137,6 +190,70 @@ def _validate_ci_reporting(
     return errors
 
 
+def _validate_steering_batch(
+    steering: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    batch = steering.get("batch_contract", {})
+    wanted = expected["steering_batch_contract"]
+    if not isinstance(batch, dict) or not isinstance(wanted, dict):
+        return ["Steering batch guide is absent"]
+    if any(batch.get(field) != value for field, value in wanted.items()):
+        return ["Steering batch contract changed"]
+    return []
+
+
+def _validate_steering_statuses(
+    steering: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    statuses = steering.get("status_contract", {})
+    if not isinstance(statuses, dict):
+        return ["Steering status guide is absent"]
+    if statuses.get("evidence_status") != expected["steering_evidence_statuses"]:
+        return ["Steering evidence status contract changed"]
+    return []
+
+
+def _validate_steering_data(
+    document: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    steering = document.get("steering_data", {})
+    if not isinstance(steering, dict):
+        return ["Steering integration guide is absent"]
+    operations = steering.get("operations", {})
+    operation_names = ("import", "list", "detail", "overview", "export")
+    observed_operations = (
+        [operations.get(name) for name in operation_names]
+        if isinstance(operations, dict)
+        else []
+    )
+    if observed_operations != expected["steering_operations"]:
+        errors.append("Steering operation contract changed")
+    checks = (
+        (
+            steering.get("required_scopes") == expected["steering_required_scopes"],
+            "Steering required scopes changed",
+        ),
+        (
+            steering.get("required_headers") == expected["steering_required_headers"],
+            "Steering required headers changed",
+        ),
+        (
+            steering.get("uses_if_match") is expected["steering_uses_if_match"],
+            "Steering revision contract changed",
+        ),
+    )
+    errors.extend(message for valid, message in checks if not valid)
+    errors.extend(_validate_steering_batch(steering, expected))
+    errors.extend(_validate_steering_statuses(steering, expected))
+    recovery = steering.get("failure_recovery", {})
+    if not isinstance(recovery, dict) or not set(
+        expected["steering_failure_codes"]
+    ).issubset(recovery):
+        errors.append("required Steering failure recovery codes are absent")
+    return errors
+
+
 def validate_integration_guide(
     document: dict[str, object], contract: dict[str, object]
 ) -> list[str]:
@@ -153,6 +270,7 @@ def validate_integration_guide(
         *_validate_command_protocol(document, expected),
         *_validate_cycle_execution(document, expected),
         *_validate_ci_reporting(document, expected),
+        *_validate_steering_data(document, expected),
     ]
 
 

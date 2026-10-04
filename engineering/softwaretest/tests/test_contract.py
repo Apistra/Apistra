@@ -37,14 +37,37 @@ class SoftwaretestContractTests(unittest.TestCase):
             "openapi": "3.0.3",
             "info": {"title": "softwaretest.it REST API", "version": "1.0.0"},
             "paths": paths,
-            "components": {"securitySchemes": {"ProjectBearer": {}}},
+            "components": {
+                "securitySchemes": {"ProjectBearer": {}},
+                "schemas": {
+                    "SteeringImportRequest": {
+                        "properties": {"items": {"minItems": 1, "maxItems": 100}}
+                    },
+                    "SteeringItemImportRequest": {
+                        "properties": {
+                            "criteria": {"maxItems": 500},
+                            "decisions": {"maxItems": 50},
+                            "evidence_status": {
+                                "$ref": (
+                                    "#/components/schemas/SteeringEvidenceStatusEnum"
+                                )
+                            },
+                        }
+                    },
+                    "SteeringEvidenceStatusEnum": {
+                        "enum": self.contract["integration_guide"][
+                            "steering_evidence_statuses"
+                        ]
+                    },
+                },
+            },
         }
         self.assertEqual(preflight.validate_openapi(document, self.contract), [])
 
     def test_ci_integration_guide_passes_and_drift_fails_closed(self) -> None:
         guide = {
             "contract": "softwaretest.it-ci-integration",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "command_protocol": {
                 "read_before_write": True,
                 "revision_header": "If-Match",
@@ -93,6 +116,48 @@ class SoftwaretestContractTests(unittest.TestCase):
                 ],
                 "failure_recovery": {"CI_REPORT_CYCLE_NOT_FOUND": "documented"},
             },
+            "steering_data": {
+                "required_scopes": {
+                    "import": ["steering:write"],
+                    "readback": ["read"],
+                },
+                "required_headers": [
+                    "Authorization",
+                    "Content-Type",
+                    "Idempotency-Key",
+                ],
+                "uses_if_match": False,
+                "operations": {
+                    "import": "steering_import",
+                    "list": "steering_item_list",
+                    "detail": "steering_item_retrieve",
+                    "overview": "steering_overview",
+                    "export": "steering_export",
+                },
+                "batch_contract": {
+                    "minimum_items": 1,
+                    "maximum_items": 100,
+                    "maximum_criteria_per_item": 500,
+                    "maximum_decisions_per_item": 50,
+                    "list_page_size": 50,
+                },
+                "status_contract": {
+                    "evidence_status": [
+                        "MISSING",
+                        "PARTIAL",
+                        "CURRENT",
+                        "FAILED",
+                        "STALE",
+                        "UNKNOWN",
+                    ]
+                },
+                "failure_recovery": {
+                    code: "documented"
+                    for code in self.contract["integration_guide"][
+                        "steering_failure_codes"
+                    ]
+                },
+            },
         }
         self.assertEqual(preflight.validate_integration_guide(guide, self.contract), [])
         guide["cycle_execution"]["steps"].pop()
@@ -104,6 +169,12 @@ class SoftwaretestContractTests(unittest.TestCase):
         guide["ci_reporting"]["uses_if_match"] = True
         self.assertIn(
             "CI reporting revision contract changed",
+            preflight.validate_integration_guide(guide, self.contract),
+        )
+        guide["ci_reporting"]["uses_if_match"] = False
+        guide["steering_data"]["batch_contract"]["maximum_items"] = 101
+        self.assertIn(
+            "Steering batch contract changed",
             preflight.validate_integration_guide(guide, self.contract),
         )
 

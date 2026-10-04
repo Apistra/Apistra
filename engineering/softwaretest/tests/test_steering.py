@@ -149,6 +149,35 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(imported_ids, expected_ids)
         self.assertTrue(calls[2][0].endswith("/steering/export"))
 
+    def test_receipt_accepts_current_and_historical_item_total(self) -> None:
+        payload = {"items": [{"external_id": "CAP-01"}]}
+        steering._validate_import_receipt(
+            {
+                "accepted_items": 0,
+                "historical_items": 1,
+                "payload_sha256": "a" * 64,
+            },
+            payload,
+        )
+        with self.assertRaisesRegex(ValueError, "item total differs"):
+            steering._validate_import_receipt(
+                {
+                    "accepted_items": 0,
+                    "historical_items": 0,
+                    "payload_sha256": "a" * 64,
+                },
+                payload,
+            )
+        with self.assertRaisesRegex(ValueError, "item counts are invalid"):
+            steering._validate_import_receipt(
+                {
+                    "accepted_items": -1,
+                    "historical_items": 2,
+                    "payload_sha256": "a" * 64,
+                },
+                payload,
+            )
+
     def test_second_batch_failure_retains_completed_batch_evidence(self) -> None:
         manifest = steering.build_manifest(
             observed_at_provider=lambda _path: OBSERVED_AT
@@ -164,6 +193,7 @@ class SteeringPublisherTests(unittest.TestCase):
                 raise OSError("second batch rejected")
             return {
                 "accepted_items": len(payload["items"]),
+                "historical_items": 0,
                 "payload_sha256": steering.payload_sha256(payload),
             }
 
@@ -216,6 +246,31 @@ class SteeringPublisherTests(unittest.TestCase):
             self.assertIn("[REDACTED]", rendered)
             self.assertNotIn("private-token", rendered)
             self.assertFalse(path.with_suffix(".json.tmp").exists())
+
+    def test_failed_remote_receipt_is_retained_and_redacted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "receipt.json"
+            error = steering.SteeringPublishError(
+                "import",
+                ValueError("receipt mismatch"),
+                [],
+                batch_number=1,
+                failed_receipt={
+                    "payload_sha256": "a" * 64,
+                    "diagnostic": "private-token",
+                },
+            )
+            steering.write_failure_receipt(
+                path,
+                project_id="project-1",
+                token="private-token",
+                manifest_hash="b" * 64,
+                command_revision="test-v3",
+                error=error,
+            )
+            receipt = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(receipt["failed_receipt"]["payload_sha256"], "a" * 64)
+            self.assertEqual(receipt["failed_receipt"]["diagnostic"], "[REDACTED]")
 
 
 if __name__ == "__main__":

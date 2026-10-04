@@ -101,12 +101,14 @@ class SteeringPublishError(RuntimeError):
         completed_batches: list[dict[str, Any]],
         *,
         batch_number: int | None = None,
+        failed_receipt: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(str(cause))
         self.phase = phase
         self.cause = cause
         self.completed_batches = completed_batches
         self.batch_number = batch_number
+        self.failed_receipt = failed_receipt
 
 
 def _metadata(text: str, name: str, *, required: bool = True) -> str:
@@ -517,12 +519,23 @@ def import_payloads(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 def _validate_import_receipt(
     receipt: dict[str, Any], batch_payload: dict[str, Any]
 ) -> None:
-    expected_hash = payload_sha256(batch_payload)
     mismatches = []
-    if receipt.get(FIELD_PAYLOAD_SHA256) != expected_hash:
-        mismatches.append("receipt payload_sha256 differs")
-    if receipt.get("accepted_items") != len(batch_payload[FIELD_ITEMS]):
-        mismatches.append("receipt accepted_items differs")
+    remote_hash = receipt.get(FIELD_PAYLOAD_SHA256)
+    accepted = receipt.get("accepted_items")
+    historical = receipt.get("historical_items")
+    if not isinstance(remote_hash, str) or not CONTENT_HASH_PATTERN.fullmatch(
+        remote_hash
+    ):
+        mismatches.append("receipt payload_sha256 is invalid")
+    if (
+        type(accepted) is not int
+        or type(historical) is not int
+        or accepted < 0
+        or historical < 0
+    ):
+        mismatches.append("receipt item counts are invalid")
+    elif accepted + historical != len(batch_payload[FIELD_ITEMS]):
+        mismatches.append("receipt accepted/historical item total differs")
     if mismatches:
         raise ValueError("; ".join(mismatches))
 
@@ -538,6 +551,7 @@ def _publish_batches(
     completed: list[dict[str, Any]] = []
     for batch_number, batch_payload in enumerate(import_payloads(manifest), 1):
         batch_hash = payload_sha256(batch_payload)
+        remote_receipt: dict[str, Any] | None = None
         try:
             remote_receipt = requester(
                 import_url,
@@ -553,12 +567,13 @@ def _publish_batches(
                 error,
                 completed,
                 batch_number=batch_number,
+                failed_receipt=remote_receipt,
             ) from error
         completed.append(
             {
                 "batch_number": batch_number,
                 "item_count": len(batch_payload[FIELD_ITEMS]),
-                FIELD_PAYLOAD_SHA256: batch_hash,
+                "request_payload_sha256": batch_hash,
                 "remote_receipt": remote_receipt,
             }
         )
@@ -638,6 +653,7 @@ def write_failure_receipt(
         payload["failure"]["phase"] = error.phase
         payload["failure"]["batch_number"] = error.batch_number
         payload["completed_batches"] = error.completed_batches
+        payload["failed_receipt"] = error.failed_receipt
     write_json_atomic(path, redact(payload, (token,)))
 
 

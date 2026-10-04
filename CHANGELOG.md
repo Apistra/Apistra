@@ -67,6 +67,8 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Fixed
 
+- Aligned the fail-closed Softwaretest.it preflight with Guide 1.2.0 and its Steering/OpenAPI limits, enums, scopes, operations, and recovery contract.
+- Reconciled Steering receipts across accepted and historical items, retained rejected remote receipts, and stopped guessing the undocumented server-checksum preimage while preserving exact complete-export verification.
 - Corrected Steering evidence-state mapping to the running API's `MISSING`, `PARTIAL`, `CURRENT`, `FAILED`, `STALE`, and `UNKNOWN` domain instead of the unrelated file-scan enum exposed by the current OpenAPI component-name collision.
 - Split Softwaretest.it Steering publication into deterministic imports of at most 100 items while preserving independent idempotency, per-batch receipts, and one complete export readback.
 
