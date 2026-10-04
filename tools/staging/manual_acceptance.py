@@ -11,6 +11,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from tools.fixtures.cap_01.generator import descriptors as fixture_descriptors
 from tools.staging.verify_candidate import (
     COMPOSE,
     DATABASE_PASSWORD_BYTES,
@@ -27,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[2]
 ACCEPTANCE_ROOT = ROOT / "artifacts/acceptance/CAP-01"
 SESSION_FILE = "session.json"
 SECRET_FILE = "runtime-secrets.json"
+TEST_DATA_FILE = "manual-test-data.json"
+PASSWORD_FILE = "staging-admin-password.txt"
 UTF8 = "utf-8"
 RUNNING = "RUNNING"
 STOPPED = "STOPPED"
@@ -34,16 +37,29 @@ FIELD_STATUS = "status"
 FIELD_RUN_ID = "run_id"
 FIELD_CANDIDATE_COMMIT = "candidate_commit"
 FIELD_FIXTURE = "fixture"
+FIELD_ADMINISTRATOR = "administrator"
+FIELD_ADMINISTRATOR_PASSWORD = "administrator_password"
+FIELD_ADMINISTRATOR_USERNAME = "administrator_username"
+FIELD_BOOTSTRAP_URL = "bootstrap_url"
+FIELD_PASSWORD = "password"
+FIELD_SIGN_IN_URL = "sign_in_url"
+FIELD_USERNAME = "username"
+FIELD_URLS = "urls"
 ARG_RUN_ID = "--run-id"
 OWNER_ONLY_MODE = 0o600
 OWNER_DIRECTORY_MODE = 0o700
 FIXTURE_FRESH = "FX-PRC-01-FRESH"
+FIXTURE_ADMIN_NO_PROJECT = "FX-PRC-01-ADMIN-NO-PROJECT"
+FIXTURE_ISOLATION = "FX-PRC-01-ISOLATION"
 FIXTURES = (
     FIXTURE_FRESH,
-    "FX-PRC-01-ADMIN-NO-PROJECT",
-    "FX-PRC-01-ISOLATION",
+    FIXTURE_ADMIN_NO_PROJECT,
+    FIXTURE_ISOLATION,
 )
 RUN_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+UNKNOWN_PROJECT_ID = "99999999-9999-4999-8999-999999999999"
+URL_AUDIT = "audit"
+URL_SIGN_IN = "sign_in"
 
 
 class ManualAcceptanceError(RuntimeError):
@@ -115,10 +131,104 @@ def _environment(
 def _session_urls(web_port: int) -> dict[str, str]:
     base = f"http://127.0.0.1:{web_port}"
     return {
-        "sign_in_url": base,
-        "bootstrap_url": f"{base}/bootstrap",
+        FIELD_SIGN_IN_URL: base,
+        FIELD_BOOTSTRAP_URL: f"{base}/bootstrap",
         "project_url_template": f"{base}/projects/{{project_id}}",
     }
+
+
+def _project_url(base: str, project_id: object) -> str:
+    return f"{base}/projects/{project_id}"
+
+
+def _manual_test_data(directory: Path, state: dict[str, object]) -> dict[str, object]:
+    run_id = str(state[FIELD_RUN_ID])
+    fixtures = fixture_descriptors(run_id)
+    isolation = fixtures[FIXTURE_ISOLATION]
+    projects = isolation["projects"]
+    atlas, orion = projects
+    base = str(state[FIELD_SIGN_IN_URL])
+    administrator_username = isolation[FIELD_ADMINISTRATOR][FIELD_USERNAME]
+    urls = {
+        URL_SIGN_IN: base,
+        "overview": base,
+        "bootstrap": str(state[FIELD_BOOTSTRAP_URL]),
+        URL_AUDIT: f"{base}/audit",
+        "atlas_project": _project_url(base, atlas["id"]),
+        "orion_project": _project_url(base, orion["id"]),
+        "unknown_project": _project_url(base, UNKNOWN_PROJECT_ID),
+    }
+    password_path = directory / PASSWORD_FILE
+    return {
+        "schema_version": "1.0",
+        FIELD_RUN_ID: run_id,
+        FIELD_CANDIDATE_COMMIT: state[FIELD_CANDIDATE_COMMIT],
+        "session_status": state[FIELD_STATUS],
+        "active_fixture": state[FIELD_FIXTURE],
+        FIELD_URLS: urls,
+        "credentials": {
+            "bootstrap_username": "admin.bootstrap",
+            FIELD_ADMINISTRATOR_USERNAME: administrator_username,
+            FIELD_ADMINISTRATOR_PASSWORD: {
+                "secret": True,
+                "source_file": str(password_path) if password_path.is_file() else None,
+                "json_field": FIELD_PASSWORD,
+            },
+        },
+        "projects": {
+            "atlas": atlas,
+            "orion": orion,
+            "unknown": {"id": UNKNOWN_PROJECT_ID},
+        },
+        "test_cases": {
+            "MT-PRC-01-001": {
+                FIELD_FIXTURE: FIXTURE_FRESH,
+                FIELD_URLS: [urls[URL_SIGN_IN], urls["bootstrap"], urls[URL_AUDIT]],
+                "bootstrap_username": "admin.bootstrap",
+            },
+            "MT-PRC-01-002": {
+                FIELD_FIXTURE: FIXTURE_ADMIN_NO_PROJECT,
+                FIELD_URLS: [urls[URL_SIGN_IN], urls["bootstrap"], urls[URL_AUDIT]],
+                FIELD_ADMINISTRATOR_USERNAME: administrator_username,
+            },
+            "MT-PRC-01-003": {
+                FIELD_FIXTURE: FIXTURE_ADMIN_NO_PROJECT,
+                FIELD_URLS: [urls[URL_SIGN_IN]],
+                FIELD_USERNAME: "missing.user",
+                FIELD_PASSWORD: "Invalid-Only-For-Test-01!",
+            },
+            "MT-PRC-01-004": {
+                FIELD_FIXTURE: FIXTURE_ISOLATION,
+                FIELD_URLS: [
+                    urls[URL_SIGN_IN],
+                    urls["atlas_project"],
+                    urls[URL_AUDIT],
+                ],
+                FIELD_ADMINISTRATOR_USERNAME: administrator_username,
+            },
+            "MT-PRC-01-005": {
+                FIELD_FIXTURE: FIXTURE_ADMIN_NO_PROJECT,
+                FIELD_URLS: [urls[URL_SIGN_IN], urls[URL_AUDIT]],
+                FIELD_ADMINISTRATOR_USERNAME: administrator_username,
+                "project_name": atlas["name"],
+                "project_key": atlas["key"],
+            },
+            "MT-PRC-01-006": {
+                FIELD_FIXTURE: FIXTURE_ISOLATION,
+                FIELD_URLS: [
+                    urls[URL_SIGN_IN],
+                    urls["atlas_project"],
+                    urls["orion_project"],
+                    urls["unknown_project"],
+                ],
+                FIELD_ADMINISTRATOR_USERNAME: administrator_username,
+            },
+        },
+    }
+
+
+def _write_manual_test_data(directory: Path, state: dict[str, object]) -> None:
+    _write_json(directory / TEST_DATA_FILE, _manual_test_data(directory, state))
 
 
 def _initial_state(
@@ -207,11 +317,12 @@ def _apply_fixture(
 ) -> dict[str, object]:
     env = _environment(state, private)
     if fixture != FIXTURE_FRESH:
-        env["STAGING_ADMIN_PASSWORD"] = str(private["administrator_password"])
+        env["STAGING_ADMIN_PASSWORD"] = str(private[FIELD_ADMINISTRATOR_PASSWORD])
     receipt = apply_cap01_fixture(
         _compose_command(), env, str(state[FIELD_RUN_ID]), fixture
     )
     _record_fixture(directory, state, receipt, fixture)
+    _write_manual_test_data(directory, state)
     return receipt
 
 
@@ -224,16 +335,17 @@ def _verify_deployment(state: dict[str, object]) -> None:
 
 
 def _public_summary(directory: Path, state: dict[str, object]) -> dict[str, object]:
-    password_path = directory / "staging-admin-password.txt"
+    password_path = directory / PASSWORD_FILE
     return {
         FIELD_STATUS: state[FIELD_STATUS],
         FIELD_RUN_ID: state[FIELD_RUN_ID],
         FIELD_CANDIDATE_COMMIT: state[FIELD_CANDIDATE_COMMIT],
         FIELD_FIXTURE: state[FIELD_FIXTURE],
-        "sign_in_url": state["sign_in_url"],
-        "bootstrap_url": state["bootstrap_url"],
+        FIELD_SIGN_IN_URL: state[FIELD_SIGN_IN_URL],
+        FIELD_BOOTSTRAP_URL: state[FIELD_BOOTSTRAP_URL],
         "project_url_template": state["project_url_template"],
         "password_file": str(password_path) if password_path.is_file() else None,
+        "test_data_file": str(directory / TEST_DATA_FILE),
         "evidence_directory": str(directory),
     }
 
@@ -246,14 +358,17 @@ def start(args: argparse.Namespace) -> int:
     state = _initial_state(manifest, args.run_id, args.api_port, args.web_port)
     private = {
         "database_password": secrets.token_urlsafe(DATABASE_PASSWORD_BYTES),
-        "administrator_password": secrets.token_urlsafe(24),
+        FIELD_ADMINISTRATOR_PASSWORD: secrets.token_urlsafe(24),
     }
     _write_json(directory / SESSION_FILE, state)
     _write_private_json(directory / SECRET_FILE, private)
-    password_path = directory / "staging-admin-password.txt"
+    password_path = directory / PASSWORD_FILE
     _write_private_json(
         password_path,
-        {"username": "admin.alpha", "password": private["administrator_password"]},
+        {
+            FIELD_USERNAME: "admin.alpha",
+            FIELD_PASSWORD: private[FIELD_ADMINISTRATOR_PASSWORD],
+        },
     )
     env = _environment(state, private)
     try:
@@ -313,9 +428,10 @@ def stop(args: argparse.Namespace) -> int:
         check=False,
     )
     (directory / SECRET_FILE).unlink(missing_ok=True)
-    (directory / "staging-admin-password.txt").unlink(missing_ok=True)
+    (directory / PASSWORD_FILE).unlink(missing_ok=True)
     state.update({FIELD_STATUS: STOPPED, "stopped_at": _utc_now()})
     _write_json(directory / SESSION_FILE, state)
+    _write_manual_test_data(directory, state)
     print(json.dumps(_public_summary(directory, state), sort_keys=True))
     return 0
 

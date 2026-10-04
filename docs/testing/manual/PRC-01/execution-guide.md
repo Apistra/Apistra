@@ -30,6 +30,29 @@ permissions below the ignored `artifacts/acceptance/CAP-01/` tree. Read it only
 in the local terminal and never copy it into screenshots, notes, commits, or
 Softwaretest.it evidence.
 
+The same output names `test_data_file`. This local JSON file resolves every
+non-secret value needed by all six cases: the active fixture, candidate, URLs,
+usernames, project IDs, names, keys, and the test-case-to-fixture mapping. It
+contains only a reference to the protected password file, never the password.
+Display it at any time with:
+
+```bash
+python3 -m json.tool \
+  "artifacts/acceptance/CAP-01/${run_id}/manual-test-data.json"
+```
+
+With the default web port, the resolved URLs are:
+
+- sign-in and overview: `http://127.0.0.1:13000`;
+- bootstrap: `http://127.0.0.1:13000/bootstrap`;
+- audit: `http://127.0.0.1:13000/audit`;
+- Atlas: `http://127.0.0.1:13000/projects/11111111-1111-4111-8111-111111111111`;
+- Orion: `http://127.0.0.1:13000/projects/22222222-2222-4222-8222-222222222222`;
+- unknown project: `http://127.0.0.1:13000/projects/99999999-9999-4999-8999-999999999999`.
+
+The JSON derives these URLs from the actual `--web-port`, so it remains the
+authoritative execution data when a non-default port is selected.
+
 ## 2. Execute the six cases
 
 Use a fresh private browser profile for every case. Before each case, reset the
@@ -54,6 +77,8 @@ Execute the cases in this order and use the fixture declared by each file:
 5. `MT-PRC-01-006` with `FX-PRC-01-ISOLATION`.
 
 Each reset writes a secret-free receipt into the session evidence directory.
+It also updates `manual-test-data.json` so that `active_fixture` always names
+the fixture currently applied to the local database.
 Record every atomic step result and the required screenshots in
 Softwaretest.it against the candidate commit printed by the session tool.
 

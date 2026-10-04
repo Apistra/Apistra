@@ -17,6 +17,7 @@ from tools.staging.manual_acceptance import (  # noqa: E402
     _create_session_directory,
     _environment,
     _initial_state,
+    _manual_test_data,
     _session_urls,
     _write_private_json,
     build_parser,
@@ -68,6 +69,47 @@ def test_cli_defaults_to_fresh_fixture() -> None:
 
     assert args.fixture == FIXTURE_FRESH
     assert _session_urls(13_000)["bootstrap_url"].endswith("/bootstrap")
+
+
+def test_manual_test_data_resolves_every_case_and_local_url(tmp_path: Path) -> None:
+    state = _initial_state(
+        {
+            "source_commit": "a" * 40,
+            "images": {
+                "api": {"reference": "api:test"},
+                "worker": {"reference": "worker:test"},
+                "web": {"reference": "web:test"},
+            },
+        },
+        "acceptance-data",
+        18_080,
+        13_000,
+    )
+    state["status"] = "RUNNING"
+    state["fixture"] = FIXTURE_FRESH
+
+    data = _manual_test_data(tmp_path, state)
+
+    assert data["active_fixture"] == FIXTURE_FRESH
+    assert data["urls"] == {
+        "sign_in": "http://127.0.0.1:13000",
+        "overview": "http://127.0.0.1:13000",
+        "bootstrap": "http://127.0.0.1:13000/bootstrap",
+        "audit": "http://127.0.0.1:13000/audit",
+        "atlas_project": ("http://127.0.0.1:13000/projects/11111111-1111-4111-8111-111111111111"),
+        "orion_project": ("http://127.0.0.1:13000/projects/22222222-2222-4222-8222-222222222222"),
+        "unknown_project": ("http://127.0.0.1:13000/projects/99999999-9999-4999-8999-999999999999"),
+    }
+    assert sorted(data["test_cases"]) == [
+        "MT-PRC-01-001",
+        "MT-PRC-01-002",
+        "MT-PRC-01-003",
+        "MT-PRC-01-004",
+        "MT-PRC-01-005",
+        "MT-PRC-01-006",
+    ]
+    assert data["credentials"]["administrator_password"]["source_file"] is None
+    assert "secret-value" not in json.dumps(data)
 
 
 def _stopped_state(run_id: str) -> dict[str, object]:
