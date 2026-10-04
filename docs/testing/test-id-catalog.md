@@ -117,22 +117,22 @@ Allocated `MTP-PRC-01` definitions:
 The six cases above are published and executed, all linked defects are closed,
 and the product owner accepted CAP-01 on 2026-10-04.
 
-Reserved for the CAP-02 definition/publication workorder; not yet published or executed:
+Allocated CAP-02 definitions; reviewed locally, not yet published or executed:
 
-- `MT-PRC-01-007` — Store and replace a write-only project secret without disclosure.
-- `MT-PRC-01-008` — Deny foreign-project, revoked, tampered, and unresolved secret references without existence disclosure.
-- `MT-PRC-01-009` — Save an endpoint offline and perform a credential-safe bounded connection probe.
-- `MT-PRC-01-010` — Create an immutable agent version with exact primary and optional fallback references.
-- `MT-PRC-01-011` — Classify tool effects and enforce approval-required defaults and exact policy exceptions.
-- `MT-PRC-01-012` — Enforce duration, call, token, cost, concurrency, and rate boundaries below, at, and above the configured limit.
-- `MT-PRC-01-013` — Reject a stale policy draft while retaining valid unsaved input and emitting an attributable conflict outcome.
-- `MT-PRC-01-014` — Verify responsive, keyboard, focus, safe-error, permission, and expired-session states across the five CAP-02 administration pages.
+- [`MT-PRC-01-007`](manual/PRC-01/CAP-02/MT-PRC-01-007.md) — Store and replace a write-only project secret without disclosure.
+- [`MT-PRC-01-008`](manual/PRC-01/CAP-02/MT-PRC-01-008.md) — Deny foreign-project, revoked, tampered, and unresolved secret references without existence disclosure.
+- [`MT-PRC-01-009`](manual/PRC-01/CAP-02/MT-PRC-01-009.md) — Save an endpoint offline and perform a credential-safe bounded connection probe.
+- [`MT-PRC-01-010`](manual/PRC-01/CAP-02/MT-PRC-01-010.md) — Create an immutable agent version with exact primary and optional fallback references.
+- [`MT-PRC-01-011`](manual/PRC-01/CAP-02/MT-PRC-01-011.md) — Classify tool effects and enforce approval-required defaults and exact policy exceptions.
+- [`MT-PRC-01-012`](manual/PRC-01/CAP-02/MT-PRC-01-012.md) — Enforce duration, call, token, cost, concurrency, and rate boundaries below, at, and above the configured limit.
+- [`MT-PRC-01-013`](manual/PRC-01/CAP-02/MT-PRC-01-013.md) — Reject a stale policy draft while retaining valid unsaved input and emitting an attributable conflict outcome.
+- [`MT-PRC-01-014`](manual/PRC-01/CAP-02/MT-PRC-01-014.md) — Verify responsive, keyboard, focus, safe-error, permission, and expired-session states across the five CAP-02 administration pages.
 
-These IDs are reserved and must not be renamed or reused. Their UI labels derive
-from CAP-02 design revision `0.4`, which remains IN_REVIEW. The concrete BDD and
-manual definitions, deterministic fixture descriptors, Softwaretest.it
-publication/read-back, staging fixture application, execution, and acceptance
-remain separate gates owned by WO-CAP-02-06 and WO-CAP-02-07.
+These IDs must not be renamed or reused. Their UI labels derive from approved
+CAP-02 design revision `0.4`. Local BDD/manual definitions and deterministic
+fixture descriptors are present. Softwaretest.it publication/read-back,
+guarded staging fixture application, execution, and acceptance remain separate
+gates owned by WO-CAP-02-06 and WO-CAP-02-07.
 
 Implementation workorders reference the package only. Acceptance workorders execute the exact published case IDs; they must not create IDs during execution.
 

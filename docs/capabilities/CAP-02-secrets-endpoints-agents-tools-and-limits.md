@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.3-in-review
-Status: DRAFT; planning revision IN_REVIEW, implementation not yet READY
+Version: 0.4
+Status: DRAFT; planning/design/review approved, test-definition publication in progress
 Release: 0.1
 Assurance: EXTENDED
 
@@ -9,11 +9,9 @@ Assurance: EXTENDED
 
 **Result:** An Administrator can safely configure protected secrets, provider-neutral endpoints, versioned agents, governed tools, and enforceable operating limits.
 **Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** Rendered design approval, independent expectation comparison,
-CAP-02 test-definition publication/readback, and the scoped qualified
-architecture/security review are not yet complete.
-**Next step:** Review revision 0.3, approve the rendered CAP-02 administration
-references, then execute WO-CAP-02-06 before any behavioural workorder.
+**Main blocker:** CAP-02 test-definition publication and authenticated readback
+are not yet complete.
+**Next step:** Execute WO-CAP-02-06 before any behavioural workorder.
 
 ## Goal and value
 
@@ -92,7 +90,7 @@ An Administrator can safely configure protected secrets, provider-neutral endpoi
 - ARCH rules: ARCH-001, ARCH-002, ARCH-003, ARCH-005, ARCH-011, ARCH-012
 - SEC rules: SEC-002, SEC-003, SEC-004, SEC-007, SEC-015
 - Design references: DSN-005, DSN-006, DSN-019, DSN-022, DSN-023; revision
-  0.4 is complete for review but not yet product-approved
+  0.4 was approved by the product owner on 2026-10-04
 - Each workorder selects applicable ADRs and pattern boundaries; proposed ADRs are not silently treated as approved.
 
 ## Acceptance criteria
@@ -130,23 +128,17 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-The technical readiness decisions below are resolved for this draft. The named
-reviews and approvals remain open gates rather than implicit decisions.
+The technical readiness decisions, design approval, and human review
+independent of the implementing agent are resolved for this draft.
 
 ADR-024, ADR-025, module ownership, and the expanded test scope were confirmed
 by the product owner on 2026-10-04. The decisions are recorded in the decision,
 architecture, security, design, path, and CAP-02 readiness contracts.
 
-The following are approvals/evidence still to be completed, not permission for
-an implementing agent to improvise:
-
-1. approve or correct design revision 0.4 and its rendered desktop/mobile
-   references;
-2. complete the independent expectation and qualified architecture/security
-   comparison against this exact revision;
-3. finalise the eight atomic manual cases and five BDD scenarios;
-4. publish and read back CAP-02 Steering/test definitions through
-   WO-CAP-02-06.
-
-Until those items pass, WO-CAP-02-01 through WO-CAP-02-05 remain DRAFT.
+Design revision 0.4 was approved and the independent expectation,
+architecture, and security comparison was confirmed complete by the product
+owner on 2026-10-04. The eight atomic manual cases and five BDD scenarios are
+now locally defined. Publication and authenticated readback through
+WO-CAP-02-06 remain the only readiness gate. Until that gate passes,
+WO-CAP-02-01 through WO-CAP-02-05 remain DRAFT.
 

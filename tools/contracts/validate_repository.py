@@ -645,12 +645,11 @@ def validate_manual_test_case(path: Path, text: str) -> list[str]:
 def validate_manual_test_definitions(root: Path, test_catalog: str) -> list[str]:
     errors: list[str] = []
     manual_root = root / "docs/testing/manual"
-    allocation_section = test_catalog.split("Allocated `MTP-PRC-01` definitions:", 1)[
-        -1
-    ].split("Reserved for the CAP-02 definition/publication workorder", 1)[0]
-    catalogue_ids = set(MT_ID_PATTERN.findall(allocation_section))
+    catalogue_ids = set(
+        re.findall(r"\[`(MT-PRC-\d{2}-\d{3})`\]\([^)]+\)", test_catalog)
+    )
     known_ids = set(MT_ID_PATTERN.findall(test_catalog))
-    case_files = sorted(manual_root.glob("PRC-*/MT-PRC-??-???.md"))
+    case_files = sorted(manual_root.glob("PRC-*/**/MT-PRC-??-???.md"))
     file_ids = {path.stem for path in case_files}
 
     for test_id in sorted(catalogue_ids - file_ids):

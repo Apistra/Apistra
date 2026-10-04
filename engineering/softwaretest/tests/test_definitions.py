@@ -15,16 +15,58 @@ def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(name, None)
+        raise
     return module
 
 
 definitions = load_module(
     "definition_publisher", SOFTWARETEST / "definition_publisher.py"
 )
+cap02_fixture = load_module(
+    "cap02_fixture", ROOT / "tools/fixtures/cap_02/generator.py"
+)
 
 
 class DefinitionPublisherTests(unittest.TestCase):
+    def test_cap02_fixture_package_is_deterministic_and_secret_free(self) -> None:
+        run_id = "cap02-contract"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = cap02_fixture.setup(root, run_id)
+            first_manifest = first.joinpath("manifest.json").read_bytes()
+            self.assertTrue(cap02_fixture.verify(root, run_id))
+            second = cap02_fixture.setup(root, run_id)
+            self.assertEqual(
+                first_manifest, second.joinpath("manifest.json").read_bytes()
+            )
+            self.assertNotIn(b"CAP02_TEST_SECRET_PRIMARY=", first_manifest)
+
+    def test_cap02_package_is_lossless_role_prefixed_and_separate(self) -> None:
+        manifest = definitions.build_manifest(package=definitions.CAP02_PACKAGE)
+        self.assertEqual(manifest["capability"], "CAP-02")
+        self.assertEqual(manifest["workorder"], "WO-CAP-02-06")
+        self.assertEqual(
+            [item["stable_id"] for item in manifest["definitions"]],
+            [f"MT-PRC-01-{index:03d}" for index in range(7, 15)],
+        )
+        self.assertTrue(
+            all(len(item["payload"]["steps"]) >= 10 for item in manifest["definitions"])
+        )
+        for item in manifest["definitions"]:
+            self.assertEqual(len(item["source_sha256"]), 64)
+            self.assertEqual(len(item["payload_sha256"]), 64)
+            self.assertNotIn(
+                "CAP02_TEST_SECRET_PRIMARY", item["payload"]["description"]
+            )
+            for step in item["payload"]["steps"]:
+                self.assertRegex(step["action"], r"^[^:]+: .+")
+                self.assertTrue(step["expected"])
+
     def test_reviewed_package_is_lossless_and_role_prefixed(self) -> None:
         manifest = definitions.build_manifest()
         self.assertEqual(len(manifest["definitions"]), 6)

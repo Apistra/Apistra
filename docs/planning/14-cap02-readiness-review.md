@@ -1,12 +1,12 @@
 # CAP-02 Readiness Review
 
-Version: 0.1
+Version: 0.2
 Date: 2026-10-04
-Status: IN_REVIEW
+Status: APPROVED FOR WO-CAP-02-06
 Assurance: EXTENDED (`secrets`, `authorization`, `architecture_boundary`)
 Baseline commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
-Capability revision: CAP-02 0.3-in-review
-Workorder revision: 0.7-draft
+Capability revision: CAP-02 0.4
+Workorder revision: WO-CAP-02-06 0.7-ready
 
 ## Control summary
 
@@ -17,17 +17,18 @@ path, and test-definition delta is now concrete enough for review.
 contract, web feature, fixture, or behavioural test exists at the baseline.
 
 **Evidence:** The repository observation and planning consistency checks can be
-executed locally. Rendered design references are generated but still require
-product approval. CAP-02 definitions have not been published to
+executed locally. The rendered design references and exact interaction
+contract are approved. CAP-02 definitions have not yet been published to
 Softwaretest.it.
 
 **Approval:** The product owner confirmed ADR-024, ADR-025, module ownership,
-and the expanded test scope on 2026-10-04. This confirmation is not design
-approval, independent expectation review, workorder READY, capability
-acceptance, or production approval.
+the expanded test scope, and design revision 0.4 on 2026-10-04. A human review
+independent of the implementing agent compared the expectation, architecture,
+and security contracts for baseline `d83810d181374171abc7118b37a5090b6c71bb7f`;
+the product owner reported it complete with no unresolved discrepancy. This is
+not capability acceptance, deployment, or production approval.
 
-**Next action:** Review the rendered design references and this exact revision.
-After approval, complete WO-CAP-02-06 on its own feature branch and retain its
+**Next action:** Complete WO-CAP-02-06 on its own feature branch and retain its
 authenticated publication/readback receipt before starting WO-CAP-02-01.
 
 ## Baseline and observed delta
@@ -81,10 +82,14 @@ for a provider SDK in a public/domain signature, a shared database repository,
 silent plaintext fallback, implicit generative probe, or private cross-module
 import invalidates this review.
 
-An independent reviewer must compare these expectations with the original
-product decisions and the final workorder/test contracts. The comparison must
-record reviewer, exact revision/checksum, discrepancies, disposition, and any
-remaining blocker before a workorder becomes READY.
+Review record: on 2026-10-04, the product owner confirmed completion of a human
+review independent of the implementing agent against baseline
+`d83810d181374171abc7118b37a5090b6c71bb7f`. The review covered original product
+expectations, ADR-024/025, module ownership, security enforcement points,
+design revision 0.4, workorder boundaries, and the allocated test scope. No
+unresolved discrepancy or blocker was reported. The product owner is the
+recorded human confirmer; no personal reviewer identity is invented by this
+repository.
 
 ## Design review package
 
@@ -97,8 +102,9 @@ representative desktop and mobile renderings are maintained from
 - `docs/visuals/design/cap02-administration-mobile.svg` and `.png`
 
 The references inherit the already selected dark technical direction and
-design tokens; no new logo or visual-direction exploration is required. They
-remain IN_REVIEW until the product owner explicitly approves or corrects them.
+design tokens; no new logo or visual-direction exploration is required. The
+product owner approved them on 2026-10-04. This does not substitute for
+responsive/accessibility execution evidence against the eventual candidate.
 
 ## Test-definition allocation
 
@@ -142,10 +148,10 @@ promotes to `staging` or `main`.
 | CAP-00/CAP-01 prerequisite | PASS | Accepted baseline on `test` |
 | Code quality setup | PASS | Existing formatter, linter, type, complexity, architecture, and negative-fixture gates |
 | Product decisions | PASS | 2026-10-04 confirmation; ADR-024 and ADR-025 recorded |
-| Repository path mapping | PARTIAL | Product ownership confirmed; independent architecture comparison pending |
-| Security definition | PARTIAL | CAP-02 controls defined; qualified comparison pending |
-| Design | PENDING | Revision 0.4 and renders require product approval |
-| Expectation review | PENDING | Independent derivation/comparison not yet recorded |
+| Repository path mapping | PASS | Product ownership and architecture comparison confirmed on 2026-10-04 |
+| Security definition | PASS | CAP-02 controls and qualified comparison confirmed on 2026-10-04 |
+| Design | PASS | Revision 0.4 and renders approved on 2026-10-04 |
+| Expectation review | PASS | Human comparison independent of the implementing agent confirmed on 2026-10-04 |
 | CAP-02 test definitions | PENDING | WO-CAP-02-06 not executed |
 | Softwaretest.it CAP-02 publication | PENDING | No CAP-02 receipt/readback exists |
 | Product implementation | NOT STARTED | WO-CAP-02-01 through WO-CAP-02-05 remain DRAFT |
@@ -154,8 +160,7 @@ promotes to `staging` or `main`.
 
 ## Readiness decision
 
-CAP-02 planning may proceed through review. No product implementation workorder
-is READY at this revision. After explicit design approval and an independent
-expectation/architecture/security comparison, WO-CAP-02-06 may be changed to
-READY. Behavioural workorders remain blocked until WO-CAP-02-06 is DONE with a
-verified Softwaretest.it receipt and readback.
+WO-CAP-02-06 is READY and may publish the reviewed definitions. Product
+implementation workorders remain blocked until WO-CAP-02-06 is DONE with a
+verified Softwaretest.it receipt and readback. CAP-02 itself remains DRAFT and
+unaccepted.

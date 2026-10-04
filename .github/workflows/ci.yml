@@ -289,6 +289,15 @@ jobs:
           python engineering/softwaretest/definition_publisher.py
           --apply
           --command-revision cap01-definitions-v1
+      - name: CI-TS-06 publish and verify CAP-02 manual definitions
+        env:
+          SOFTWARETEST_PROJECT_ID: ${{ secrets.SOFTWARETEST_PROJECT_ID }}
+          SOFTWARETEST_TOKEN: ${{ secrets.SOFTWARETEST_TOKEN }}
+        run: >-
+          python engineering/softwaretest/definition_publisher.py
+          --package CAP-02
+          --apply
+          --command-revision cap02-definitions-v1
       - name: CI-TS-16 publish, read back and verify receipts
         env:
           SOFTWARETEST_ANCHOR_VERSION_ID: ${{ vars.SOFTWARETEST_ANCHOR_VERSION_ID }}
@@ -314,3 +323,5 @@ jobs:
             artifacts/softwaretest-steering-receipt.json
             artifacts/softwaretest-cap01-definition-outbox.json
             artifacts/softwaretest-cap01-definition-receipt.json
+            artifacts/softwaretest-cap02-definition-outbox.json
+            artifacts/softwaretest-cap02-definition-receipt.json

@@ -1,4 +1,4 @@
-"""Publish reviewed CAP-01 manual definitions with verified readback.
+"""Publish reviewed capability manual definitions with verified readback.
 
 The default mode is local-only and writes a lossless outbox. ``--apply`` is
 required for any remote mutation. The publisher never creates executions or
@@ -12,6 +12,7 @@ import hashlib
 import os
 import re
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANUAL_DIR = ROOT / "docs/testing/manual/PRC-01"
 DEFAULT_OUTBOX = ROOT / "artifacts/softwaretest-cap01-definition-outbox.json"
 DEFAULT_RECEIPT = ROOT / "artifacts/softwaretest-cap01-definition-receipt.json"
+CAP02_MANUAL_DIR = DEFAULT_MANUAL_DIR / "CAP-02"
+CAP02_OUTBOX = ROOT / "artifacts/softwaretest-cap02-definition-outbox.json"
+CAP02_RECEIPT = ROOT / "artifacts/softwaretest-cap02-definition-receipt.json"
 CASE_PATTERN = re.compile(r"MT-PRC-01-\d{3}")
 STEP_PATTERN = re.compile(r"^(\d+)\. \*\*(Action|Observation) \(([^)]+)\):\*\* (.+)$")
 FIELD_NAME = "name"
@@ -44,23 +48,73 @@ FIELD_MANIFEST_SHA256 = "manifest_sha256"
 FIELD_STATUS = "status"
 FIELD_ID = "id"
 FIELD_VERIFIED = "verified"
+FIELD_CAPABILITY = "capability"
 HTTP_POST = "POST"
-CYCLE = {
-    FIELD_NAME: "Apistra CAP-01 Acceptance",
-    "objective": (
-        "Publish and later execute the approved CAP-01 administration and "
-        "project-isolation acceptance package."
-    ),
-    FIELD_BUILD: "CAP-01",
-    FIELD_ENVIRONMENT: "isolated-local-staging",
-}
-
+CAP02_CASE_STOP = 15
 Requester = Callable[..., dict[str, Any]]
 
 
-def stable_key(command: str, value: str) -> str:
+@dataclass(frozen=True)
+class PackageConfig:
+    """Immutable local publishing contract for one capability package."""
+
+    capability: str
+    workorder: str
+    manual_dir: Path
+    outbox: Path
+    receipt: Path
+    expected_ids: tuple[str, ...]
+    cycle: dict[str, str]
+    command_revision: str
+
+    @property
+    def key_namespace(self) -> str:
+        return self.capability.lower().replace("-", "")
+
+
+CAP01_PACKAGE = PackageConfig(
+    capability="CAP-01",
+    workorder="WO-CAP-01-04",
+    manual_dir=DEFAULT_MANUAL_DIR,
+    outbox=DEFAULT_OUTBOX,
+    receipt=DEFAULT_RECEIPT,
+    expected_ids=tuple(f"MT-PRC-01-{index:03d}" for index in range(1, 7)),
+    cycle={
+        FIELD_NAME: "Apistra CAP-01 Acceptance",
+        "objective": (
+            "Publish and later execute the approved CAP-01 administration and "
+            "project-isolation acceptance package."
+        ),
+        FIELD_BUILD: "CAP-01",
+        FIELD_ENVIRONMENT: "isolated-local-staging",
+    },
+    command_revision="cap01-definitions-v1",
+)
+CAP02_PACKAGE = PackageConfig(
+    capability="CAP-02",
+    workorder="WO-CAP-02-06",
+    manual_dir=CAP02_MANUAL_DIR,
+    outbox=CAP02_OUTBOX,
+    receipt=CAP02_RECEIPT,
+    expected_ids=tuple(f"MT-PRC-01-{index:03d}" for index in range(7, CAP02_CASE_STOP)),
+    cycle={
+        FIELD_NAME: "Apistra CAP-02 Acceptance",
+        "objective": (
+            "Publish and later execute the approved CAP-02 safe AI "
+            "configuration acceptance package."
+        ),
+        FIELD_BUILD: "CAP-02",
+        FIELD_ENVIRONMENT: "isolated-local-staging",
+    },
+    command_revision="cap02-definitions-v1",
+)
+PACKAGES = {package.capability: package for package in (CAP01_PACKAGE, CAP02_PACKAGE)}
+CYCLE = CAP01_PACKAGE.cycle
+
+
+def stable_key(command: str, value: str, namespace: str = "cap01") -> str:
     digest = hashlib.sha256(value.encode()).hexdigest()[:24]
-    return f"apistra-cap01-{command}-{digest}"
+    return f"apistra-{namespace}-{command}-{digest}"
 
 
 def _section(text: str, heading: str, next_heading: str | None = None) -> str:
@@ -223,26 +277,33 @@ def parse_case(path: Path) -> dict[str, Any]:
     }
 
 
-def build_manifest(manual_dir: Path = DEFAULT_MANUAL_DIR) -> dict[str, Any]:
-    definitions = [parse_case(path) for path in sorted(manual_dir.glob("MT-*.md"))]
+def build_manifest(
+    manual_dir: Path | None = None,
+    package: PackageConfig = CAP01_PACKAGE,
+) -> dict[str, Any]:
+    source_dir = manual_dir or package.manual_dir
+    definitions = [parse_case(path) for path in sorted(source_dir.glob("MT-*.md"))]
     manifest = {
         "schema_version": "1.0",
-        "capability": "CAP-01",
+        FIELD_CAPABILITY: package.capability,
         "process": "PRC-01",
-        "workorder": "WO-CAP-01-04",
-        "cycle": CYCLE,
+        "workorder": package.workorder,
+        "cycle": package.cycle,
         FIELD_DEFINITIONS: definitions,
     }
-    validate_manifest(manifest)
+    validate_manifest(manifest, package)
     manifest[FIELD_MANIFEST_SHA256] = payload_sha256(manifest)
     return manifest
 
 
-def validate_manifest(manifest: dict[str, Any]) -> None:
+def validate_manifest(manifest: dict[str, Any], package: PackageConfig) -> None:
     definitions = manifest.get(FIELD_DEFINITIONS, [])
-    if len(definitions) != 6:
-        raise ValueError("CAP-01 package must contain exactly six manual definitions")
     stable_ids = [definition[FIELD_STABLE_ID] for definition in definitions]
+    if tuple(stable_ids) != package.expected_ids:
+        raise ValueError(
+            f"{package.capability} package must contain exactly "
+            f"{', '.join(package.expected_ids)}"
+        )
     if len(set(stable_ids)) != len(stable_ids):
         raise ValueError("manual definition IDs must be unique")
     for definition in definitions:
@@ -297,13 +358,19 @@ def verify_definition(expected: dict[str, Any], actual: dict[str, Any]) -> list[
 
 
 def ensure_cycle(
-    *, base_url: str, project_id: str, token: str, requester: Requester
+    *,
+    base_url: str,
+    project_id: str,
+    token: str,
+    package: PackageConfig = CAP01_PACKAGE,
+    requester: Requester = request_json,
 ) -> dict[str, Any]:
+    cycle_contract = package.cycle
     root = f"{base_url}/api/v1/projects/{project_id}/cycles"
     query = urlencode(
         {
-            FIELD_BUILD: CYCLE[FIELD_BUILD],
-            FIELD_ENVIRONMENT: CYCLE[FIELD_ENVIRONMENT],
+            FIELD_BUILD: cycle_contract[FIELD_BUILD],
+            FIELD_ENVIRONMENT: cycle_contract[FIELD_ENVIRONMENT],
             "page_size": 100,
         }
     )
@@ -311,20 +378,22 @@ def ensure_cycle(
     matches = [
         cycle
         for cycle in listed.get("results", [])
-        if cycle.get(FIELD_NAME) == CYCLE[FIELD_NAME]
-        and cycle.get(FIELD_BUILD) == CYCLE[FIELD_BUILD]
-        and cycle.get(FIELD_ENVIRONMENT) == CYCLE[FIELD_ENVIRONMENT]
+        if cycle.get(FIELD_NAME) == cycle_contract[FIELD_NAME]
+        and cycle.get(FIELD_BUILD) == cycle_contract[FIELD_BUILD]
+        and cycle.get(FIELD_ENVIRONMENT) == cycle_contract[FIELD_ENVIRONMENT]
     ]
     if len(matches) > 1:
-        raise ValueError("multiple CAP-01 publication cycles exist")
+        raise ValueError(f"multiple {package.capability} publication cycles exist")
     if matches:
         return matches[0]
     return requester(
         root,
         token,
         method=HTTP_POST,
-        key=stable_key("cycle-create", payload_sha256(CYCLE)),
-        payload=CYCLE,
+        key=stable_key(
+            "cycle-create", payload_sha256(cycle_contract), package.key_namespace
+        ),
+        payload=cycle_contract,
     )
 
 
@@ -357,7 +426,8 @@ def publish_definition(
     token: str,
     definition: dict[str, Any],
     command_revision: str,
-    requester: Requester,
+    key_namespace: str = "cap01",
+    requester: Requester = request_json,
 ) -> dict[str, Any]:
     expected = definition[FIELD_PAYLOAD]
     item = _find_definition(root, token, definition, requester)
@@ -370,6 +440,7 @@ def publish_definition(
             key=stable_key(
                 "guided-create",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
+                key_namespace,
             ),
             payload={
                 "cycle_id": cycle_id,
@@ -406,6 +477,7 @@ def publish_definition(
             key=stable_key(
                 "open-edit",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
+                key_namespace,
             ),
             if_match=f'"{testcase.get("revision")}"',
             payload={"source_version_id": version_id},
@@ -430,6 +502,7 @@ def publish_definition(
             key=stable_key(
                 "release",
                 f"{definition['stable_id']}:{definition['source_sha256']}:{command_revision}",
+                key_namespace,
             ),
             if_match=f'"{document.get("revision")}"',
             payload={},
@@ -465,15 +538,17 @@ def publish_manifest(
     command_revision: str,
     requester: Requester = request_json,
 ) -> dict[str, Any]:
+    package = PACKAGES[manifest[FIELD_CAPABILITY]]
     cycle = ensure_cycle(
         base_url=base_url,
         project_id=project_id,
         token=token,
+        package=package,
         requester=requester,
     )
     cycle_id = str(cycle.get(FIELD_ID, ""))
     if not cycle_id:
-        raise ValueError("CAP-01 cycle response has no id")
+        raise ValueError(f"{package.capability} cycle response has no id")
     root = f"{base_url}/api/v1/projects/{project_id}/testcases"
     definitions = [
         publish_definition(
@@ -482,6 +557,7 @@ def publish_manifest(
             token=token,
             definition=definition,
             command_revision=command_revision,
+            key_namespace=package.key_namespace,
             requester=requester,
         )
         for definition in manifest[FIELD_DEFINITIONS]
@@ -490,7 +566,7 @@ def publish_manifest(
         "schema_version": "1.0",
         "generated_at": datetime.now(UTC).isoformat(),
         "project_id": project_id,
-        "capability": manifest["capability"],
+        FIELD_CAPABILITY: manifest[FIELD_CAPABILITY],
         "workorder": manifest["workorder"],
         FIELD_MANIFEST_SHA256: manifest[FIELD_MANIFEST_SHA256],
         "command_revision": command_revision,
@@ -548,21 +624,28 @@ def _failure_receipt(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--manual-dir", type=Path, default=DEFAULT_MANUAL_DIR)
-    parser.add_argument("--outbox", type=Path, default=DEFAULT_OUTBOX)
-    parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
-    parser.add_argument("--command-revision", default="cap01-definitions-v1")
+    parser.add_argument("--package", choices=sorted(PACKAGES), default="CAP-01")
+    parser.add_argument("--manual-dir", type=Path)
+    parser.add_argument("--outbox", type=Path)
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--command-revision")
     args = parser.parse_args()
+    package = PACKAGES[args.package]
+    manual_dir = args.manual_dir or package.manual_dir
+    outbox = args.outbox or package.outbox
+    receipt_path = args.receipt or package.receipt
+    command_revision = args.command_revision or package.command_revision
 
     try:
-        manifest = build_manifest(args.manual_dir)
+        manifest = build_manifest(manual_dir, package)
     except (OSError, ValueError) as error:
-        print(f"CAP-01 definition validation failed safely: {error}")
+        print(f"{package.capability} definition validation failed safely: {error}")
         return 1
-    write_json_atomic(args.outbox, manifest)
+    write_json_atomic(outbox, manifest)
     if not args.apply:
         print(
-            "CAP-01 definition manifest validated; remote publication was not requested."
+            f"{package.capability} definition manifest validated; "
+            "remote publication was not requested."
         )
         return 0
 
@@ -578,27 +661,36 @@ def main() -> int:
             project_id=project_id,
             token=token,
             manifest=manifest,
-            command_revision=args.command_revision,
+            command_revision=command_revision,
         )
-        write_json_atomic(args.receipt, redact(receipt, (token,)))
+        write_json_atomic(receipt_path, redact(receipt, (token,)))
         if not receipt[FIELD_VERIFIED]:
-            print("CAP-01 definition publication failed readback verification.")
+            print(
+                f"{package.capability} definition publication failed "
+                "readback verification."
+            )
             return 1
-        print("CAP-01 definitions published and verified without executing tests.")
+        print(
+            f"{package.capability} definitions published and verified without "
+            "executing tests."
+        )
         return 0
     except (ApiError, OSError, ValueError) as error:
         write_json_atomic(
-            args.receipt,
+            receipt_path,
             _failure_receipt(
                 project_id=project_id,
                 base_url=base_url,
                 token=token,
                 manifest=manifest,
-                command_revision=args.command_revision,
+                command_revision=command_revision,
                 error=error,
             ),
         )
-        print(f"CAP-01 definition publication failed safely: {type(error).__name__}")
+        print(
+            f"{package.capability} definition publication failed safely: "
+            f"{type(error).__name__}"
+        )
         return 1
 
 
