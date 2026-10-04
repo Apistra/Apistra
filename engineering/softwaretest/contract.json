@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-10-02",
+  "observed_at": "2026-10-04",
   "base_url": "https://softwaretest.it",
   "openapi_path": "/api/v1/openapi.json",
   "openapi_version": "3.0.3",
@@ -8,7 +8,7 @@
   "integration_guide": {
     "path": "/api/v1/integration-guides/ci.json",
     "contract": "softwaretest.it-ci-integration",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "revision_header": "If-Match",
     "idempotency_header": "Idempotency-Key",
     "cycle_operations": ["cycle_create", "cycle_item_create", "cycle_start", "run_start"],
@@ -22,7 +22,23 @@
     "reporting_required_headers": ["Authorization", "Content-Type", "Idempotency-Key"],
     "reporting_uses_if_match": false,
     "reporting_failure_codes": ["CI_REPORT_CYCLE_NOT_FOUND"],
-    "automation_resource_required": false
+    "automation_resource_required": false,
+    "steering_required_scopes": {
+      "import": ["steering:write"],
+      "readback": ["read"]
+    },
+    "steering_required_headers": ["Authorization", "Content-Type", "Idempotency-Key"],
+    "steering_uses_if_match": false,
+    "steering_operations": ["steering_import", "steering_item_list", "steering_item_retrieve", "steering_overview", "steering_export"],
+    "steering_batch_contract": {
+      "minimum_items": 1,
+      "maximum_items": 100,
+      "maximum_criteria_per_item": 500,
+      "maximum_decisions_per_item": 50,
+      "list_page_size": 50
+    },
+    "steering_evidence_statuses": ["MISSING", "PARTIAL", "CURRENT", "FAILED", "STALE", "UNKNOWN"],
+    "steering_failure_codes": ["VALIDATION_ERROR", "REVISION_CONTENT_CONFLICT", "NOT_FOUND", "FORBIDDEN"]
   },
   "authentication": {"scheme": "ProjectBearer", "type": "http", "scheme_name": "bearer", "required_scopes": ["read", "execution:write", "testcase:write", "ci:write", "steering:write"]},
   "operations": {

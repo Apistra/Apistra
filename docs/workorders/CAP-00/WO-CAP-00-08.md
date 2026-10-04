@@ -1,6 +1,6 @@
 # WO-CAP-00-08 — Publish canonical Steering sources
 
-Version: 0.9-draft
+Version: 0.10-draft
 Status: BLOCKED
 Status reason: implementation and local verification can complete on the feature branch, but the authenticated import receipt and export readback require the protected softwaretest environment after promotion to test
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; canonical Steering import and export verification are this workorder's result
 - Delivery class: operational-governance
 - Owned verification group: TST-WO-CAP-00-08
-- Specification revision: 0.9-draft
+- Specification revision: 0.10-draft
 
 ## Risk profile and escalation
 
@@ -36,7 +36,7 @@ Stop if the observed OpenAPI contract changes, the token lacks the confirmed pro
 
 ## Context and current behavior
 
-The repository publishes manual test definitions and CI results, and those payloads carry Capability/Workorder identifiers. It does not currently import the canonical source documents into Softwaretest.it Steering. The project overview therefore has no authoritative Steering items even when test reporting succeeds.
+The repository publishes manual test definitions and CI results and now attempts the canonical Steering import. Runs 37121411402, 37125594799, and 37135598429 successively exposed an undocumented batch limit, an OpenAPI enum collision, and a non-reproducible server receipt hash. Guide 1.2.0 and the OpenAPI now resolve the first two contract gaps; Apistra still needs the versioned guide preflight, historical-count reconciliation, and a contract-honest server-hash policy before the authenticated gate can pass.
 
 ## Target result
 
@@ -56,6 +56,8 @@ One deterministic manifest represents every canonical `docs/capabilities/CAP-*.m
 - Map source evidence explicitly to the Steering-domain states `MISSING`, `PARTIAL`, `CURRENT`, `FAILED`, `STALE`, and `UNKNOWN`; do not reuse the unrelated file-scan evidence enum currently exposed by the OpenAPI component-name collision.
 - Write a lossless local outbox by default and require `--apply` for remote mutation.
 - Import deterministic ordered batches of at most 100 items with independent payload-bound idempotency keys, retain every redacted receipt, and compare every submitted item field through one complete export readback.
+- Validate Guide 1.2.0 Steering operations, scopes, headers, limits, status domain, failure recovery, and matching OpenAPI list/enum constraints before mutation.
+- Reconcile every receipt with `accepted_items + historical_items == submitted items`, validate the remote checksum shape, and retain a rejected remote receipt for diagnosis.
 - Add the confirmed operations and scope to public-contract preflight and add a separate protected CI-TS-19 step.
 - Document retry, evidence, secret, and runtime-independence boundaries.
 
@@ -90,7 +92,7 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 - The observed OpenAPI contract no longer contains the documented Steering resources, fields, scope, or idempotency behavior.
 - A source status, revision, approval, evidence, or transmission state cannot be mapped without inventing information.
 - The protected credential is absent, under-scoped, exposed, or resolves to a different project.
-- Import acknowledgement, payload checksum, exported count, or any submitted readback field differs.
+- Import acknowledgement or `accepted_items + historical_items` differs, the remote checksum is malformed, or any exported count/submitted readback field differs.
 - The change would couple the Apistra runtime to Softwaretest.it, delete remote history, or trigger product deployment or execution.
 
 ## Technical guardrails
@@ -100,7 +102,7 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 - `observed_at` is the last Git commit timestamp for the exact source path; authenticated CI checks out full history.
 - Missing optional state maps only to the API's explicit unknown/pending values. Unknown mandatory implementation state fails locally.
 - One stable source identifier and one payload hash determine idempotency. The same key is reused only for an identical payload.
-- Remote content checksums are retained, while correctness is established by exact field comparison because the public API does not define the server checksum algorithm.
+- Remote receipt/content checksums are validated for shape and retained, while correctness is established by exact field comparison because Guide 1.2.0 does not define the server receipt-checksum preimage.
 
 ## ARCH rules and pattern limits
 
@@ -121,9 +123,9 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 ## Acceptance criteria
 
 1. The local manifest contains every canonical Capability and Workorder exactly once, preserves raw-source and payload hashes, and rejects an empty or duplicate scope.
-2. A simulated import proves ordered API-sized payload-bound writes, Steering-domain evidence mapping, receipt validation for every batch, one full export readback, and failure on a changed field or count.
-3. Public preflight verifies all confirmed Steering operations, and CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
-4. A trusted-branch run accepts all submitted items, returns a matching payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
+2. A simulated import proves ordered API-sized payload-bound writes, Steering-domain evidence mapping, current-plus-historical receipt reconciliation for every batch, one full export readback, and failure on a changed field or count.
+3. Public preflight verifies Guide 1.2.0 and matching OpenAPI Steering operations, limits, enums, scopes, headers, and recovery rules; CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
+4. A trusted-branch run accounts for every submitted item as accepted or historical, retains a well-formed remote payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
 
 ## Acceptance examples and test oracles
 
@@ -134,9 +136,9 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 
 ## Expectation sources and independent review
 
-- Sources: the confirmed product-owner request for Steering visibility, the current public Softwaretest.it OpenAPI contract observed 2026-10-02, the `$spec-to-workorders` publishing contract, CAP-00, REQ-019/REQ-020, PRC-07, and the linked architecture, security, delivery, and test contracts.
+- Sources: the confirmed product-owner request for Steering visibility, the current public Softwaretest.it OpenAPI contract and integration guide observed 2026-10-04, the `$spec-to-workorders` publishing contract, CAP-00, REQ-019/REQ-020, PRC-07, and the linked architecture, security, delivery, and test contracts.
 - Positive expectation: one canonical manifest imports all 19 Capabilities and 141 Workorders and exact export readback confirms every submitted field without changing product runtime behavior.
-- Counterexample: a successful HTTP response with a partial item set, changed source field, mismatched payload checksum, invalid remote checksum, invented state, or leaked credential remains a failed result.
+- Counterexample: a successful HTTP response with an unaccounted item, changed source field, malformed remote checksum, invented state, incomplete export, or leaked credential remains a failed result.
 - Independent review must compare the implementation, tests, CI boundary, status mappings, and retained evidence with this workorder before DONE; the author may not self-approve unexplained contract drift.
 
 ## Required tests
@@ -167,7 +169,7 @@ Not applicable to product deployment: this workorder neither builds nor deploys 
 
 - Local outbox: `artifacts/softwaretest-steering-outbox.json`
 - Authenticated receipt: `artifacts/softwaretest-steering-receipt.json`
-- The receipt records project, source, command revision, complete payload checksum, all batch checksums and remote receipts, export state checksum, item IDs/revisions/content checksums, and verification result.
+- The receipt records project, source, command revision, complete request-payload checksum, all request-batch checksums and remote receipts, export state checksum, item IDs/revisions/content checksums, and verification result.
 - Documentation records the exact API observation date and the distinction between Steering, test definitions, executions, and CI reports.
 
 ## Definition of Done
