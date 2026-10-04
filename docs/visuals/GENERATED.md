@@ -23,10 +23,12 @@ BPMN and previews:
 
 Design sources and rendered previews:
 - design/information-architecture.svg and .png
+- design/cap02-administration-desktop.svg and .png
+- design/cap02-administration-mobile.svg and .png
 - design/workflow-editor-desktop.svg and .png
 - design/run-trace-desktop.svg and .png
 - design/human-approval-desktop.svg and .png
 - design/human-approval-mobile.svg and .png
 - design/design-system.svg and .png
 
-PNG previews generated: information-architecture.png, workflow-editor-desktop.png, run-trace-desktop.png, human-approval-desktop.png, human-approval-mobile.png, design-system.png
+PNG previews generated: information-architecture.png, cap02-administration-desktop.png, cap02-administration-mobile.png, workflow-editor-desktop.png, run-trace-desktop.png, human-approval-desktop.png, human-approval-mobile.png, design-system.png

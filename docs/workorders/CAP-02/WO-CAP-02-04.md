@@ -1,8 +1,8 @@
 # WO-CAP-02-04 — Implement governed tool contracts and approval classification
 
-Version: 0.6-draft
+Version: 0.7-draft
 Status: DRAFT
-Status reason: CAP-00 and the named workorder prerequisites are not yet satisfied
+Status reason: CAP-00 and CAP-01 are accepted; CAP-02 design/review and WO-CAP-02-06 publication gates remain open
 Implementation state: NOT STARTED
 Evidence state: NOT EXECUTED
 Approval state: NOT APPROVED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-04
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.6 workorder result. Existing code and prior CAP-00 evidence are an observed baseline only; they do not define the expected behavior. Before READY, the readiness review must record current repository paths, public/persisted contracts, consumers, relevant configuration/identity boundaries, and any contradicting behavior.
+Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; CAP-02 has no product implementation. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
 
 ## Target result
 
@@ -67,7 +67,9 @@ The capability exposes governed tool contracts and approval classification as on
 
 Path authority: [Business Workorder Repository Path Contract](../../planning/12-repository-path-contract.md).
 
-Repository observation: 2026-09-30 at commit `be7e84d`. EXISTING means the literal path was observed at that baseline; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
+Repository observation: 2026-09-30 at commit `be7e84d`.
+
+Readiness review observation: 2026-10-04 at commit `d83810d181374171abc7118b37a5090b6c71bb7f`. EXISTING means the literal path was observed at the repository path-contract baseline and rechecked for this readiness revision; PLANNED means this workorder may create or use that exact path only after every READY prerequisite is satisfied. A path label is not implementation evidence.
 
 Observed existing paths within the bounded change area:
 
@@ -108,7 +110,7 @@ Path boundary: The EXISTING and PLANNED paths together form the upper bound afte
 
 ## Stop conditions
 
-- CAP-00 or another prerequisite is not accepted
+- CAP-00 or CAP-01 acceptance is invalidated, or another named prerequisite is not satisfied
 - A required ADR, schema, identity, project boundary, design state, authorised test target, or Softwaretest.it resource is missing
 - The observed repository contradicts this workorder
 - Acceptance would require an unlisted external mutation, destructive test, or production deployment
@@ -122,13 +124,13 @@ Path boundary: The EXISTING and PLANNED paths together form the upper bound afte
 - Schema-first boundary mappers prevent vendor or transport models from entering domain code.
 - Mutable administration uses optimistic concurrency; no global CQRS or Event Sourcing is introduced.
 
-No new UI is authorised unless the capability design contract explicitly assigns one.
+UI scope is DSN-023 plus its DSN-019 approval-policy link from design revision 0.4 after explicit product approval; no other page is authorised.
 
 ## ARCH rules and pattern limits
 
 - Rules: ARCH-002, ARCH-003, ARCH-005, ARCH-009, ARCH-011, ARCH-012
 - Applicability: the named implementation result; capability-wide rules not listed remain owned by their specific workorders or final acceptance.
-- ADRs/patterns: ADR-002 through ADR-005, ADR-009 through ADR-011, ADR-013 through ADR-015, ADR-017, ADR-018
+- ADRs/patterns: ADR-002 through ADR-004, ADR-009 through ADR-011, ADR-013 through ADR-015, ADR-017 through ADR-019, ADR-024, ADR-025; ADR-005 only if a real lifecycle requires it
 - Only ADRs approved for the exact scope are binding; proposed or pending decisions keep dependent implementation BLOCKED.
 - Architecture tests require an allowed fixture, a forbidden counterexample, actual source-scope discovery, and a non-empty result.
 
@@ -152,7 +154,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** A governed tool exposes a versioned input/output contract and a deterministic read/write approval classification.
 - **Negative oracle:** A tool with an unknown schema or ambiguous write classification cannot be published or executed.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.6, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
@@ -164,14 +166,14 @@ No new UI is authorised unless the capability design contract explicitly assigns
 ## Required tests
 
 - TST-WO-CAP-02-04: focused unit/component tests for the named invariants, state transitions, boundary values, and safe error taxonomy.
-- Canonical BDD coverage: BDD-ENDPOINT-001, BDD-LIMIT-001; WO-CAP-02-06 owns the exact scenario definitions and traceability before READY.
+- Canonical BDD coverage: BDD-TOOL-001; WO-CAP-02-06 owns the exact scenario definition and traceability before READY.
 - Contract and compatibility fixtures for each changed public/persisted schema, including unknown-version rejection.
 - Architecture and security tests for the listed ARCH/SEC rules, including own-project success and foreign/anonymous/revoked denial where access exists.
 - Capability regression selected by recorded change impact; WO-CAP-02-07 still owns the final complete unchanged-candidate matrix.
 
 ## BDD and manual tests
 
-WO-CAP-02-06 must define and publish the applicable catalog-listed scenarios (BDD-ENDPOINT-001, BDD-LIMIT-001) before this workorder becomes READY. Manual coverage belongs to `MTP-PRC-01`; individual `MT-PRC-01-NNN` case IDs are allocated in the published package rather than invented in this implementation workorder. Execution remains with WO-CAP-02-07 unless a case is explicitly assigned here.
+WO-CAP-02-06 must define and publish BDD-TOOL-001 and manual case MT-PRC-01-011 before this workorder becomes READY. Execution remains with WO-CAP-02-07.
 
 ## Softwaretest.it and CI reporting
 

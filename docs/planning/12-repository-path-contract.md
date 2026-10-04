@@ -1,10 +1,11 @@
 # Business Workorder Repository Path Contract
 
-Version: 0.2
-Status: APPROVED FOR CAP-01; IN_REVIEW FOR CAP-02 THROUGH CAP-18
+Version: 0.3
+Status: APPROVED FOR CAP-01; CAP-02 PRODUCT MAPPING CONFIRMED AND IN REVIEW; CAP-03 THROUGH CAP-18 IN REVIEW
 CAP-01 approval date: 2026-09-30
-Observation date: 2026-09-30
-Observed repository commit: `be7e84d`
+CAP-02 product mapping confirmation date: 2026-10-04
+Observation date: 2026-10-04
+Observed repository commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
 Scope: CAP-01 through CAP-18 business workorders
 Assurance: EXTENDED (`architecture_boundary`)
 
@@ -19,9 +20,11 @@ at `/home/jens/projects/apistra`. Planned paths are specifications and are not
 implementation evidence.
 
 **Approval state:** The CAP-01 mapping is approved by the product owner and the
-CAP-01 readiness review. ADR-019 already approves the top-level monorepo roots
-and module-first structure. CAP-02 through CAP-18 mappings still require their
-normal expectation and qualified architecture review before an affected
+CAP-01 readiness review. The product owner confirmed the CAP-02 ownership split
+between `catalog`, `agents`, and `policies` on 2026-10-04. ADR-019 already
+approves the top-level monorepo roots and module-first structure. CAP-02 still
+requires its exact expectation and qualified architecture review; CAP-03
+through CAP-18 retain their original review requirement before an affected
 workorder may become READY.
 
 **Main blockers:** `contracts/plugins`, `plugin-sdk/python`, and
@@ -69,10 +72,13 @@ be DONE.
   `backend/src/apistra/modules/projects/`, and
   `apps/web/src/features/administration/`. The canonical module name is
   `identity`; `identity_admin` is not an authorised alternative path.
-- CAP-02: `backend/src/apistra/modules/catalog/`,
+- CAP-02 (product mapping confirmed; architecture review pending):
+  `backend/src/apistra/modules/catalog/`,
   `backend/src/apistra/modules/agents/`,
   `backend/src/apistra/modules/policies/`, and matching web features
-  `catalog/`, `agents/`, and `policies/`.
+  `catalog/`, `agents/`, and `policies/`. `catalog` owns secret references,
+  endpoints, and tool definitions; `agents` owns immutable agent versions;
+  `policies` owns approval classifications and limit decisions.
 - CAP-03 and CAP-10: `backend/src/apistra/modules/connectors/` and
   `apps/web/src/features/connectors/`; public connector contracts remain under
   `contracts/connectors/` and `connector-sdk/python/`.

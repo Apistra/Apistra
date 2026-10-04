@@ -18,7 +18,10 @@ Generated capability or workorder aliases such as `BDD-CAP-*`, `BDD-WO-*`, and `
 - `BDD-PROJ-001` — Create an isolated project and deny access from an unrelated project context.
 
 CAP-01 definitions: `tests/bdd/features/cap_01/administration.feature`; reviewed locally, not yet published or executed.
+- `BDD-SECRET-001` — Store a project secret as a write-only authenticated envelope and deny disclosure or foreign/revoked use.
 - `BDD-ENDPOINT-001` — Configure and validate an AI endpoint without exposing stored credentials.
+- `BDD-AGENT-001` — Create an immutable agent version that retains exact primary, optional fallback, tool-set, and policy references.
+- `BDD-TOOL-001` — Classify a tool effect and require the active approval policy for protected actions.
 - `BDD-LIMIT-001` — Stop a run safely when its configured hard resource or cost limit is reached.
 
 ### Knowledge and connectors
@@ -104,14 +107,32 @@ An individual manual case receives the immutable format `MT-PRC-NN-NNN`, where `
 
 Allocated `MTP-PRC-01` definitions:
 
-- [`MT-PRC-01-001`](manual/PRC-01/MT-PRC-01-001.md) — Create the single bootstrap Administrator; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
-- [`MT-PRC-01-002`](manual/PRC-01/MT-PRC-01-002.md) — Do not expose a second Administrator bootstrap after completion; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
-- [`MT-PRC-01-003`](manual/PRC-01/MT-PRC-01-003.md) — Reject invalid credentials without account disclosure; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
-- [`MT-PRC-01-004`](manual/PRC-01/MT-PRC-01-004.md) — Revoke a session on sign-out and reject its reuse; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
-- [`MT-PRC-01-005`](manual/PRC-01/MT-PRC-01-005.md) — Create an isolated project and verify its attributable audit event; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
-- [`MT-PRC-01-006`](manual/PRC-01/MT-PRC-01-006.md) — Deny direct access to a foreign project without disclosure; `DRAFT`, `NOT PUBLISHED`, `NOT EXECUTED`.
+- [`MT-PRC-01-001`](manual/PRC-01/MT-PRC-01-001.md) — accepted CAP-01 bootstrap case.
+- [`MT-PRC-01-002`](manual/PRC-01/MT-PRC-01-002.md) — accepted CAP-01 authentication case.
+- [`MT-PRC-01-003`](manual/PRC-01/MT-PRC-01-003.md) — accepted CAP-01 session-revocation case.
+- [`MT-PRC-01-004`](manual/PRC-01/MT-PRC-01-004.md) — accepted CAP-01 project-creation/audit case.
+- [`MT-PRC-01-005`](manual/PRC-01/MT-PRC-01-005.md) — accepted CAP-01 project-isolation case.
+- [`MT-PRC-01-006`](manual/PRC-01/MT-PRC-01-006.md) — accepted CAP-01 responsive administration case.
 
-These IDs are reserved and must not be renamed or reused. Their UI labels derive from design revision `0.3`, approved for DSN-001 through DSN-004. Local BDD definitions, manual definitions, and deterministic fixture descriptors are present; Softwaretest.it publication/read-back, staging fixture application, execution, and acceptance remain separate gates.
+The six cases above are published and executed, all linked defects are closed,
+and the product owner accepted CAP-01 on 2026-10-04.
+
+Reserved for the CAP-02 definition/publication workorder; not yet published or executed:
+
+- `MT-PRC-01-007` — Store and replace a write-only project secret without disclosure.
+- `MT-PRC-01-008` — Deny foreign-project, revoked, tampered, and unresolved secret references without existence disclosure.
+- `MT-PRC-01-009` — Save an endpoint offline and perform a credential-safe bounded connection probe.
+- `MT-PRC-01-010` — Create an immutable agent version with exact primary and optional fallback references.
+- `MT-PRC-01-011` — Classify tool effects and enforce approval-required defaults and exact policy exceptions.
+- `MT-PRC-01-012` — Enforce duration, call, token, cost, concurrency, and rate boundaries below, at, and above the configured limit.
+- `MT-PRC-01-013` — Reject a stale policy draft while retaining valid unsaved input and emitting an attributable conflict outcome.
+- `MT-PRC-01-014` — Verify responsive, keyboard, focus, safe-error, permission, and expired-session states across the five CAP-02 administration pages.
+
+These IDs are reserved and must not be renamed or reused. Their UI labels derive
+from CAP-02 design revision `0.4`, which remains IN_REVIEW. The concrete BDD and
+manual definitions, deterministic fixture descriptors, Softwaretest.it
+publication/read-back, staging fixture application, execution, and acceptance
+remain separate gates owned by WO-CAP-02-06 and WO-CAP-02-07.
 
 Implementation workorders reference the package only. Acceptance workorders execute the exact published case IDs; they must not create IDs during execution.
 

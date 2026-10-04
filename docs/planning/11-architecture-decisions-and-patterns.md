@@ -745,3 +745,55 @@ adapter. ADR-005 is explicitly not applicable to CAP-01. ADR-019 and ADR-021
 and ADR-023 remain the decided layout, authentication, principal, and guarded
 acceptance-fixture constraints. This scoped decision
 does not approve those proposed ADRs for unrelated capabilities.
+
+### CAP-02 scoped architecture decision
+
+Status: IN_REVIEW; product decisions confirmed on 2026-10-04, independent
+expectation comparison and rendered-design approval remain required before the
+first implementation workorder becomes READY.
+
+CAP-02 uses the existing modular-monolith and module-first baseline with these
+exclusive responsibilities:
+
+- `catalog` owns encrypted secret envelopes and opaque secret references,
+  model/embedding endpoint definitions, provider-neutral endpoint contracts,
+  and governed tool definitions. It never owns agent lifecycle or policy
+  decisions.
+- `agents` owns immutable agent versions and their exact prompt, primary
+  endpoint, optional fallback endpoint, tool-set, and policy-version
+  references. It consumes only `catalog.public` and `policies.public`.
+- `policies` owns approval classifications, versioned limit sets, and
+  deterministic allow/deny/limit decisions. It never resolves secret values or
+  invokes providers.
+- Web features mirror those boundaries under `catalog`, `agents`, and
+  `policies`; they call versioned API contracts and never import backend or
+  vendor models.
+
+Applicable scoped decisions are ADR-002, ADR-003, ADR-004, ADR-009, ADR-010,
+ADR-011, ADR-013, ADR-014, ADR-015, ADR-017, ADR-018, ADR-019, ADR-024, and
+ADR-025. ADR-005 applies only if a persisted entity introduced by CAP-02 has a
+real multi-state lifecycle; simple active/revoked flags do not justify a
+generic state machine. No event sourcing, global CQRS, service locator,
+provider SDK type in a public/domain signature, private cross-module import, or
+cross-module table access is permitted.
+
+The following dependency edges are allowed:
+
+```text
+entrypoints -> catalog.public | agents.public | policies.public
+agents.application -> catalog.public | policies.public
+catalog.application -> catalog.ports
+policies.application -> policies.ports
+module adapters -> same-module ports/application/domain
+```
+
+All other cross-module imports are denied. Provider Strategy and
+Anti-Corruption-Layer implementations live behind `catalog` ports. AES-GCM key
+access is a security-relevant outbound port and is composed only at an explicit
+entrypoint. Policy decisions are immutable values that include policy version,
+input fingerprint, decision, reason code, and audit correlation.
+
+Architecture evidence before DONE includes non-empty dependency discovery,
+allowed fixtures, forbidden private-import/provider-leak fixtures, composition
+smokes, provider-contract tests, and a structured review confirming that
+secret resolution and policy decisions are located in their declared owners.

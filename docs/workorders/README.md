@@ -9,7 +9,7 @@ Version 0.7 adds the separately gated Softwaretest.it Steering handover while pr
 
 Only `DRAFT`, `BLOCKED`, `READY`, and `DONE` are valid workflow statuses. Implementation, evidence, and approval are recorded separately. Behavioural scenarios and manual package namespaces are governed by the [canonical test-ID catalogue](../testing/test-id-catalog.md); individual manual cases are allocated only by the owning publication workorder.
 
-Every CAP-01 through CAP-18 workorder names literal paths from the [business repository path contract](../planning/12-repository-path-contract.md). `EXISTING` records the observed `be7e84d` location; `PLANNED` records an exact target below an approved root without claiming that it already exists. CAP-01 child paths are approved; later capability mappings remain subject to their READY review, including the CAP-16 and CAP-17 new-root blockers. An agent may not invent or use an unlisted repository path.
+Every CAP-01 through CAP-18 workorder names literal paths from the [business repository path contract](../planning/12-repository-path-contract.md). `EXISTING` records the stated observation commit; `PLANNED` records an exact target below an approved root without claiming that it already exists. CAP-01 child paths are approved. CAP-02 ownership was refreshed at `d83810d` and remains under its exact expectation/architecture review. Later capability mappings remain subject to their READY review, including the CAP-16 and CAP-17 new-root blockers. An agent may not invent or use an unlisted repository path.
 
 ## CAP-00
 
@@ -32,13 +32,13 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 
 ## CAP-02
 
-- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-02 — Implement model and embedding endpoint catalogue](CAP-02/WO-CAP-02-02.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-03 — Implement versioned agents and explicit fallback](CAP-02/WO-CAP-02-03.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-04 — Implement governed tool contracts and approval classification](CAP-02/WO-CAP-02-04.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-05 — Implement configurable limits and budget decisions](CAP-02/WO-CAP-02-05.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-06 — Publish and verify CAP-02 test definitions](CAP-02/WO-CAP-02-06.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
-- [WO-CAP-02-07 — Accept CAP-02 on local staging](CAP-02/WO-CAP-02-07.md) — DRAFT; blocked from implementation until CAP-00 and named prerequisites pass
+- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-02 — Implement model and embedding endpoint catalogue](CAP-02/WO-CAP-02-02.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-03 — Implement versioned agents and explicit fallback](CAP-02/WO-CAP-02-03.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-04 — Implement governed tool contracts and approval classification](CAP-02/WO-CAP-02-04.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-05 — Implement configurable limits and budget decisions](CAP-02/WO-CAP-02-05.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-06 — Publish and verify CAP-02 test definitions](CAP-02/WO-CAP-02-06.md) — DRAFT; first planned execution after design and independent review
+- [WO-CAP-02-07 — Accept CAP-02 on local staging](CAP-02/WO-CAP-02-07.md) — DRAFT; final unchanged-candidate acceptance workorder
 
 ## CAP-03
 

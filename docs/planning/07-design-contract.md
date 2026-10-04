@@ -100,6 +100,8 @@ Initial page inventory:
 - DSN-019 Limits and policies
 - DSN-020 Audit log
 - DSN-021 Licence status
+- DSN-022 Agent catalogue and version editor
+- DSN-023 Tool catalogue and effect classification editor
 
 ### 4.1 Information-architecture reference
 
@@ -186,6 +188,107 @@ This narrow evidence view does not approve the general DSN-020 information
 architecture or any unrelated audit-log behavior. No approval is inferred for
 DSN-005 through DSN-021 beyond this narrow CAP-01 evidence view. The six definitions are published but
 remain `NOT EXECUTED` until their separate execution gate is satisfied.
+
+### 4.6 CAP-02 administration design revision 0.4
+
+Status: IN_REVIEW. The product owner confirmed the information, security, and
+module baseline on 2026-10-04. The rendered references and exact interaction
+contract below still require explicit visual/product approval before a CAP-02
+UI workorder becomes READY.
+
+Capability routes use the existing dynamic project segment:
+
+| Design ID | Route | Page title | Primary action |
+| --- | --- | --- | --- |
+| DSN-006 | `/projects/{project_id}/secrets` | `Secret references` | `Add secret` |
+| DSN-005 | `/projects/{project_id}/endpoints` | `Model endpoints` | `Add endpoint` |
+| DSN-022 | `/projects/{project_id}/agents` | `Agent versions` | `Create agent version` |
+| DSN-023 | `/projects/{project_id}/tools` | `Tools` | `Add tool` |
+| DSN-019 | `/projects/{project_id}/policies/limits` | `Limits and policies` | `Create policy version` |
+
+Visible navigation labels are `Secrets`, `Model Endpoints`, `Agents`, `Tools`,
+and `Limits & Policies`. Direct routes are stable test inputs but never bypass
+the existing project-authorisation boundary.
+
+#### Secret references
+
+- The create form contains `Name`, `Purpose`, and the masked `Secret value`.
+- The value is never shown again. Success copy is `Secret stored. The value
+  cannot be viewed again.`
+- List/detail views show name, opaque reference ID, status, created/updated
+  timestamps, and key-envelope version only.
+- Actions are `Replace value` and `Revoke`. Replacement creates a new secret
+  version; revocation requires a confirmation dialog naming the reference and
+  its affected consumers.
+- Validation copy is `Enter a secret value.`; resolution or ownership failure
+  is `Secret reference is unavailable.` and does not reveal existence.
+
+#### Model and embedding endpoints
+
+- Fields are `Name`, `Purpose` (`Generative` or `Embedding`), `Provider
+  protocol`, `Base URL`, `Model identifier`, `Secret reference`, and `Network
+  profile` (`Cloud`, `On-premise`, or `Local`).
+- `Save endpoint` performs no network call. `Test connection` is a separate
+  secondary action and displays `Connection verified`, `Connection failed`,
+  `Destination blocked`, `Authentication failed`, `Timed out`, or `Probe not
+  supported` without provider payloads.
+- The test action is disabled until required fields are valid. During the test,
+  the action reads `Testing…`, is not repeatable, and exposes an accessible
+  progress status.
+- Redirects, DNS changes, and an endpoint outside the selected network profile
+  produce `Destination blocked by network policy.`
+
+#### Agent versions
+
+- The editor contains `Agent name`, `Instructions`, `Primary endpoint`,
+  optional `Fallback endpoint`, `Tool set`, and `Limits policy`.
+- `Create agent version` produces an immutable version. Editing an existing
+  version opens a new draft; a published version is read-only.
+- Primary and fallback must be different, compatible generative endpoints.
+  Empty fallback is valid. Dynamic or implicit routing is not offered.
+- The version summary displays the exact referenced IDs and versions, not only
+  mutable display names.
+
+#### Tools and policies
+
+- Tool fields are `Name`, `Description`, `Input schema`, `Effect class`, and
+  `Adapter binding`. Effect choices are `Read`, `Write`, and `Administrative`.
+- `Write` and `Administrative` visibly carry `Approval required by default`.
+  A policy exception is configured only from DSN-019 and names exact project,
+  tool version, action, and scope.
+- Limit fields are `Maximum duration`, `Maximum calls`, `Maximum tokens`,
+  `Maximum cost`, `Maximum concurrency`, and `Rate limit`. Units and currency
+  are explicit. Zero, missing, boundary, and over-limit values have defined
+  validation or denial outcomes.
+- Published policy versions are immutable. Conflicts show `This draft changed
+  elsewhere. Reload the latest version before saving.` and retain unsaved
+  valid input for comparison.
+
+#### Shared states and accessibility
+
+All five pages define loading skeletons, empty guidance, saved success,
+field-level validation, safe technical error with retry, optimistic-concurrency
+conflict, project-not-found/permission state, disabled/read-only version state,
+pagination, long-name truncation with full accessible name, and expired-session
+return to DSN-001. No secret value, credential, provider body, or internal
+address is placed in visible diagnostics.
+
+Desktop uses the persistent project navigation and a content/editor split.
+Below 768 px, navigation becomes a labelled menu, catalogue cards replace wide
+tables, form sections are single-column, and the primary action remains after
+the content in DOM order. At 200% zoom, content reflows without horizontal page
+scroll. Every action is keyboard reachable with visible focus; status is never
+colour-only; test-result and form-error messages use an appropriate live
+region. WCAG 2.2 AA remains the target.
+
+Maintainable sources and rendered previews:
+
+- `../visuals/design/cap02-administration-desktop.svg` and `.png`
+- `../visuals/design/cap02-administration-mobile.svg` and `.png`
+
+The representative Agent view establishes shared shell, tabs, catalogue-card,
+version-reference, form, warning, and responsive behaviour. The page-specific
+field/state contract above remains normative for the other four views.
 
 ## 5. Workflow editor contract
 
