@@ -12,10 +12,17 @@ Run from the repository root in WSL:
 
 ```bash
 python3 tools/release/build_candidate.py
+run_id="cap01-acceptance-$(date -u +%Y%m%d-%H%M%S)"
 python3 -m tools.staging.manual_acceptance start \
   artifacts/cap00-candidate/candidate-manifest.json \
-  --run-id cap01-acceptance-01
+  --run-id "${run_id}"
 ```
+
+Keep the generated `run_id` in the same shell for all commands below. Every
+run ID identifies one immutable evidence directory and must never be reused,
+including after a stopped or failed run. If the shell is reopened, recover the
+exact ID from `artifacts/acceptance/CAP-01/`; do not create a new ID for an
+already running session.
 
 The command prints secret-free session identity and URLs. The generated local
 credential file is named in `password_file`; it is created with owner-only
@@ -30,11 +37,11 @@ exact required fixture:
 
 ```bash
 python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-FRESH \
-  --run-id cap01-acceptance-01
+  --run-id "${run_id}"
 python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-ADMIN-NO-PROJECT \
-  --run-id cap01-acceptance-01
+  --run-id "${run_id}"
 python3 -m tools.staging.manual_acceptance fixture FX-PRC-01-ISOLATION \
-  --run-id cap01-acceptance-01
+  --run-id "${run_id}"
 ```
 
 Execute the cases in this order and use the fixture declared by each file:
@@ -53,13 +60,15 @@ Softwaretest.it against the candidate commit printed by the session tool.
 ## 3. Check and close the session
 
 ```bash
-python3 -m tools.staging.manual_acceptance status --run-id cap01-acceptance-01
-python3 -m tools.staging.manual_acceptance stop --run-id cap01-acceptance-01
+python3 -m tools.staging.manual_acceptance status --run-id "${run_id}"
+python3 -m tools.staging.manual_acceptance stop --run-id "${run_id}"
 ```
 
 `stop` removes containers and volumes and deletes the local runtime secrets.
 The secret-free session and fixture receipts remain below
-`artifacts/acceptance/CAP-01/cap01-acceptance-01/` for the acceptance record.
+`artifacts/acceptance/CAP-01/${run_id}/` for the acceptance record. Both
+`status` and repeated `stop` remain safe after the runtime secrets have been
+deleted.
 
 Do not merge or promote the candidate after execution until all six cases,
 candidate-bound Softwaretest.it receipts, independent implementation review,

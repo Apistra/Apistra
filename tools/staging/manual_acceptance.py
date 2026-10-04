@@ -7,6 +7,7 @@ import json
 import os
 import re
 import secrets
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -43,6 +44,10 @@ FIXTURES = (
     "FX-PRC-01-ISOLATION",
 )
 RUN_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+
+
+class ManualAcceptanceError(RuntimeError):
+    """Report an expected operator error without exposing a traceback."""
 
 
 def session_directory(run_id: str) -> Path:
@@ -138,11 +143,39 @@ def _initial_state(
     }
 
 
-def _load_session(run_id: str) -> tuple[Path, dict[str, object], dict[str, object]]:
+def _load_state(run_id: str) -> tuple[Path, dict[str, object]]:
     directory = session_directory(run_id)
     state = _read_json(directory / SESSION_FILE)
-    private = _read_json(directory / SECRET_FILE)
-    return directory, state, private
+    return directory, state
+
+
+def _load_private(directory: Path) -> dict[str, object]:
+    return _read_json(directory / SECRET_FILE)
+
+
+def _existing_run_error(directory: Path, run_id: str) -> ManualAcceptanceError:
+    session_path = directory / SESSION_FILE
+    if not session_path.is_file():
+        detail = "the evidence directory exists without a readable session record"
+    else:
+        try:
+            status_value = _read_json(session_path).get(FIELD_STATUS, "UNKNOWN")
+            detail = f"the existing session has status {status_value}"
+        except (OSError, ValueError, TypeError):
+            detail = "the existing session record cannot be read"
+    return ManualAcceptanceError(
+        f"run ID '{run_id}' already exists and must not be overwritten; {detail}. "
+        "Choose a new run ID and retain the existing evidence directory."
+    )
+
+
+def _create_session_directory(run_id: str) -> Path:
+    directory = session_directory(run_id)
+    try:
+        directory.mkdir(parents=True, mode=OWNER_DIRECTORY_MODE, exist_ok=False)
+    except FileExistsError:
+        raise _existing_run_error(directory, run_id) from None
+    return directory
 
 
 def _record_fixture(
@@ -191,6 +224,7 @@ def _verify_deployment(state: dict[str, object]) -> None:
 
 
 def _public_summary(directory: Path, state: dict[str, object]) -> dict[str, object]:
+    password_path = directory / "staging-admin-password.txt"
     return {
         FIELD_STATUS: state[FIELD_STATUS],
         FIELD_RUN_ID: state[FIELD_RUN_ID],
@@ -199,7 +233,7 @@ def _public_summary(directory: Path, state: dict[str, object]) -> dict[str, obje
         "sign_in_url": state["sign_in_url"],
         "bootstrap_url": state["bootstrap_url"],
         "project_url_template": state["project_url_template"],
-        "password_file": str(directory / "staging-admin-password.txt"),
+        "password_file": str(password_path) if password_path.is_file() else None,
         "evidence_directory": str(directory),
     }
 
@@ -207,8 +241,7 @@ def _public_summary(directory: Path, state: dict[str, object]) -> dict[str, obje
 def start(args: argparse.Namespace) -> int:
     """Start one candidate and prepare the requested deterministic fixture."""
 
-    directory = session_directory(args.run_id)
-    directory.mkdir(parents=True, mode=OWNER_DIRECTORY_MODE, exist_ok=False)
+    directory = _create_session_directory(args.run_id)
     manifest = _read_json(args.manifest)
     state = _initial_state(manifest, args.run_id, args.api_port, args.web_port)
     private = {
@@ -245,7 +278,8 @@ def start(args: argparse.Namespace) -> int:
 def fixture(args: argparse.Namespace) -> int:
     """Reset the running session to one named fixture and retain its receipt."""
 
-    directory, state, private = _load_session(args.run_id)
+    directory, state = _load_state(args.run_id)
+    private = _load_private(directory)
     if state[FIELD_STATUS] != RUNNING:
         raise RuntimeError("manual acceptance session is not running")
     _verify_deployment(state)
@@ -257,7 +291,7 @@ def fixture(args: argparse.Namespace) -> int:
 def status(args: argparse.Namespace) -> int:
     """Print secret-free identity and health details for one session."""
 
-    directory, state, _private = _load_session(args.run_id)
+    directory, state = _load_state(args.run_id)
     if state[FIELD_STATUS] == RUNNING:
         _verify_deployment(state)
     print(json.dumps(_public_summary(directory, state), sort_keys=True))
@@ -267,7 +301,11 @@ def status(args: argparse.Namespace) -> int:
 def stop(args: argparse.Namespace) -> int:
     """Remove the isolated runtime and delete its local secret material."""
 
-    directory, state, private = _load_session(args.run_id)
+    directory, state = _load_state(args.run_id)
+    if state[FIELD_STATUS] == STOPPED:
+        print(json.dumps(_public_summary(directory, state), sort_keys=True))
+        return 0
+    private = _load_private(directory)
     env = _environment(state, private)
     run(
         [*_compose_command(), "down", "--volumes", "--remove-orphans"],
@@ -313,7 +351,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    return int(args.handler(args))
+    try:
+        return int(args.handler(args))
+    except ManualAcceptanceError as error:
+        print(f"Manual acceptance command failed safely: {error}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

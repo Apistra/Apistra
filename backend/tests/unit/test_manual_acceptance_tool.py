@@ -1,6 +1,7 @@
 import json
 import stat
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 import pytest
@@ -8,14 +9,20 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
+import tools.staging.manual_acceptance as manual_acceptance  # noqa: E402
 from tools.staging.manual_acceptance import (  # noqa: E402
     FIXTURE_FRESH,
+    STOPPED,
+    ManualAcceptanceError,
+    _create_session_directory,
     _environment,
     _initial_state,
     _session_urls,
     _write_private_json,
     build_parser,
     session_directory,
+    status,
+    stop,
 )
 
 
@@ -61,3 +68,93 @@ def test_cli_defaults_to_fresh_fixture() -> None:
 
     assert args.fixture == FIXTURE_FRESH
     assert _session_urls(13_000)["bootstrap_url"].endswith("/bootstrap")
+
+
+def _stopped_state(run_id: str) -> dict[str, object]:
+    return {
+        "status": STOPPED,
+        "run_id": run_id,
+        "candidate_commit": "a" * 40,
+        "fixture": FIXTURE_FRESH,
+        "sign_in_url": "http://127.0.0.1:13000",
+        "bootstrap_url": "http://127.0.0.1:13000/bootstrap",
+        "project_url_template": "http://127.0.0.1:13000/projects/{project_id}",
+    }
+
+
+def test_existing_run_id_is_rejected_without_changing_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(manual_acceptance, "ACCEPTANCE_ROOT", tmp_path)
+    directory = tmp_path / "acceptance-existing"
+    directory.mkdir()
+    session = directory / "session.json"
+    session.write_text(json.dumps(_stopped_state("acceptance-existing")))
+    original = session.read_bytes()
+
+    with pytest.raises(ManualAcceptanceError, match="status STOPPED"):
+        _create_session_directory("acceptance-existing")
+
+    assert session.read_bytes() == original
+    assert sorted(path.name for path in directory.iterdir()) == ["session.json"]
+
+
+def test_cli_reports_existing_run_without_traceback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(manual_acceptance, "ACCEPTANCE_ROOT", tmp_path)
+    directory = tmp_path / "acceptance-existing"
+    directory.mkdir()
+    (directory / "session.json").write_text(json.dumps(_stopped_state("acceptance-existing")))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "manual_acceptance.py",
+            "start",
+            "candidate-manifest.json",
+            "--run-id",
+            "acceptance-existing",
+        ],
+    )
+
+    assert manual_acceptance.main() == 2
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "failed safely" in captured.err
+    assert "status STOPPED" in captured.err
+    assert "Traceback" not in captured.err
+
+
+def test_status_reads_stopped_session_after_secrets_are_deleted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(manual_acceptance, "ACCEPTANCE_ROOT", tmp_path)
+    directory = tmp_path / "acceptance-stopped"
+    directory.mkdir()
+    (directory / "session.json").write_text(json.dumps(_stopped_state("acceptance-stopped")))
+
+    assert status(Namespace(run_id="acceptance-stopped")) == 0
+
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == STOPPED
+    assert output["run_id"] == "acceptance-stopped"
+    assert output["password_file"] is None
+
+
+def test_stop_is_idempotent_after_runtime_secrets_are_deleted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(manual_acceptance, "ACCEPTANCE_ROOT", tmp_path)
+    directory = tmp_path / "acceptance-stopped"
+    directory.mkdir()
+    (directory / "session.json").write_text(json.dumps(_stopped_state("acceptance-stopped")))
+
+    assert stop(Namespace(run_id="acceptance-stopped")) == 0
+
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == STOPPED
+    assert output["password_file"] is None
