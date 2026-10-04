@@ -1,16 +1,18 @@
 # CAP-00 — Reproducible Delivery Walking Skeleton
 
-Version: 0.3
-Status: ACCEPTED; steering integration evidence pending; production approval not granted
+Version: 0.4
+Status: ACCEPTED; steering integration verified; production approval not granted
 Release: 0.0
 Assurance: EXTENDED
+Evidence state: VERIFIED — GitHub Actions run 37182972206 and exact Softwaretest.it export readback
+Approval state: HUMAN ACCEPTED — product-owner acceptance remains applicable; WO-CAP-00-08 approved 2026-10-04
 
 ## Control summary
 
 **Result:** A maintainer can build, verify, stage, diagnose, and recover an immutable minimal Apistra candidate without business functionality.
-**Evidence:** The accepted walking-skeleton evidence remains recorded; WO-CAP-00-08 adds the separate canonical Steering handover without changing product runtime behavior.
-**Main blocker:** The authenticated Capability/Workorder Steering import and export readback require the protected `softwaretest` environment on a trusted branch.
-**Next step:** Merge WO-CAP-00-08 through `test` and retain its Softwaretest.it import receipt and complete export comparison.
+**Evidence:** The accepted walking-skeleton evidence remains recorded. GitHub Actions run 37182972206 verified the separate canonical Steering import and complete export readback for all 160 sources.
+**Main blocker:** None for CAP-00; production approval remains a separate ungranted gate.
+**Next step:** Execute and record the six published CAP-01 manual acceptance cases on the unchanged local-staging candidate.
 
 ## Goal and value
 
@@ -85,11 +87,19 @@ A maintainer can build, verify, stage, diagnose, and recover an immutable minima
 3. Controlled failure recovery preserves image identity
 4. External and human acceptance gates are evidenced
 
+## Steering criterion evidence
+
+- CAP-00-AC-01: status=PASSED; due_now=true; gate=CAP-00 acceptance; reason=GitHub Actions run 37182972206 completed all five required jobs successfully.
+- CAP-00-AC-02: status=PASSED; due_now=true; gate=CAP-00 acceptance; reason=The Package candidate job in run 37182972206 started and verified the exact candidate in isolated staging.
+- CAP-00-AC-03: status=PASSED; due_now=true; gate=CAP-00 acceptance; reason=The isolated staging and recovery step in run 37182972206 verified controlled failure recovery with unchanged image identity.
+- CAP-00-AC-04: status=PASSED; due_now=true; gate=CAP-00 acceptance; reason=Human bootstrap acceptance is recorded and run 37182972206 retained verified Softwaretest.it import and export receipts.
+
 ## Test and evidence contract
 
 - Planned automated and manual IDs are defined by the capability test-definition workorder and mapped to process PRC-07.
 - Definition, Softwaretest.it publication, fixtures, execution, and reporting are separate evidence states.
 - The unchanged candidate runs the complete scope matrix before manual staging acceptance.
+- Softwaretest.it mapping: PUBLISHED; run 37182972206 verified two import receipts and complete export readback for all 160 Steering sources.
 
 ## Workorders
 
@@ -108,7 +118,7 @@ The final workorder deploys the unchanged capability candidate to isolated local
 
 ## Open decisions
 
-Independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30 in [the CAP-00 review record](../testing/cap00-review-and-acceptance.md). GitHub Actions run 36875393087 completed the authenticated Softwaretest.it round-trip for the immutable candidate with a COMPLETE/PASSED readback and confirmed create, entries, and finalize receipts. Live branch protection is active on `test`, `staging`, and `main` with a solo-maintainer-safe review policy.
+Independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30 in [the CAP-00 review record](../testing/cap00-review-and-acceptance.md). GitHub Actions run 36875393087 completed the authenticated Softwaretest.it result round-trip for the immutable candidate. Run 37182972206 subsequently verified the canonical Steering import and exact complete export readback with receipt IDs `a89ffd1d-22f7-40e2-acbb-51162acce5b7` and `a1dd166d-a3b9-4536-a299-147286ea129f`; the product owner reviewed and approved WO-CAP-00-08 on 2026-10-04. Live branch protection is active on `test`, `staging`, and `main` with a solo-maintainer-safe review policy.
 
 No implementing agent may resolve a blocking decision implicitly.
 

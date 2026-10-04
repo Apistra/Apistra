@@ -54,27 +54,41 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(items["CAP-01"]["evidence_status"], "MISSING")
         self.assertEqual(items["CAP-02"]["implementation_status"], "PLANNED")
         self.assertEqual(items["WO-CAP-00-06"]["evidence_status"], "CURRENT")
-        self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "BLOCKED")
-        self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "OPEN")
-        self.assertEqual(items["WO-CAP-00-08"]["evidence_status"], "MISSING")
-        self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "PENDING")
+        self.assertEqual(items["WO-CAP-00-08"]["implementation_status"], "IMPLEMENTED")
+        self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "APPROVED")
+        self.assertEqual(items["WO-CAP-00-08"]["evidence_status"], "CURRENT")
+        self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "CONFIRMED")
 
-    def test_acceptance_criteria_are_not_inferred_as_passed_or_due(self) -> None:
+    def test_acceptance_criteria_require_explicit_source_evidence(self) -> None:
         manifest = steering.build_manifest(
             observed_at_provider=lambda _path: OBSERVED_AT
         )
-        criteria = [
-            criterion
+        items = {
+            source["payload"]["external_id"]: source["payload"]
             for source in manifest["sources"]
-            for criterion in source["payload"]["criteria"]
-        ]
-        self.assertGreater(len(criteria), 0)
-        self.assertEqual({row["status"] for row in criteria}, {"UNKNOWN"})
-        self.assertFalse(any(row["due_now"] for row in criteria))
+        }
+        self.assertTrue(
+            all(
+                row["status"] == "PASSED" and row["due_now"]
+                for row in items["CAP-00"]["criteria"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "PASSED" and row["due_now"]
+                for row in items["WO-CAP-00-08"]["criteria"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "UNKNOWN" and not row["due_now"]
+                for row in items["CAP-02"]["criteria"]
+            )
+        )
 
     def test_source_revision_includes_projection_contract_revision(self) -> None:
-        self.assertEqual(steering._source_revision("0.3"), 300_101)
-        self.assertEqual(steering._source_revision("1.1"), 100_100_101)
+        self.assertEqual(steering._source_revision("0.3"), 300_102)
+        self.assertEqual(steering._source_revision("1.1"), 100_100_102)
         self.assertGreater(
             steering._source_revision("0.4"),
             steering._source_revision("0.3"),
@@ -136,8 +150,31 @@ class SteeringPublisherTests(unittest.TestCase):
             if item["implementation_status"] == "IMPLEMENTED"
             and item["approval_status"] == "OPEN"
         }
-        self.assertEqual(active, {"CAP-01", "WO-CAP-00-08"})
+        self.assertEqual(active, {"CAP-01"})
         self.assertEqual(waiting_review, {"CAP-01"})
+
+    def test_invalid_or_cross_source_criterion_evidence_fails_closed(self) -> None:
+        malformed = """## Acceptance criteria
+
+1. One criterion
+
+## Steering criterion evidence
+
+- CAP-01-AC-01: passed now
+"""
+        with self.assertRaisesRegex(ValueError, "invalid Steering criterion evidence"):
+            steering._criteria(malformed, "CAP-01")
+
+        cross_source = """## Acceptance criteria
+
+1. One criterion
+
+## Steering criterion evidence
+
+- CAP-02-AC-01: status=PASSED; due_now=true; gate=review; reason=verified
+"""
+        with self.assertRaisesRegex(ValueError, "belongs to another source"):
+            steering._criteria(cross_source, "CAP-01")
 
     def test_evidence_mapping_uses_the_steering_domain_enum(self) -> None:
         examples = {

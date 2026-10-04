@@ -40,6 +40,11 @@ FIELD_PAYLOAD = "payload"
 FIELD_SOURCE = "source"
 FIELD_ITEMS = "items"
 FIELD_PAYLOAD_SHA256 = "payload_sha256"
+FIELD_CRITERIA = "criteria"
+FIELD_STATUS = "status"
+FIELD_DUE_NOW = "due_now"
+FIELD_GATE = "gate"
+FIELD_REASON = "reason"
 STATUS_PLANNED = "PLANNED"
 STATUS_IN_PROGRESS = "IN_PROGRESS"
 STATUS_IMPLEMENTED = "IMPLEMENTED"
@@ -54,6 +59,7 @@ STATUS_EVIDENCE_FAILED = "FAILED"
 STATUS_EVIDENCE_STALE = "STALE"
 STATUS_PENDING = "PENDING"
 STATUS_CONFIRMED = "CONFIRMED"
+CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
 SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
 STEERING_EVIDENCE_STATUSES = frozenset(
@@ -69,6 +75,7 @@ STEERING_EVIDENCE_STATUSES = frozenset(
 MAX_IMPORT_ITEMS = 100
 MAX_TITLE_LENGTH = 240
 MAX_CRITERION_LENGTH = 300
+MAX_GATE_LENGTH = 120
 MAX_GOAL_LENGTH = 10_000
 MAX_NON_GOAL_LENGTH = 1_000
 MAX_DELTA_LENGTH = 10_000
@@ -76,7 +83,7 @@ MAX_NEXT_STEP_LENGTH = 500
 VERSION_MAJOR_SCALE = 1_000_000
 VERSION_MINOR_SCALE = 1_000
 SOURCE_REVISION_SCALE = 100
-PROJECTION_REVISION = 1
+PROJECTION_REVISION = 2
 MAX_SOURCE_REVISION = 2_147_483_647
 CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 DATETIME_FIELDS = frozenset({"observed_at", "confirmed_at"})
@@ -86,6 +93,12 @@ HEADING_PATTERN = re.compile(
 VERSION_PATTERN = re.compile(r"^(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))?")
 IDENTIFIER_PATTERN = re.compile(r"\b(?:WO-)?CAP-\d{2}(?:-\d{2})?\b")
 NUMBERED_ITEM_PATTERN = re.compile(r"^\d+\.\s+(.+)$")
+CRITERION_STATE_PATTERN = re.compile(
+    r"^- (?P<id>(?:WO-)?CAP-\d{2}(?:-\d{2})?-AC-\d{2}): "
+    r"status=(?P<status>PASSED|UNKNOWN); "
+    r"due_now=(?P<due_now>true|false); "
+    r"gate=(?P<gate>[^;]*); reason=(?P<reason>.+)$"
+)
 SNAPSHOT_PATTERN = re.compile(
     r"implementation snapshot:\s*`([0-9a-f]{7,40})`",
     re.IGNORECASE,
@@ -293,21 +306,57 @@ def git_observed_at(path: Path) -> str:
     return canonical_datetime(observed_at)
 
 
+def _criterion_states(text: str, external_id: str) -> dict[str, dict[str, Any]]:
+    section = _section(text, "Steering criterion evidence")
+    if not section:
+        return {}
+    states: dict[str, dict[str, Any]] = {}
+    for line in section.splitlines():
+        if not line.strip():
+            continue
+        match = CRITERION_STATE_PATTERN.fullmatch(line.strip())
+        if not match:
+            raise ValueError(f"invalid Steering criterion evidence: {line.strip()}")
+        criterion_id = match.group("id")
+        if not criterion_id.startswith(f"{external_id}-AC-"):
+            raise ValueError(
+                f"criterion evidence belongs to another source: {criterion_id}"
+            )
+        if criterion_id in states:
+            raise ValueError(f"duplicate criterion evidence: {criterion_id}")
+        states[criterion_id] = {
+            FIELD_STATUS: match.group(FIELD_STATUS),
+            FIELD_DUE_NOW: match.group(FIELD_DUE_NOW) == "true",
+            FIELD_GATE: match.group(FIELD_GATE).strip(),
+            FIELD_REASON: match.group(FIELD_REASON).strip(),
+        }
+    return states
+
+
 def _criteria(text: str, external_id: str) -> list[dict[str, Any]]:
     titles = _numbered_items(_section(text, "Acceptance criteria"))
-    return [
-        {
-            FIELD_EXTERNAL_ID: f"{external_id}-AC-{index:02d}",
-            FIELD_TITLE: title,
-            "status": CRITERION_UNKNOWN,
-            "required": True,
-            "due_now": False,
-            "exception_allowed": False,
-            "gate": "",
-            "reason": "",
-        }
-        for index, title in enumerate(titles, 1)
-    ]
+    states = _criterion_states(text, external_id)
+    criteria = []
+    for index, title in enumerate(titles, 1):
+        criterion_id = f"{external_id}-AC-{index:02d}"
+        state = states.pop(criterion_id, {})
+        criteria.append(
+            {
+                FIELD_EXTERNAL_ID: criterion_id,
+                FIELD_TITLE: title,
+                FIELD_STATUS: state.get(FIELD_STATUS, CRITERION_UNKNOWN),
+                "required": True,
+                FIELD_DUE_NOW: state.get(FIELD_DUE_NOW, False),
+                "exception_allowed": False,
+                FIELD_GATE: state.get(FIELD_GATE, ""),
+                FIELD_REASON: state.get(FIELD_REASON, ""),
+            }
+        )
+    if states:
+        raise ValueError(
+            f"criterion evidence has no acceptance criterion: {min(states)}"
+        )
+    return criteria
 
 
 def _source_url(relative_path: str) -> str:
@@ -327,9 +376,15 @@ def _validate_lengths(item: dict[str, Any]) -> None:
     if any(len(value) > MAX_NON_GOAL_LENGTH for value in item["non_goals"]):
         raise ValueError(f"{item[FIELD_EXTERNAL_ID]} non-goal exceeds API limit")
     if any(
-        len(value[FIELD_TITLE]) > MAX_CRITERION_LENGTH for value in item["criteria"]
+        len(value[FIELD_TITLE]) > MAX_CRITERION_LENGTH for value in item[FIELD_CRITERIA]
     ):
         raise ValueError(f"{item[FIELD_EXTERNAL_ID]} criterion exceeds API limit")
+    if any(len(value[FIELD_GATE]) > MAX_GATE_LENGTH for value in item[FIELD_CRITERIA]):
+        raise ValueError(f"{item[FIELD_EXTERNAL_ID]} criterion gate exceeds API limit")
+    if any(len(value[FIELD_REASON]) > 1_000 for value in item[FIELD_CRITERIA]):
+        raise ValueError(
+            f"{item[FIELD_EXTERNAL_ID]} criterion reason exceeds API limit"
+        )
 
 
 def parse_source(path: Path, observed_at: str) -> dict[str, Any]:
@@ -372,7 +427,7 @@ def parse_source(path: Path, observed_at: str) -> dict[str, Any]:
         "due_gate": "",
         "observed_at": canonical_datetime(observed_at),
         "confirmed_at": None,
-        "criteria": _criteria(text, external_id),
+        FIELD_CRITERIA: _criteria(text, external_id),
         "decisions": [],
     }
     _validate_lengths(item)

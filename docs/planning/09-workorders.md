@@ -7,9 +7,9 @@ Status: DRAFT
 
 **Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
 **Change:** Version 0.7 adds a distinct Softwaretest.it Steering publication workorder and CI gate while preserving the version 0.6 execution contract, status model, semantic test IDs, architecture/security applicability, and dependency graph.
-**Current position:** 141 workorder contracts exist. Seven CAP-00 workorders are DONE and WO-CAP-00-08 is BLOCKED only on its authenticated trusted-branch receipt; all business workorders remain DRAFT until their own prerequisite gates and expectation reviews pass.
-**Main blocker:** The complete Capability/Workorder Steering manifest still requires authenticated import and complete export readback on the protected `test` branch. Local schema, parser, mapping, idempotency, checksum, drift, and redaction proofs are implemented.
-**Next step:** Promote WO-CAP-00-08 through protected CI, retain its import/export receipt, and then update its evidence state without changing the already accepted CAP-00 product candidate.
+**Current position:** 141 workorder contracts exist. All eight CAP-00 workorders are DONE. CAP-01 implementation and test-definition publication workorders are DONE; WO-CAP-01-05 is READY for the unchanged-candidate fixture and six-case manual acceptance execution. CAP-02 through CAP-18 remain DRAFT until their own prerequisite gates and expectation reviews pass.
+**Main blocker:** CAP-01 acceptance requires the six published `MTP-PRC-01` manual cases to be executed and recorded on the exact local-staging candidate. CAP-00 has no remaining delivery or Steering blocker.
+**Next step:** Follow `docs/testing/manual/PRC-01/execution-guide.md`, retain the candidate/fixture receipts, record every case result in Softwaretest.it, and then request explicit CAP-01 acceptance.
 
 The [canonical workorder index](../workorders/README.md) links every file and its current status.
 

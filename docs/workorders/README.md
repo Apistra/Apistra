@@ -20,15 +20,15 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 - [WO-CAP-00-05 — Establish Softwaretest.it publishing readiness](CAP-00/WO-CAP-00-05.md) — DONE; authenticated round-trip and receipts verified
 - [WO-CAP-00-06 — Provide synthetic staging fixtures](CAP-00/WO-CAP-00-06.md) — DONE; fixture contracts and negative proofs verified
 - [WO-CAP-00-07 — Complete bootstrap candidate gate](CAP-00/WO-CAP-00-07.md) — DONE; CAP-00 evidence and human acceptance package complete
-- [WO-CAP-00-08 — Publish canonical Steering sources](CAP-00/WO-CAP-00-08.md) — BLOCKED; implementation and local proof complete, authenticated trusted-branch receipt pending
+- [WO-CAP-00-08 — Publish canonical Steering sources](CAP-00/WO-CAP-00-08.md) — DONE; authenticated import receipts, complete export readback, review, and product-owner approval recorded
 
 ## CAP-01
 
-- [WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session](CAP-01/WO-CAP-01-01.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
-- [WO-CAP-01-02 — Implement installation and isolated project lifecycle](CAP-01/WO-CAP-01-02.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
-- [WO-CAP-01-03 — Implement project-context enforcement and audit](CAP-01/WO-CAP-01-03.md) — DRAFT; planning approved, Softwaretest.it publication/read-back pending
-- [WO-CAP-01-04 — Publish and verify PRC-01 test definitions](CAP-01/WO-CAP-01-04.md) — DRAFT; local package complete, Softwaretest.it publication/read-back pending
-- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — DRAFT; future acceptance after implementation and staging evidence
+- [WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session](CAP-01/WO-CAP-01-01.md) — DONE; implementation and technical review complete
+- [WO-CAP-01-02 — Implement installation and isolated project lifecycle](CAP-01/WO-CAP-01-02.md) — DONE; implementation conformance and hosted evidence verified
+- [WO-CAP-01-03 — Implement project-context enforcement and audit](CAP-01/WO-CAP-01-03.md) — DONE; implementation conformance and hosted evidence verified
+- [WO-CAP-01-04 — Publish and verify PRC-01 test definitions](CAP-01/WO-CAP-01-04.md) — DONE; all six definitions published and read back
+- [WO-CAP-01-05 — Accept CAP-01 on local staging](CAP-01/WO-CAP-01-05.md) — READY; fixture application and six manual executions remain
 
 ## CAP-02
 
