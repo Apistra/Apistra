@@ -59,6 +59,26 @@ class SoftwaretestContractTests(unittest.TestCase):
                             "steering_evidence_statuses"
                         ]
                     },
+                    "SteeringImportReceipt": {
+                        "properties": {
+                            "payload_hash_contract": {
+                                "allOf": [
+                                    {
+                                        "$ref": (
+                                            "#/components/schemas/"
+                                            "PayloadHashContractEnum"
+                                        )
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "PayloadHashContractEnum": {
+                        "enum": [
+                            "rfc8785-sha256",
+                            "legacy-drf-normalized-sha256",
+                        ]
+                    },
                 },
             },
         }
@@ -67,7 +87,7 @@ class SoftwaretestContractTests(unittest.TestCase):
     def test_ci_integration_guide_passes_and_drift_fails_closed(self) -> None:
         guide = {
             "contract": "softwaretest.it-ci-integration",
-            "version": "1.2.0",
+            "version": "1.3.0",
             "command_protocol": {
                 "read_before_write": True,
                 "revision_header": "If-Match",
@@ -141,6 +161,12 @@ class SoftwaretestContractTests(unittest.TestCase):
                     "maximum_decisions_per_item": 50,
                     "list_page_size": 50,
                 },
+                "payload_hash_contract": {
+                    "current_contract": "rfc8785-sha256",
+                    "operation_version": "steering.import.v2",
+                    "algorithm": "SHA-256",
+                    "canonicalization_uri": "https://www.rfc-editor.org/rfc/rfc8785",
+                },
                 "status_contract": {
                     "evidence_status": [
                         "MISSING",
@@ -156,6 +182,16 @@ class SoftwaretestContractTests(unittest.TestCase):
                     for code in self.contract["integration_guide"][
                         "steering_failure_codes"
                     ]
+                },
+                "idempotency": {
+                    "compatibility": {
+                        "legacy": (
+                            "Existing receipts return legacy-drf-normalized-sha256."
+                        ),
+                        "key_rotation": (
+                            "Changed requests require a new Idempotency-Key."
+                        ),
+                    }
                 },
             },
         }
