@@ -21,6 +21,13 @@ GitHub Actions run `37192774502` passed contracts/static checks, architecture,
 tests, security/supply-chain, candidate packaging, isolated staging/recovery,
 and the authenticated Softwaretest.it round-trip for the merged tree.
 
+The final closure update was squash-merged by PR #26 as
+`b3f8c1991a431374d19f5d31e7551d0b1abd5e95`. Protected run `37199065456`
+passed every gate and published the accepted CAP-01 source through Guide 1.3.0.
+Steering receipts `491c0e38-fd64-4603-9191-6aa3b2b2cd00` and
+`60628602-4736-488b-b214-4030f9de0f78` declared `rfc8785-sha256`, matched the
+request hashes exactly, and were followed by complete export readback.
+
 ## Manual execution and defect disposition
 
 Softwaretest.it cycle `420e010d-0e29-4033-b127-ff4ec2400238` contains the six

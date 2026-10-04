@@ -1,6 +1,6 @@
 # CAP-01 — Installation And Isolated Project Administration
 
-Version: 1.2
+Version: 1.3
 Status: ACCEPTED; direct defect-retest exception recorded; production approval not granted
 Release: 0.1
 Assurance: EXTENDED
@@ -23,6 +23,7 @@ An Administrator can bootstrap an offline installation, authenticate locally, an
 
 - Requirements: REQ-001, REQ-002, REQ-016, REQ-017
 - Process: PRC-01
+- Softwaretest.it mapping: PUBLISHED; protected run 37199065456 verified Guide 1.3.0, two RFC 8785/JCS import receipts, and complete export readback for all 160 Steering sources.
 - Product baseline: ../planning/01-product-scope.md
 - Architecture and patterns: ../planning/03-architecture.md and ../planning/11-architecture-decisions-and-patterns.md
 - Security, delivery, tests, and design: ../planning/04-security-concept.md through ../planning/07-design-contract.md
