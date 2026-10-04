@@ -143,3 +143,52 @@ source_modules =
     apistra.modules.catalog.adapters
 forbidden_modules =
     apistra.entrypoints
+
+[importlinter:contract:agents-domain-independence]
+name = ARCH-001 agents domain independence
+type = forbidden
+source_modules =
+    apistra.modules.agents.domain
+forbidden_modules =
+    apistra.modules.agents.application
+    apistra.modules.agents.ports
+    apistra.modules.agents.adapters
+    apistra.modules.catalog
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:agents-application-boundary]
+name = ARCH-002 agents application controls use cases
+type = forbidden
+source_modules =
+    apistra.modules.agents.application
+forbidden_modules =
+    apistra.modules.agents.adapters
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:agents-ports-boundary]
+name = ARCH-003 agents ports remain provider neutral
+type = forbidden
+source_modules =
+    apistra.modules.agents.ports
+forbidden_modules =
+    apistra.modules.agents.application
+    apistra.modules.agents.adapters
+    apistra.modules.catalog
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:agents-adapter-containment]
+name = ARCH-011 agents adapters do not own composition
+type = forbidden
+source_modules =
+    apistra.modules.agents.adapters
+forbidden_modules =
+    apistra.entrypoints

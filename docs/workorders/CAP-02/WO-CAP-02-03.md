@@ -2,10 +2,10 @@
 
 Version: 0.9-ready
 Status: READY
-Status reason: CAP-00/CAP-01, WO-CAP-02-06, WO-CAP-02-01, and WO-CAP-02-02 are complete; the approved CAP-02 expectation, architecture, security, design, path, and publication gates cover this agent-version slice
-Implementation state: NOT STARTED
-Evidence state: PREREQUISITE EVIDENCE VERIFIED; IMPLEMENTATION NOT EXECUTED
-Approval state: APPROVED FOR EXECUTION; NOT YET DONE
+Status reason: the bounded agent-version slice is implemented and locally verified, but remains READY until protected CI, independent implementation review, merge, and human approval complete the workorder
+Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED TO PROTECTED `test`
+Evidence state: LOCAL UNIT, COMPONENT, CONTRACT, ARCHITECTURE, POSTGRESQL MIGRATION/INTEGRATION, WEB, BUILD, AND 90% COVERAGE GATES VERIFIED; PROTECTED EVIDENCE PENDING
+Approval state: APPROVED FOR EXECUTION; IMPLEMENTATION REVIEW AND HUMAN WORKORDER APPROVAL PENDING
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -39,11 +39,13 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 CAP-00 and CAP-01 are accepted baselines. WO-CAP-02-06 published and verified
 BDD-AGENT-001 and MT-PRC-01-010. WO-CAP-02-01 and WO-CAP-02-02 are DONE on
-protected `test`; the shared `catalog` module now supplies opaque secret
-references plus exact versioned endpoint references. No immutable agent
-version, explicit fallback binding, agent persistence, DSN-022 implementation,
-or WO-CAP-02-03 execution evidence exists yet. The approved readiness review
-remains the expectation, architecture, security, design, and path authority.
+protected `test`; the shared `catalog` module supplies opaque secret references
+plus exact versioned endpoint references. The feature branch now implements
+immutable project-scoped agent versions, explicit primary/fallback bindings,
+PostgreSQL persistence, versioned API contracts, safe audit evidence, and
+DSN-022. Tool and limits-policy fields retain exact optional references without
+implementing the separately owned catalogues or policies. Protected CI,
+independent implementation review, merge, and human approval remain open.
 
 ## Target result
 

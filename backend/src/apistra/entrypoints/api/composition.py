@@ -3,6 +3,10 @@
 import os
 from datetime import timedelta
 
+from apistra.modules.agents.adapters.memory import InMemoryAgentStore
+from apistra.modules.agents.adapters.postgres import PostgresAgentStore
+from apistra.modules.agents.application import AgentService
+from apistra.modules.agents.ports import AgentStore
 from apistra.modules.catalog.adapters.crypto import AesGcmSecretCipher
 from apistra.modules.catalog.adapters.endpoint_memory import InMemoryEndpointStore
 from apistra.modules.catalog.adapters.endpoint_postgres import PostgresEndpointStore
@@ -33,6 +37,7 @@ from apistra.platform.runtime import RuntimeSettings
 
 EPHEMERAL_SECRET_KEY_BYTES = 32
 LOCAL_ENVIRONMENTS = {"local", "test"}
+DATABASE_REQUIRED_MESSAGE = "APISTRA_DATABASE_URL is required outside local/test environments"
 
 
 def build_identity_service(settings: RuntimeSettings) -> IdentityService:
@@ -43,7 +48,7 @@ def build_identity_service(settings: RuntimeSettings) -> IdentityService:
     elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemoryIdentityStore()
     else:
-        raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
     return IdentityService(
         store=store,
         password_hasher=Argon2PasswordHasher(),
@@ -61,7 +66,7 @@ def build_project_service(settings: RuntimeSettings) -> ProjectService:
     elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemoryProjectStore()
     else:
-        raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
     return ProjectService(store=store, clock=UtcClock())
 
 
@@ -97,7 +102,7 @@ def build_endpoint_service(settings: RuntimeSettings, secrets: SecretService) ->
     elif settings.environment in LOCAL_ENVIRONMENTS:
         store = InMemoryEndpointStore()
     else:
-        raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
     return EndpointService(
         store,
         secrets,
@@ -105,3 +110,15 @@ def build_endpoint_service(settings: RuntimeSettings, secrets: SecretService) ->
         OpenAiCompatibleEndpointProbe(),
         UtcClock(),
     )
+
+
+def build_agent_service(settings: RuntimeSettings, endpoints: EndpointService) -> AgentService:
+    """Compose immutable agent-version persistence."""
+
+    if settings.database_url:
+        store: AgentStore = PostgresAgentStore(settings.database_url)
+    elif settings.environment in LOCAL_ENVIRONMENTS:
+        store = InMemoryAgentStore()
+    else:
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
+    return AgentService(store, endpoints, UtcClock())

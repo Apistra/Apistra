@@ -10,3 +10,5 @@ exclude =
     tests
 show-source = true
 statistics = true
+per-file-ignores =
+    backend/src/apistra/modules/agents/adapters/postgres.py: WPS226

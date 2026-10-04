@@ -163,3 +163,59 @@ def test_endpoint_requests_require_authentication_csrf_and_current_version() -> 
         headers={"x-csrf-token": csrf},
     )
     assert missing_version.status_code == 422
+
+
+def test_agent_versions_retain_exact_declared_endpoint_order() -> None:
+    api, csrf, project_id, secret_id = client()
+    endpoint_payload = {
+        "name": "primary-llm",
+        "purpose": "GENERATIVE",
+        "provider_protocol": "OPENAI_COMPATIBLE",
+        "base_url": "http://127.0.0.1:18080/v1",
+        "model_identifier": "synthetic-chat",
+        "secret_reference_id": secret_id,
+        "network_profile": "LOCAL",
+    }
+    primary = api.post(
+        f"/api/v1/projects/{project_id}/endpoints",
+        json=endpoint_payload,
+        headers={"x-csrf-token": csrf, "idempotency-key": "primary-endpoint"},
+    ).json()
+    fallback = api.post(
+        f"/api/v1/projects/{project_id}/endpoints",
+        json={**endpoint_payload, "name": "fallback-llm"},
+        headers={"x-csrf-token": csrf, "idempotency-key": "fallback-endpoint"},
+    ).json()
+    payload = {
+        "name": "Research Analyst",
+        "instructions": "Use cited evidence.",
+        "primary_endpoint": {"id": primary["id"], "version": primary["version"]},
+        "fallback_endpoint": {"id": fallback["id"], "version": fallback["version"]},
+        "tool_versions": [],
+        "limits_policy_version": None,
+    }
+    created = api.post(
+        f"/api/v1/projects/{project_id}/agents",
+        json=payload,
+        headers={"x-csrf-token": csrf, "idempotency-key": "agent-v1"},
+    )
+    replay = api.post(
+        f"/api/v1/projects/{project_id}/agents",
+        json=payload,
+        headers={"x-csrf-token": csrf, "idempotency-key": "agent-v1"},
+    )
+    assert created.status_code == replay.status_code == 201
+    assert created.json() == replay.json()
+    assert created.json()["status"] == "PUBLISHED"
+    draft = api.post(
+        f"/api/v1/projects/{project_id}/agents/{created.json()['agent_id']}/versions",
+        json={**payload, "instructions": "Use verified cited evidence."},
+        headers={"x-csrf-token": csrf, "idempotency-key": "agent-v2", "if-match": '"1"'},
+    )
+    assert draft.status_code == 201
+    assert draft.json()["status"] == "DRAFT"
+    versions = api.get(
+        f"/api/v1/projects/{project_id}/agents/{created.json()['agent_id']}/versions"
+    ).json()["items"]
+    assert [item["version"] for item in versions] == [2, 1]
+    assert versions[1]["primary_endpoint"] == payload["primary_endpoint"]

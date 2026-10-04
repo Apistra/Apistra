@@ -1,0 +1,51 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Apistra CAP-02 agent versions", "version": "0.1.0" },
+  "paths": {
+    "/api/v1/projects/{project_id}/agents": { "get": {}, "post": {} },
+    "/api/v1/projects/{project_id}/agents/{agent_id}/versions": { "get": {}, "post": {} }
+  },
+  "components": {
+    "schemas": {
+      "VersionReference": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "version"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "version": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "AgentVersionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "instructions", "primary_endpoint"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "instructions": { "type": "string", "minLength": 1, "maxLength": 32768 },
+          "primary_endpoint": { "$ref": "#/components/schemas/VersionReference" },
+          "fallback_endpoint": { "oneOf": [{ "$ref": "#/components/schemas/VersionReference" }, { "type": "null" }] },
+          "tool_versions": { "type": "array", "maxItems": 128, "items": { "$ref": "#/components/schemas/VersionReference" } },
+          "limits_policy_version": { "oneOf": [{ "$ref": "#/components/schemas/VersionReference" }, { "type": "null" }] }
+        }
+      },
+      "AgentVersion": {
+        "allOf": [
+          { "$ref": "#/components/schemas/AgentVersionRequest" },
+          {
+            "type": "object",
+            "required": ["agent_id", "project_id", "version", "status", "created_at", "created_by"],
+            "properties": {
+              "agent_id": { "type": "string", "format": "uuid" },
+              "project_id": { "type": "string", "format": "uuid" },
+              "version": { "type": "integer", "minimum": 1 },
+              "status": { "type": "string", "enum": ["DRAFT", "PUBLISHED"] },
+              "created_at": { "type": "string", "format": "date-time" },
+              "created_by": { "type": "string", "format": "uuid" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
