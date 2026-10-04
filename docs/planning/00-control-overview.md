@@ -1,8 +1,8 @@
 # Human Control Overview
 
-Version: 0.9
+Version: 1.0
 Date: 2026-10-04
-Scope: Apistra planning baseline and accepted CAP-00/CAP-01 evidence
+Scope: Apistra planning baseline, accepted CAP-00/CAP-01 evidence, and active CAP-02 delivery
 Profile: EXTENDED
 
 ## 1. Intended result
@@ -11,7 +11,10 @@ Apistra is planned as a public build-in-public platform for designing, testing, 
 
 ## 2. Change from the prior state
 
-Version 0.9 closes CAP-01 after candidate `e522266`, tree-equivalent protected merge `e348ee5`, successful run 37192774502, local-staging execution, successful direct defect retests, authenticated closure of APISTRA-D0001 through APISTRA-D0003, and explicit product-owner acceptance. It also selects CAP-02 and records its confirmed secret-envelope, endpoint-validation, module-ownership, design, and test-allocation baseline without claiming implementation or READY.
+Version 1.0 retains the accepted CAP-01 baseline, closes WO-CAP-02-06 from
+protected publication/readback run 37212285531, and records WO-CAP-02-01 as
+implemented on its feature branch pending protected CI and independent
+implementation review. CAP-02 capability acceptance is not claimed.
 
 ## 3. Status by control dimension
 
@@ -19,7 +22,7 @@ Implementation:
 
 - CAP-00 health-only web, API, worker, packaging, local-staging, recovery, fixture, and reporting-adapter foundations are implemented.
 - CAP-01 workorders WO-CAP-01-01 through WO-CAP-01-05 are DONE; CAP-01 is human-accepted for the recorded candidate and local-staging environment.
-- CAP-02 is selected and IN_REVIEW at capability revision 0.3/workorder revision 0.7; CAP-03 through CAP-18 remain planning contracts only. No later capability implementation is claimed.
+- CAP-02 is IN PROGRESS at capability revision 0.5. WO-CAP-02-06 is DONE and WO-CAP-02-01 is the only active implementation workorder; CAP-03 through CAP-18 remain planning contracts only.
 - No production environment or automatic deployment exists.
 
 Evidence:
@@ -30,6 +33,7 @@ Evidence:
 - The expanded repository validator checks exactly CAP-00 through CAP-18, all 140 numbered workorders, exact workflow statuses and separated state fields, canonical test IDs, delivery classes, positive/negative oracles, rule references and applicability, dependency existence and acyclicity, catalogue membership, local links, forbidden generic boilerplate, and the existence/safety of every business-workorder `EXISTING` repository path. A retained negative fixture proves that a falsely observed path fails validation.
 - Softwaretest.it guide 1.1.0, authenticated preflight, report creation, stage/test import, finalisation, full report readback, and all command-receipt readbacks pass without mismatches.
 - Protected run 37192774502 passed the complete CAP-01 merged-tree matrix. Five manual cases have normal passed final runs; the sixth used the direct defect-retest path, after which APISTRA-D0001 through APISTRA-D0003 read back as CLOSED/FIXED at revision 5.
+- Protected run 37212285531 published and exactly read back the eight CAP-02 manual definitions and retained the redacted definition/Steering receipts required to start product implementation.
 - Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
 
 Approval:
@@ -38,12 +42,12 @@ Approval:
 - ADR-019 is approved and implemented. ADR-001 through ADR-018 remain proposed globally; the exact CAP-01 pattern slice is approved in 13-cap01-readiness-review.md.
 - ADR-020 through ADR-022 are product-owner approved. ADR-022 is implemented by the source-available licence set and the exact boundary recorded in `LICENSE-TRANSITION.md`.
 - CAP-00 independent expectation/implementation review and human bootstrap acceptance were recorded on 2026-09-30. WO-CAP-00-08 review and product-owner approval were recorded on 2026-10-04; no production approval is inferred.
-- Design revision 0.3 is product-owner approved for DSN-001 through DSN-004. CAP-02 revision 0.4 is complete for visual review but not yet approved; unrelated design references remain in review.
+- Design revision 0.3 is product-owner approved for DSN-001 through DSN-004. CAP-02 revision 0.4 is product-owner approved; unrelated design references remain in review.
 - CAP-01 human acceptance is recorded. No release promotion or production approval exists.
 
 ## 4. Blocking obligations
 
-1. For CAP-02, approve or correct design revision 0.4, complete its independent expectation/architecture/security comparison, and finish WO-CAP-02-06 publication/readback before a behavioural workorder becomes READY.
+1. For CAP-02, complete protected CI and independent implementation review for WO-CAP-02-01 before marking it DONE or starting WO-CAP-02-02.
 2. Keep the CAP-01 direct-retest reporting exception visible until Softwaretest.it reconciles its two retest status paths; it does not reopen the accepted product behavior while all linked defects remain CLOSED/FIXED.
 3. CAP-16 and CAP-17 retain their new-root blockers.
 
@@ -54,10 +58,14 @@ Independent reviewer and product owner:
 - Re-review CAP-00 only if change-impact analysis identifies a material change to the accepted behaviour or boundary; CAP-00 and WO-CAP-00-08 are otherwise closed.
 - Preserve the approved CAP-01 readiness baseline unless change-impact analysis identifies a material delta.
 - Use `docs/testing/manual/PRC-01/acceptance-record.md` as the human decision and exception record for CAP-01.
-- Review CAP-02 design revision 0.4 and readiness revision 0.1; if approved, make WO-CAP-02-06 the first executable workorder.
+- Review the WO-CAP-02-01 implementation against revision 0.8-ready after protected CI; retain WO-CAP-02-07 as the owner of manual execution and capability acceptance.
 - Review later capability path mappings when selected; resolve the CAP-16 and CAP-17 new-root blockers before those capabilities become READY.
 - Approve no more than one or two independent first workorders as READY.
 
 ## 6. Decision required now
 
-CAP-02 is selected. The next required human decision is approval or correction of design revision 0.4 and its rendered desktop/mobile references. This does not approve implementation, capability acceptance, release promotion, or production. Required PR approvals and CODEOWNERS review must be reconsidered when a second qualified maintainer joins.
+CAP-02 implementation has started. The next required human decision is the
+independent implementation review of WO-CAP-02-01 revision 0.9-ready after protected CI. This does
+not approve capability acceptance, release promotion, or production. Required
+PR approvals and CODEOWNERS review must be reconsidered when a second qualified
+maintainer joins.

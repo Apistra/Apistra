@@ -49,7 +49,7 @@ def migration_result() -> dict[str, object]:
     applied = apply_migrations(dsn) if dsn else []
     return {
         "status": "up_to_date",
-        "schema_version": "cap01-projects" if dsn else "cap00-none",
+        "schema_version": "cap02-secret-references" if dsn else "cap00-none",
         "commit": os.getenv("APISTRA_COMMIT", "unknown"),
         "applied": applied,
     }

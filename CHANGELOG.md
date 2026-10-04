@@ -6,6 +6,8 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Added the WO-CAP-02-01 encrypted project secret-reference slice with AES-256-GCM envelopes, operator-file key configuration, opaque versioned APIs, project isolation, idempotency, safe audit evidence, PostgreSQL migration, DSN-006 administration UI, and executable architecture/security/contract tests.
+- Closed WO-CAP-02-06 from protected run 37212285531 after authenticated publication and exact readback of all CAP-02 test definitions.
 - Approved the CAP-02 design and independent expectation/architecture/security review, added five stable BDD scenarios, eight atomic manual definitions, deterministic secret-free fixture descriptors, package-aware Softwaretest.it publication with exact ordered-step readback, and the protected CI handover required by WO-CAP-02-06.
 - Prepared the reviewable CAP-02 architecture, security, repository-path, design, traceability, and workorder baseline for project-scoped secrets, model endpoints, immutable agent versions, tools, and limits. Added ADR-024/ADR-025, DSN-022/DSN-023, reserved automated and manual test identities, taught repository validation to distinguish reserved cases from allocated definitions, and kept product implementation blocked behind design approval, independent review, and verified test publication/read-back.
 - Aligned the fail-closed Softwaretest.it Steering integration with Guide 1.3.0: new imports use RFC 8785/JCS SHA-256 receipts, validate the declared hash contract and exact digest, rotate to the `steering.import.v2` idempotency namespace, and retain guarded replay compatibility for legacy receipts.

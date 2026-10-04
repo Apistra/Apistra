@@ -1,7 +1,13 @@
 """Composition root for the API process."""
 
+import os
 from datetime import timedelta
 
+from apistra.modules.catalog.adapters.crypto import AesGcmSecretCipher
+from apistra.modules.catalog.adapters.memory import InMemorySecretStore
+from apistra.modules.catalog.adapters.postgres import PostgresSecretStore
+from apistra.modules.catalog.application import SecretService
+from apistra.modules.catalog.ports import SecretStore
 from apistra.modules.identity.adapters.memory import InMemoryIdentityStore
 from apistra.modules.identity.adapters.postgres import PostgresIdentityStore
 from apistra.modules.identity.adapters.security import (
@@ -16,6 +22,8 @@ from apistra.modules.projects.adapters.postgres import PostgresProjectStore
 from apistra.modules.projects.application import ProjectService
 from apistra.modules.projects.ports import ProjectStore
 from apistra.platform.runtime import RuntimeSettings
+
+EPHEMERAL_SECRET_KEY_BYTES = 32
 
 
 def build_identity_service(settings: RuntimeSettings) -> IdentityService:
@@ -46,3 +54,27 @@ def build_project_service(settings: RuntimeSettings) -> ProjectService:
     else:
         raise RuntimeError("APISTRA_DATABASE_URL is required outside local/test environments")
     return ProjectService(store=store, clock=UtcClock())
+
+
+def build_secret_service(settings: RuntimeSettings) -> SecretService:
+    """Compose encrypted storage; persistent data always requires an operator key file."""
+
+    if settings.database_url:
+        if not settings.secret_key_ring_file:
+            raise RuntimeError(
+                "APISTRA_SECRET_KEY_RING_FILE is required with persistent secret storage"
+            )
+        store: SecretStore = PostgresSecretStore(settings.database_url)
+        cipher = AesGcmSecretCipher.from_key_ring_file(
+            settings.secret_active_key_id,
+            settings.secret_key_ring_file,
+        )
+    elif settings.environment in {"local", "test"}:
+        store = InMemorySecretStore()
+        cipher = AesGcmSecretCipher(
+            settings.secret_active_key_id,
+            {settings.secret_active_key_id: os.urandom(EPHEMERAL_SECRET_KEY_BYTES)},
+        )
+    else:
+        raise RuntimeError("Persistent database and secret master-key file are required")
+    return SecretService(store, cipher, UtcClock(), settings.installation_id)

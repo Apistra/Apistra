@@ -1,11 +1,11 @@
 # WO-CAP-02-01 — Implement encrypted project secret references
 
-Version: 0.7-draft
-Status: DRAFT
-Status reason: CAP-00 and CAP-01 are accepted; CAP-02 design/review and WO-CAP-02-06 publication gates remain open
-Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Version: 0.9-ready
+Status: READY
+Status reason: WO-CAP-02-06 publication/readback and all planning, design, architecture, security, and path gates are satisfied
+Implementation state: IMPLEMENTED ON FEATURE BRANCH; INDEPENDENT IMPLEMENTATION REVIEW PENDING
+Evidence state: LOCAL AUTOMATED GATES PASS; PROTECTED CI PENDING
+Approval state: APPROVED FOR EXECUTION; NOT YET DONE
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-01
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-01
-- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,14 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; CAP-02 has no product implementation. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
+The feature branch implements the first CAP-02 product slice below the approved
+`catalog` boundary: AES-256-GCM envelopes, opaque project references,
+project/version/idempotency enforcement, safe audit data, PostgreSQL migration,
+versioned HTTP contract, and DSN-006. Local evidence contains 102 passing
+backend tests with 90.24% coverage, 17 passing web tests, strict Python typing,
+Ruff/complexity, Python and TypeScript architecture gates, and PostgreSQL
+migration/persistence coverage. Protected CI and independent implementation
+review remain required before DONE.
 
 ## Target result
 
@@ -86,6 +93,9 @@ Observed existing paths within the bounded change area:
 - EXISTING: `backend/tests/integration/`
 - EXISTING: `contracts/openapi/`
 - EXISTING: `contracts/events/`
+- EXISTING: `deploy/compose/compose.staging.yml`
+- EXISTING: `tools/staging/verify_candidate.py`
+- EXISTING: `tools/staging/manual_acceptance.py`
 
 Planned additions to the bounded change area after READY:
 
@@ -103,6 +113,12 @@ Planned additions to the bounded change area after READY:
 - PLANNED: `backend/src/apistra/platform/database/migrations/cap_02/`
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
+
+Observed implementation impact: persistent database-backed startup requires the
+operator key-ring file mandated by ADR-024. The existing compose and staging
+controllers are therefore included only to create, mount, and delete synthetic
+local key material. They may not deploy automatically, retain keys in evidence,
+or change candidate promotion behavior.
 
 Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
 

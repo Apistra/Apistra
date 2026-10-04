@@ -84,7 +84,7 @@ Concrete implementation patterns and their boundaries are defined in `11-archite
 The stable identifier definitions and intents are governed by the [Canonical Test ID Catalogue](../testing/test-id-catalog.md). A range below is descriptive; each referenced ID remains an individual catalogue entry.
 
 - PRC-01 → CAP-01 → MTP-PRC-01 → BDD-AUTH-001 and BDD-PROJ-001 → MT-PRC-01-001 through MT-PRC-01-006 (`ACCEPTED`; five normal passed final runs plus the product-owner-approved direct defect-retest path with all linked defects CLOSED/FIXED)
-- PRC-01 → CAP-02 → MTP-PRC-01/CAP-02 → BDD-SECRET-001, BDD-ENDPOINT-001, BDD-AGENT-001, BDD-TOOL-001, and BDD-LIMIT-001 → MT-PRC-01-007 through MT-PRC-01-014 (`RESERVED`; concrete definitions, fixtures, publication, and read-back belong to WO-CAP-02-06)
+- PRC-01 → CAP-02 → MTP-PRC-01/CAP-02 → BDD-SECRET-001, BDD-ENDPOINT-001, BDD-AGENT-001, BDD-TOOL-001, and BDD-LIMIT-001 → MT-PRC-01-007 through MT-PRC-01-014 (`PUBLISHED`; protected definition/read-back evidence belongs to completed WO-CAP-02-06, execution remains with WO-CAP-02-07)
 - PRC-02 → CAP-03, CAP-04, and CAP-10 → MTP-PRC-02 → BDD-KNOW-001 and BDD-KNOW-002
 - PRC-03 → CAP-05 → MTP-PRC-03 → BDD-WF-001 and BDD-WF-002
 - PRC-04 → CAP-06 → MTP-PRC-04 → BDD-RUN-001 through BDD-RUN-003

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import http.cookiejar
 import json
 import os
 import secrets
 import subprocess
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -33,6 +35,9 @@ HTTP_POST = "POST"
 ATLAS_KEY = "ATLAS"
 HTTP_CREATED = 201
 HTTP_NO_CONTENT = 204
+SECRET_KEY_BYTES = 32
+SECRET_KEY_ID = "local-v1"
+OWNER_ONLY_MODE = 0o600
 HTTP_UNAUTHORIZED = 401
 HTTP_NOT_FOUND = 404
 DEFAULT_API_PORT = 18_080
@@ -424,6 +429,27 @@ def image_ids(manifest: dict[str, object]) -> dict[str, str]:
     }
 
 
+def create_secret_key_ring() -> tuple[Path, Path]:
+    """Create one owner-only synthetic key ring outside retained evidence."""
+
+    directory = Path(tempfile.mkdtemp(prefix="apistra-cap02-key-ring-"))
+    path = directory / "key-ring.json"
+    path.write_text(
+        json.dumps(
+            {
+                "keys": {
+                    SECRET_KEY_ID: base64.urlsafe_b64encode(
+                        secrets.token_bytes(SECRET_KEY_BYTES)
+                    ).decode("ascii")
+                }
+            }
+        ),
+        encoding=UTF8,
+    )
+    path.chmod(OWNER_ONLY_MODE)
+    return directory, path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
@@ -434,6 +460,7 @@ def main() -> int:
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding=UTF8))
     commit = manifest["source_commit"]
+    secret_directory, key_ring_path = create_secret_key_ring()
     env = os.environ.copy()
     env.update(
         {
@@ -447,6 +474,8 @@ def main() -> int:
             "APISTRA_WEB_PORT": str(args.web_port),
             "APISTRA_ENVIRONMENT": f"local-staging-{args.run_id}",
             "APISTRA_SECURE_COOKIES": "false",
+            "APISTRA_SECRET_KEY_RING_FILE_HOST": str(key_ring_path),
+            "APISTRA_SECRET_ACTIVE_KEY_ID": SECRET_KEY_ID,
         }
     )
     compose = ["docker", "compose", "--file", str(COMPOSE)]
@@ -514,6 +543,8 @@ def main() -> int:
     finally:
         if not args.keep:
             run([*compose, "down", "--volumes", "--remove-orphans"], env, check=False)
+            key_ring_path.unlink(missing_ok=True)
+            secret_directory.rmdir()
 
 
 if __name__ == "__main__":

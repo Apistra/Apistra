@@ -63,6 +63,13 @@ services:
       APISTRA_FORCE_NOT_READY: ${APISTRA_API_FORCE_NOT_READY:-false}
       APISTRA_DATABASE_URL: postgresql://apistra:${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}@postgres:5432/apistra
       APISTRA_SECURE_COOKIES: ${APISTRA_SECURE_COOKIES:-true}
+      APISTRA_SECRET_KEY_RING_FILE: /run/secrets/apistra-key-ring.json
+      APISTRA_SECRET_ACTIVE_KEY_ID: ${APISTRA_SECRET_ACTIVE_KEY_ID:-local-v1}
+    volumes:
+      - type: bind
+        source: ${APISTRA_SECRET_KEY_RING_FILE_HOST:?set APISTRA_SECRET_KEY_RING_FILE_HOST}
+        target: /run/secrets/apistra-key-ring.json
+        read_only: true
     depends_on:
       migrate:
         condition: service_completed_successfully

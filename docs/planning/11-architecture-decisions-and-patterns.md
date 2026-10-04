@@ -748,9 +748,9 @@ does not approve those proposed ADRs for unrelated capabilities.
 
 ### CAP-02 scoped architecture decision
 
-Status: IN_REVIEW; product decisions confirmed on 2026-10-04, independent
-expectation comparison and rendered-design approval remain required before the
-first implementation workorder becomes READY.
+Status: DECIDED; product decisions, independent expectation comparison, and
+rendered-design approval were confirmed on 2026-10-04. WO-CAP-02-06 publication
+and readback completed in protected run 37212285531.
 
 CAP-02 uses the existing modular-monolith and module-first baseline with these
 exclusive responsibilities:

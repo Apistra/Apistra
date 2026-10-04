@@ -1,11 +1,11 @@
 # WO-CAP-02-06 — Publish and verify CAP-02 test definitions
 
-Version: 0.8-ready
-Status: READY
-Status reason: CAP-00/CAP-01, design 0.4, independent expectation/architecture/security review, and path gates are satisfied
-Implementation state: IN PROGRESS
-Evidence state: NOT EXECUTED
-Approval state: APPROVED FOR WORKORDER EXECUTION
+Version: 0.9-done
+Status: DONE
+Status reason: protected test run 37212285531 published and field-/step-level read back all CAP-02 definitions
+Implementation state: IMPLEMENTED
+Evidence state: VERIFIED ON PROTECTED TEST BRANCH
+Approval state: WORKORDER COMPLETE; CAPABILITY ACCEPTANCE NOT IMPLIED
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-06
-- Softwaretest.it mapping: NOT PUBLISHED; local definitions are ready and publication/readback is pending
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED; cycle `fe50655d-4f88-414f-ba75-541cb5184de2`
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-02-06
-- Specification revision: 0.8-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-done; receipt is bound to protected run 37212285531 and its exact source payload
 
 ## Risk profile and escalation
 
@@ -37,7 +37,12 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.8 workorder result. CAP-00 and CAP-01 are accepted baselines; the existing publisher is CAP-01-specific and cannot yet publish a separate CAP-02 definition set. The readiness review at `../../planning/14-cap02-readiness-review.md` records the exact delta.
+Protected `test` run 37212285531 established this workorder result. Its redacted
+receipt verified all eight CAP-02 manual definitions, stable IDs
+`MT-PRC-01-007` through `MT-PRC-01-014`, ordered steps, and the CAP-02 cycle
+readback. The definition manifest SHA-256 is
+`f0166d186cfc12bb8b45c0ade680869d49937f94bd67b3f4fd5837f507f36574`.
+No execution result was created by definition publication.
 
 ## Target result
 

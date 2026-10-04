@@ -17,6 +17,9 @@ class RuntimeSettings:
     database_url: str | None = None
     session_ttl_seconds: int = 43_200
     secure_cookies: bool = True
+    installation_id: str = "local"
+    secret_key_ring_file: str | None = None
+    secret_active_key_id: str = "local-v1"  # noqa: S105 - identifier, not a credential
 
     @classmethod
     def from_environment(cls, service: str) -> RuntimeSettings:
@@ -35,6 +38,9 @@ class RuntimeSettings:
             session_ttl_seconds=int(os.getenv("APISTRA_SESSION_TTL_SECONDS", "43200")),
             secure_cookies=os.getenv("APISTRA_SECURE_COOKIES", "true").lower()
             in {"1", "true", "yes"},
+            installation_id=os.getenv("APISTRA_INSTALLATION_ID", "local"),
+            secret_key_ring_file=os.getenv("APISTRA_SECRET_KEY_RING_FILE"),
+            secret_active_key_id=os.getenv("APISTRA_SECRET_ACTIVE_KEY_ID", "local-v1"),
         )
 
     def marker(self) -> dict[str, str]:
