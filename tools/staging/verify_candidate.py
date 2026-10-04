@@ -37,7 +37,7 @@ HTTP_CREATED = 201
 HTTP_NO_CONTENT = 204
 SECRET_KEY_BYTES = 32
 SECRET_KEY_ID = "local-v1"
-OWNER_ONLY_MODE = 0o600
+CONTAINER_SECRET_MODE = 0o644
 HTTP_UNAUTHORIZED = 401
 HTTP_NOT_FOUND = 404
 DEFAULT_API_PORT = 18_080
@@ -52,6 +52,24 @@ def run(
         command, cwd=ROOT, env=env, check=check, text=True, capture_output=capture
     )
     return result.stdout.strip() if capture else ""
+
+
+def write_container_secret_json(path: Path, payload: dict[str, object]) -> None:
+    """Create a secret readable by the remapped, read-only container user.
+
+    The parent directory remains owner-only. The file itself needs the host-side
+    read bit for the container UID because Compose implements this secret as a
+    read-only bind mount.
+    """
+
+    descriptor = os.open(
+        path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+        CONTAINER_SECRET_MODE,
+    )
+    with os.fdopen(descriptor, "w", encoding=UTF8) as handle:
+        json.dump(payload, handle, sort_keys=True)
+        handle.write("\n")
 
 
 def get_json(url: str) -> dict[str, object]:
@@ -430,24 +448,32 @@ def image_ids(manifest: dict[str, object]) -> dict[str, str]:
 
 
 def create_secret_key_ring() -> tuple[Path, Path]:
-    """Create one owner-only synthetic key ring outside retained evidence."""
+    """Create one isolated synthetic key ring outside retained evidence."""
 
     directory = Path(tempfile.mkdtemp(prefix="apistra-cap02-key-ring-"))
     path = directory / "key-ring.json"
-    path.write_text(
-        json.dumps(
-            {
-                "keys": {
-                    SECRET_KEY_ID: base64.urlsafe_b64encode(
-                        secrets.token_bytes(SECRET_KEY_BYTES)
-                    ).decode("ascii")
-                }
+    write_container_secret_json(
+        path,
+        {
+            "keys": {
+                SECRET_KEY_ID: base64.urlsafe_b64encode(
+                    secrets.token_bytes(SECRET_KEY_BYTES)
+                ).decode("ascii")
             }
-        ),
-        encoding=UTF8,
+        },
     )
-    path.chmod(OWNER_ONLY_MODE)
     return directory, path
+
+
+def start_candidate(compose: list[str], env: dict[str, str]) -> None:
+    """Start the candidate and retain useful container output on failure."""
+
+    try:
+        run([*compose, "up", "--detach", "--wait"], env)
+    except subprocess.CalledProcessError:
+        run([*compose, "ps", "--all"], env, check=False)
+        run([*compose, "logs", "--no-color", "migrate", "api"], env, check=False)
+        raise
 
 
 def main() -> int:
@@ -481,7 +507,7 @@ def main() -> int:
     compose = ["docker", "compose", "--file", str(COMPOSE)]
     before = image_ids(manifest)
     try:
-        run([*compose, "up", "--detach", "--wait"], env)
+        start_candidate(compose, env)
         api = wait_for(f"http://127.0.0.1:{args.api_port}/health/ready", "ready")
         web = wait_for(f"http://127.0.0.1:{args.web_port}/api/health", "ready")
         if (

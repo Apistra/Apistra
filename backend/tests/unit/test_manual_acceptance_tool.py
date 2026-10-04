@@ -25,6 +25,7 @@ from tools.staging.manual_acceptance import (  # noqa: E402
     status,
     stop,
 )
+from tools.staging.verify_candidate import write_container_secret_json  # noqa: E402
 
 
 def test_session_directory_rejects_path_traversal() -> None:
@@ -38,6 +39,20 @@ def test_private_json_is_created_with_owner_only_permissions(tmp_path: Path) -> 
 
     assert stat.S_IMODE(path.stat().st_mode) == 0o600
     assert json.loads(path.read_text()) == {"value": "secret"}
+
+
+def test_container_secret_is_readable_but_parent_remains_owner_only(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "isolated"
+    directory.mkdir(mode=0o700)
+    path = directory / "key-ring.json"
+
+    write_container_secret_json(path, {"keys": {"local-v1": "synthetic"}})
+
+    assert stat.S_IMODE(directory.stat().st_mode) == 0o700
+    assert stat.S_IMODE(path.stat().st_mode) == 0o644
+    assert json.loads(path.read_text()) == {"keys": {"local-v1": "synthetic"}}
 
 
 def test_environment_binds_candidate_and_isolated_session() -> None:

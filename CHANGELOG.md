@@ -76,6 +76,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Fixed
 
+- Made the ephemeral staging key ring readable by the deliberately unprivileged API container while retaining an owner-only host directory and a read-only mount, and preserved container diagnostics when candidate startup fails.
 - Advanced the WO-CAP-02-06 numeric source revision after its reviewed content changed, resolving the protected Steering import's correctly reported same-revision content conflict.
 - Fixed CAP-01 loopback acceptance sessions so browser-managed cookies work over the explicitly local HTTP boundary, project mutations retain their matching CSRF context, sign-out cannot report success before server revocation, and a previously authenticated visitor receives the required one-time expired-session guidance.
 - Closed WO-CAP-00-08 from the verified trusted-branch Steering receipts and product-owner approval, and added strict source-authored criterion evidence so completed CAP-00 gates render as passed without making future criteria prematurely due.

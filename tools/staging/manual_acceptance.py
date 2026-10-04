@@ -25,6 +25,7 @@ from tools.staging.verify_candidate import (
     apply_cap01_fixture,
     run,
     wait_for,
+    write_container_secret_json,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -371,7 +372,7 @@ def start(args: argparse.Namespace) -> int:
     }
     _write_json(directory / SESSION_FILE, state)
     _write_private_json(directory / SECRET_FILE, private)
-    _write_private_json(
+    write_container_secret_json(
         directory / KEY_RING_FILE,
         {
             "keys": {
