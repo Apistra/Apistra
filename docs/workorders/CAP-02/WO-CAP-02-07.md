@@ -1,11 +1,11 @@
 # WO-CAP-02-07 — Accept CAP-02 on local staging
 
-Version: 0.7-draft
+Version: 0.8-draft
 Status: DRAFT
-Status reason: CAP-00 and CAP-01 are accepted; all CAP-02 implementation, publication, and acceptance prerequisites remain open
+Status reason: CAP-02 publication is complete and WO-CAP-02-01 is DONE; implementation workorders WO-CAP-02-02 through WO-CAP-02-05 remain open
 Implementation state: NOT STARTED
-Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Evidence state: PREREQUISITE EVIDENCE PARTIAL; FINAL ACCEPTANCE NOT EXECUTED
+Approval state: ACCEPTANCE CONTRACT REVIEWED; EXECUTION BLOCKED BY OPEN IMPLEMENTATION WORKORDERS
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-07
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: DEFINITIONS PUBLISHED AND VERIFIED by WO-CAP-02-06; candidate-bound execution remains required here
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-02-07
-- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
