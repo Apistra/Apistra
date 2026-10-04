@@ -1,15 +1,15 @@
 # Workorder Catalogue
 
-Version: 1.0-draft
+Version: 1.1-draft
 Status: DRAFT
 
 ## Control summary
 
 **Result:** Every planned Apistra workorder has one canonical, AI-executable and objectively verifiable contract file under `docs/workorders/<CAP-ID>/`.
-**Change:** Version 1.0 closes WO-CAP-02-01 from reviewed protected implementation evidence and activates WO-CAP-02-02 after its already approved prerequisites became complete.
-**Current position:** 141 workorder contracts exist. All CAP-00 and CAP-01 workorders are DONE. WO-CAP-02-06 and WO-CAP-02-01 are DONE; WO-CAP-02-02 is READY; other CAP-02 workorders and CAP-03 through CAP-18 remain DRAFT.
+**Change:** Version 1.1 closes WO-CAP-02-02 from reviewed protected implementation evidence and activates WO-CAP-02-03 after its already approved prerequisites became complete.
+**Current position:** 141 workorder contracts exist. All CAP-00 and CAP-01 workorders are DONE. WO-CAP-02-06, WO-CAP-02-01, and WO-CAP-02-02 are DONE; WO-CAP-02-03 is READY; other CAP-02 workorders and CAP-03 through CAP-18 remain DRAFT.
 **Main blocker:** CAP-01 has no remaining workorder blocker. Later work remains gated by each capability's own architecture, security, design, test-management, and dependency decisions.
-**Next step:** Implement WO-CAP-02-02 on a separate feature branch, then require its protected CI and independent implementation review before activating WO-CAP-02-03.
+**Next step:** Implement WO-CAP-02-03 on a separate feature branch, then require its protected CI and independent implementation review before activating WO-CAP-02-04.
 
 The [canonical workorder index](../workorders/README.md) links every file and its current status.
 

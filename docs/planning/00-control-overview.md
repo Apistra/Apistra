@@ -1,6 +1,6 @@
 # Human Control Overview
 
-Version: 1.1
+Version: 1.2
 Date: 2026-10-04
 Scope: Apistra planning baseline, accepted CAP-00/CAP-01 evidence, and active CAP-02 delivery
 Profile: EXTENDED
@@ -11,10 +11,10 @@ Apistra is planned as a public build-in-public platform for designing, testing, 
 
 ## 2. Change from the prior state
 
-Version 1.1 retains the accepted CAP-01 baseline, closes WO-CAP-02-01 after PR
-#31, merge `dfa8319`, protected run 37216514042, and explicit product-owner
-implementation approval, and activates WO-CAP-02-02. CAP-02 capability
-acceptance is not claimed.
+Version 1.2 retains the accepted CAP-01 baseline, closes WO-CAP-02-02 after PR
+#33, merge `96dfa5e`, protected run 37228142970, and product-owner merge
+approval, and activates WO-CAP-02-03. CAP-02 capability acceptance is not
+claimed.
 
 ## 3. Status by control dimension
 
@@ -22,7 +22,7 @@ Implementation:
 
 - CAP-00 health-only web, API, worker, packaging, local-staging, recovery, fixture, and reporting-adapter foundations are implemented.
 - CAP-01 workorders WO-CAP-01-01 through WO-CAP-01-05 are DONE; CAP-01 is human-accepted for the recorded candidate and local-staging environment.
-- CAP-02 is IN PROGRESS at capability revision 0.6. WO-CAP-02-06 and WO-CAP-02-01 are DONE; WO-CAP-02-02 is the only READY implementation workorder. CAP-03 through CAP-18 remain planning contracts only.
+- CAP-02 is IN PROGRESS at capability revision 0.8. WO-CAP-02-06, WO-CAP-02-01, and WO-CAP-02-02 are DONE; WO-CAP-02-03 is the only READY implementation workorder. CAP-03 through CAP-18 remain planning contracts only.
 - No production environment or automatic deployment exists.
 
 Evidence:
@@ -35,6 +35,7 @@ Evidence:
 - Protected run 37192774502 passed the complete CAP-01 merged-tree matrix. Five manual cases have normal passed final runs; the sixth used the direct defect-retest path, after which APISTRA-D0001 through APISTRA-D0003 read back as CLOSED/FIXED at revision 5.
 - Protected run 37212285531 published and exactly read back the eight CAP-02 manual definitions and retained the redacted definition/Steering receipts required to start product implementation.
 - Protected run 37216514042 passed WO-CAP-02-01 contracts/static analysis, architecture, tests, security/supply-chain, candidate packaging, isolated staging/recovery, Steering, CAP-01/CAP-02 definition, and receipt-readback gates for merge `dfa8319`.
+- Protected run 37228142970 passed the same complete gate set for WO-CAP-02-02 merge `96dfa5e`, including authenticated Steering, CAP-01/CAP-02 definition, result receipt, and exact readback.
 - Planning completeness and structural consistency are not human product, architecture, security, design, or capability acceptance.
 
 Approval:
@@ -48,7 +49,7 @@ Approval:
 
 ## 4. Blocking obligations
 
-1. For CAP-02, implement and review WO-CAP-02-02 before activating WO-CAP-02-03; retain WO-CAP-02-07 as the unchanged-candidate manual acceptance owner.
+1. For CAP-02, implement and review WO-CAP-02-03 before activating WO-CAP-02-04; retain WO-CAP-02-07 as the unchanged-candidate manual acceptance owner.
 2. Keep the CAP-01 direct-retest reporting exception visible until Softwaretest.it reconciles its two retest status paths; it does not reopen the accepted product behavior while all linked defects remain CLOSED/FIXED.
 3. CAP-16 and CAP-17 retain their new-root blockers.
 
@@ -59,14 +60,15 @@ Independent reviewer and product owner:
 - Re-review CAP-00 only if change-impact analysis identifies a material change to the accepted behaviour or boundary; CAP-00 and WO-CAP-00-08 are otherwise closed.
 - Preserve the approved CAP-01 readiness baseline unless change-impact analysis identifies a material delta.
 - Use `docs/testing/manual/PRC-01/acceptance-record.md` as the human decision and exception record for CAP-01.
-- Preserve the approved WO-CAP-02-01 result unless change-impact analysis identifies a material delta; retain WO-CAP-02-07 as the owner of manual execution and capability acceptance.
+- Preserve the approved WO-CAP-02-01 and WO-CAP-02-02 results unless change-impact analysis identifies a material delta; retain WO-CAP-02-07 as the owner of manual execution and capability acceptance.
 - Review later capability path mappings when selected; resolve the CAP-16 and CAP-17 new-root blockers before those capabilities become READY.
 - Approve no more than one or two independent first workorders as READY.
 
 ## 6. Decision required now
 
-No new product decision is required before WO-CAP-02-02 execution. Its
+No new product decision is required before WO-CAP-02-03 execution. Its
 implementation must still receive an independent review after protected CI.
-The completed WO-CAP-02-01 approval does not approve capability acceptance,
-release promotion, or production. Required PR approvals and CODEOWNERS review
-must be reconsidered when a second qualified maintainer joins.
+The completed WO-CAP-02-01 and WO-CAP-02-02 approvals do not approve
+capability acceptance, release promotion, or production. Required PR approvals
+and CODEOWNERS review must be reconsidered when a second qualified maintainer
+joins.
