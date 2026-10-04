@@ -1,11 +1,13 @@
 # Apistra UX and UI Design Contract
 
-Version: 0.3
-Status: APPROVED FOR DSN-001 THROUGH DSN-004; IN_REVIEW OTHERWISE
+Version: 0.4
+Status: APPROVED FOR DSN-001 THROUGH DSN-006, DSN-019, DSN-022, AND DSN-023; IN_REVIEW OTHERWISE
 
-Approval date: 2026-09-30
+Approval dates: 2026-09-30 (CAP-01) and 2026-10-04 (CAP-02)
 Approval scope: CAP-01 administration labels, paths, states, and maintained
-references for DSN-001 through DSN-004
+references for DSN-001 through DSN-004 plus the CAP-02 administration
+contract and rendered references for DSN-005, DSN-006, DSN-019, DSN-022,
+and DSN-023
 
 ## 1. Scope and responsibility
 
@@ -184,17 +186,19 @@ rendered previews define information hierarchy; implementation still must
 prove states, responsive behaviour, accessibility, and interaction. The
 approved cases include only the three named CAP-01 audit events, the `Audit`
 navigation action, and the `Audit log` page-title oracle in sections 4.2–4.4.
-This narrow evidence view does not approve the general DSN-020 information
-architecture or any unrelated audit-log behavior. No approval is inferred for
-DSN-005 through DSN-021 beyond this narrow CAP-01 evidence view. The six definitions are published but
-remain `NOT EXECUTED` until their separate execution gate is satisfied.
+This narrow CAP-01 evidence view does not approve the general DSN-020
+information architecture or any unrelated audit-log behavior. CAP-02 approval
+is granted separately and only for the explicitly named designs in section
+4.6. The six CAP-01 definitions are published but remain `NOT EXECUTED` until
+their separate execution gate is satisfied.
 
 ### 4.6 CAP-02 administration design revision 0.4
 
-Status: IN_REVIEW. The product owner confirmed the information, security, and
-module baseline on 2026-10-04. The rendered references and exact interaction
-contract below still require explicit visual/product approval before a CAP-02
-UI workorder becomes READY.
+Status: APPROVED. The product owner confirmed the information, security, and
+module baseline and explicitly approved the rendered references and exact
+interaction contract on 2026-10-04. This approval is limited to the CAP-02
+planning/design contract; it is not implementation, test-execution,
+capability-acceptance, deployment, or production evidence.
 
 Capability routes use the existing dynamic project segment:
 
@@ -508,5 +512,6 @@ The research screenshot is inspiration, not implementation evidence.
 - Tokens and component details: IN_REVIEW
 - Rendered reference sources: PRESENT; DSN-001 through DSN-004 scope approved
 - Accessibility test oracles: DRAFT
-- Human design approval: APPROVED for DSN-001 through DSN-004; pending elsewhere
+- Human design approval: APPROVED for DSN-001 through DSN-006, DSN-019,
+  DSN-022, and DSN-023; pending elsewhere
 - Administration labels and paths for DSN-001 through DSN-004: APPROVED 2026-09-30

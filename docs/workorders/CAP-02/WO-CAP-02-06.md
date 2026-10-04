@@ -1,11 +1,11 @@
 # WO-CAP-02-06 — Publish and verify CAP-02 test definitions
 
-Version: 0.7-draft
-Status: DRAFT
-Status reason: CAP-00 and CAP-01 are accepted; design approval and independent expectation comparison remain open
-Implementation state: NOT STARTED
+Version: 0.7-ready
+Status: READY
+Status reason: CAP-00/CAP-01, design 0.4, independent expectation/architecture/security review, and path gates are satisfied
+Implementation state: IN PROGRESS
 Evidence state: NOT EXECUTED
-Approval state: NOT APPROVED
+Approval state: APPROVED FOR WORKORDER EXECUTION
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-06
-- Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
+- Softwaretest.it mapping: LOCAL DEFINITIONS READY; publication/readback pending
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-02-06
-- Specification revision: 0.7-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -80,6 +80,13 @@ Observed existing paths within the bounded change area:
 - EXISTING: `engineering/softwaretest/`
 - EXISTING: `tools/fixtures/`
 - EXISTING: `tests/bdd/`
+- EXISTING: `.github/workflows/ci.yml`
+- EXISTING: `docs/planning/07-design-contract.md`
+- EXISTING: `docs/planning/14-cap02-readiness-review.md`
+- EXISTING: `docs/visuals/README.md`
+- EXISTING: `docs/testing/manual/README.md`
+- EXISTING: `backend/tests/contract/`
+- EXISTING: `tools/contracts/validate_repository.py`
 
 Planned additions to the bounded change area after READY:
 
@@ -146,7 +153,9 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - Sources: confirmed product decisions, the linked capability, requirements REQ-003, REQ-004, REQ-005, REQ-013, REQ-014, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - Counterexample: A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
-- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+- READY evidence: the product owner confirmed on 2026-10-04 that a human
+  review independent of the implementing agent covered baseline
+  `d83810d181374171abc7118b37a5090b6c71bb7f`, with no unresolved discrepancy.
 
 ## Required tests
 

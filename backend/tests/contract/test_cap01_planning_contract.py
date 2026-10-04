@@ -45,8 +45,11 @@ def test_cap01_workorders_have_specific_pattern_mappings() -> None:
     assert "introduces no new implementation pattern" in acceptance
 
 
-def test_cap01_design_approval_is_scoped_not_global() -> None:
+def test_design_approvals_remain_capability_scoped_not_global() -> None:
     design = (ROOT / "docs/planning/07-design-contract.md").read_text(encoding="utf-8")
     normalized = " ".join(design.split())
-    assert "APPROVED FOR DSN-001 THROUGH DSN-004" in design
-    assert "No approval is inferred for DSN-005 through DSN-021" in normalized
+    assert "Approval boundary for revision 0.3" in design
+    assert "approved this exact revision on 2026-09-30 for DSN-001 through DSN-004" in normalized
+    assert "CAP-02 approval is granted separately" in normalized
+    assert "Status: APPROVED." in design
+    assert "pending elsewhere" in design

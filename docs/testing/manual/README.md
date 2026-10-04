@@ -22,7 +22,8 @@ Rules:
 Packages:
 
 - [MTP-PRC-01 — Administration and project lifecycle](PRC-01/README.md)
-- `MTP-PRC-01/CAP-02` is reserved for MT-PRC-01-007 through
-  MT-PRC-01-014. WO-CAP-02-06 must create the concrete local definitions,
-  deterministic test data, fixture preparation, publication receipt, and
-  authenticated read-back before any CAP-02 product workorder becomes READY.
+- [MTP-PRC-01/CAP-02 — Secrets, endpoints, agents, tools, and limits](PRC-01/CAP-02/README.md)
+  allocates MT-PRC-01-007 through MT-PRC-01-014. The concrete local
+  definitions, deterministic test-data descriptors, and fixture lifecycle are
+  present. Publication receipt and authenticated read-back remain required
+  before any CAP-02 product workorder becomes READY.

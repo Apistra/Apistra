@@ -1,7 +1,7 @@
 # Apistra Visual Planning Artefacts
 
 Version: 0.4
-Status: DSN-001 THROUGH DSN-004 APPROVED; CAP-02 REFERENCES IN_REVIEW; OTHER DESIGN REFERENCES IN_REVIEW
+Status: DSN-001 THROUGH DSN-006, DSN-019, DSN-022, AND DSN-023 APPROVED; OTHER DESIGN REFERENCES IN_REVIEW
 
 This package supplies the maintainable visual sources that complement the textual BuildBySpec planning baseline.
 
@@ -62,6 +62,7 @@ The product owner approved revision 0.3 for DSN-001 through DSN-004 on
 measurement, Softwaretest.it publication, implementation, and candidate-bound
 visual evidence remain separate later gates.
 
-The product owner confirmed the CAP-02 information/security baseline on
-2026-10-04. The generated CAP-02 desktop/mobile references remain IN_REVIEW
-until their explicit visual/product approval; this file does not grant it.
+The product owner confirmed the CAP-02 information/security baseline and
+explicitly approved the generated CAP-02 desktop/mobile references on
+2026-10-04. Accessibility measurement, implementation, test execution,
+capability acceptance, and deployment remain separate gates.
