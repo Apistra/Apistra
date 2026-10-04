@@ -1,6 +1,6 @@
 # WO-CAP-02-06 — Publish and verify CAP-02 test definitions
 
-Version: 0.7-ready
+Version: 0.8-ready
 Status: READY
 Status reason: CAP-00/CAP-01, design 0.4, independent expectation/architecture/security review, and path gates are satisfied
 Implementation state: IN PROGRESS
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-01
 - Capability contract: ../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md
 - CI test group: TST-WO-CAP-02-06
-- Softwaretest.it mapping: LOCAL DEFINITIONS READY; publication/readback pending
+- Softwaretest.it mapping: NOT PUBLISHED; local definitions are ready and publication/readback is pending
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-02-06
-- Specification revision: 0.7-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.8-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; the existing publisher is CAP-01-specific and cannot yet publish a separate CAP-02 definition set. The readiness review at `../../planning/14-cap02-readiness-review.md` records the exact delta.
+Current evidence does not establish this 0.8 workorder result. CAP-00 and CAP-01 are accepted baselines; the existing publisher is CAP-01-specific and cannot yet publish a separate CAP-02 definition set. The readiness review at `../../planning/14-cap02-readiness-review.md` records the exact delta.
 
 ## Target result
 
@@ -146,7 +146,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The complete PRC-01 package publishes idempotently and read-back preserves every ID, field, traceability link, and manual-step order.
 - **Negative oracle:** A missing case, flattened/reordered step, changed field, duplicate object, or absent authorised receipt leaves publication unverified and blocks dependent READY.
 - **Boundary oracle:** Empty, single-case, maximum supported, repeated, and partially rejected publication requests retain deterministic IDs and atomic outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.8, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
