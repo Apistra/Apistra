@@ -4,13 +4,34 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   bootstrapAdministrator,
+  csrfToken,
   currentSession,
   focusErrorAlert,
   installationStatus,
+  missingSessionMessage,
+  rememberAuthenticatedSession,
+  revokeAuthenticatedSession,
+  SESSION_EXPIRED_MESSAGE,
   signIn,
   signOut,
   validateCredentials
 } from "./internal/identity-client";
+
+class MemorySessionStorage {
+  private readonly values = new Map<string, string>();
+
+  getItem(key: string): string | null {
+    return this.values.get(key) ?? null;
+  }
+
+  removeItem(key: string): void {
+    this.values.delete(key);
+  }
+
+  setItem(key: string, value: string): void {
+    this.values.set(key, value);
+  }
+}
 
 describe("administrator bootstrap contract", () => {
   it("validates the server-owned credential boundaries before submission", () => {
@@ -91,6 +112,33 @@ describe("administrator bootstrap contract", () => {
     expect(focus).toHaveBeenCalledOnce();
   });
 
+  it("distinguishes a fresh visitor from a visitor whose session disappeared", () => {
+    const freshStorage = new MemorySessionStorage();
+    expect(missingSessionMessage(freshStorage)).toBeNull();
+
+    const returningStorage = new MemorySessionStorage();
+    rememberAuthenticatedSession(returningStorage, "csrf");
+    expect(csrfToken(returningStorage)).toBe("csrf");
+    expect(missingSessionMessage(returningStorage)).toBe(SESSION_EXPIRED_MESSAGE);
+    expect(csrfToken(returningStorage)).toBe("");
+    expect(missingSessionMessage(returningStorage)).toBeNull();
+  });
+
+  it("keeps local authentication state until server revocation succeeds", async () => {
+    const storage = new MemorySessionStorage();
+    rememberAuthenticatedSession(storage, "csrf");
+    const rejectedRevocation = vi.fn().mockRejectedValue(new Error("rejected"));
+    await expect(revokeAuthenticatedSession(storage, rejectedRevocation)).rejects.toThrow(
+      "rejected"
+    );
+    expect(csrfToken(storage)).toBe("csrf");
+
+    const acceptedRevocation = vi.fn().mockResolvedValue(undefined);
+    await expect(revokeAuthenticatedSession(storage, acceptedRevocation)).resolves.toBeUndefined();
+    expect(acceptedRevocation).toHaveBeenCalledWith("csrf");
+    expect(csrfToken(storage)).toBe("");
+  });
+
   it("retains the approved CAP-01 view labels and administrator actions", () => {
     const source = readFileSync(new URL("./public.tsx", import.meta.url), "utf8");
     for (const required of [
@@ -99,7 +147,6 @@ describe("administrator bootstrap contract", () => {
       "Installation status",
       "Administrator bootstrap is complete.",
       "Project creation",
-      "Your session has expired. Sign in again.",
       "Installation: {event.installation_id}",
       "Project: {event.project_key}"
     ]) {
