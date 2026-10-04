@@ -119,6 +119,19 @@ class EndpointService:
     def list(self, owner_id: UUID, project_id: UUID) -> EndpointResult[EndpointList]:
         return EndpointResult(value=self._store.list_for_project(owner_id, project_id))
 
+    def exact_reference_available(
+        self,
+        owner_id: UUID,
+        project_id: UUID,
+        endpoint_id: UUID,
+        version: int,
+        purpose: EndpointPurpose,
+    ) -> bool:
+        """Validate an exact project-scoped endpoint reference without exposing it."""
+
+        endpoint = self._store.get_for_project(owner_id, project_id, endpoint_id)
+        return bool(endpoint and endpoint.version == version and endpoint.purpose is purpose)
+
     def test_connection(
         self,
         owner_id: UUID,
