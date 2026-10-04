@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -19,9 +20,12 @@ from tools.staging.verify_candidate import (
     DEFAULT_WEB_PORT,
     FIELD_IMAGES,
     FIELD_REFERENCE,
+    SECRET_KEY_BYTES,
+    SECRET_KEY_ID,
     apply_cap01_fixture,
     run,
     wait_for,
+    write_container_secret_json,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +34,7 @@ SESSION_FILE = "session.json"
 SECRET_FILE = "runtime-secrets.json"
 TEST_DATA_FILE = "manual-test-data.json"
 PASSWORD_FILE = "staging-admin-password.txt"
+KEY_RING_FILE = "secret-key-ring.json"
 UTF8 = "utf-8"
 RUNNING = "RUNNING"
 STOPPED = "STOPPED"
@@ -124,6 +129,10 @@ def _environment(
             "APISTRA_ENVIRONMENT": str(state["environment"]),
             "APISTRA_SECURE_COOKIES": "false",
             "APISTRA_FIXTURE_GATE": f"apply-cap01-{state[FIELD_RUN_ID]}",
+            "APISTRA_SECRET_KEY_RING_FILE_HOST": str(
+                session_directory(str(state[FIELD_RUN_ID])) / KEY_RING_FILE
+            ),
+            "APISTRA_SECRET_ACTIVE_KEY_ID": SECRET_KEY_ID,
         }
     )
     return env
@@ -363,6 +372,16 @@ def start(args: argparse.Namespace) -> int:
     }
     _write_json(directory / SESSION_FILE, state)
     _write_private_json(directory / SECRET_FILE, private)
+    write_container_secret_json(
+        directory / KEY_RING_FILE,
+        {
+            "keys": {
+                SECRET_KEY_ID: base64.urlsafe_b64encode(
+                    secrets.token_bytes(SECRET_KEY_BYTES)
+                ).decode("ascii")
+            }
+        },
+    )
     password_path = directory / PASSWORD_FILE
     _write_private_json(
         password_path,
@@ -385,6 +404,7 @@ def start(args: argparse.Namespace) -> int:
         state.update({FIELD_STATUS: "FAILED", "updated_at": _utc_now()})
         _write_json(directory / SESSION_FILE, state)
         (directory / SECRET_FILE).unlink(missing_ok=True)
+        (directory / KEY_RING_FILE).unlink(missing_ok=True)
         password_path.unlink(missing_ok=True)
         raise
     print(json.dumps(_public_summary(directory, state), sort_keys=True))
@@ -429,6 +449,7 @@ def stop(args: argparse.Namespace) -> int:
         check=False,
     )
     (directory / SECRET_FILE).unlink(missing_ok=True)
+    (directory / KEY_RING_FILE).unlink(missing_ok=True)
     (directory / PASSWORD_FILE).unlink(missing_ok=True)
     state.update({FIELD_STATUS: STOPPED, "stopped_at": _utc_now()})
     _write_json(directory / SESSION_FILE, state)

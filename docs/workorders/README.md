@@ -32,12 +32,12 @@ Every CAP-01 through CAP-18 workorder names literal paths from the [business rep
 
 ## CAP-02
 
-- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
+- [WO-CAP-02-01 — Implement encrypted project secret references](CAP-02/WO-CAP-02-01.md) — READY; implemented on feature branch, protected CI and independent implementation review pending
 - [WO-CAP-02-02 — Implement model and embedding endpoint catalogue](CAP-02/WO-CAP-02-02.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
 - [WO-CAP-02-03 — Implement versioned agents and explicit fallback](CAP-02/WO-CAP-02-03.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
 - [WO-CAP-02-04 — Implement governed tool contracts and approval classification](CAP-02/WO-CAP-02-04.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
 - [WO-CAP-02-05 — Implement configurable limits and budget decisions](CAP-02/WO-CAP-02-05.md) — DRAFT; design/review and WO-CAP-02-06 gates pending
-- [WO-CAP-02-06 — Publish and verify CAP-02 test definitions](CAP-02/WO-CAP-02-06.md) — DRAFT; first planned execution after design and independent review
+- [WO-CAP-02-06 — Publish and verify CAP-02 test definitions](CAP-02/WO-CAP-02-06.md) — DONE; protected publication and exact readback verified in run 37212285531
 - [WO-CAP-02-07 — Accept CAP-02 on local staging](CAP-02/WO-CAP-02-07.md) — DRAFT; final unchanged-candidate acceptance workorder
 
 ## CAP-03

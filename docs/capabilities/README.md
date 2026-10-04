@@ -9,7 +9,7 @@ One canonical capability contract lives in each file. The roadmap in ../planning
 |---|---|---|
 | [CAP-00 — Reproducible Delivery Walking Skeleton](CAP-00-reproducible-delivery-walking-skeleton.md) | 0.0 | ACCEPTED baseline; Steering import/readback verified; production approval not granted |
 | [CAP-01 — Installation And Isolated Project Administration](CAP-01-installation-and-isolated-project-administration.md) | 0.1 | ACCEPTED; direct defect-retest reporting exception recorded; production approval not granted |
-| [CAP-02 — Secrets Endpoints Agents Tools And Limits](CAP-02-secrets-endpoints-agents-tools-and-limits.md) | 0.1 | IN_REVIEW; decisions and design revision prepared, product implementation remains blocked until review and test publication |
+| [CAP-02 — Secrets Endpoints Agents Tools And Limits](CAP-02-secrets-endpoints-agents-tools-and-limits.md) | 0.1 | IN PROGRESS; test definitions verified and WO-CAP-02-01 implemented pending protected CI/review |
 | [CAP-03 — Connector Foundation And Trusted Sources](CAP-03-connector-foundation-and-trusted-sources.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |
 | [CAP-04 — Knowledge And Cited Retrieval](CAP-04-knowledge-and-cited-retrieval.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |
 | [CAP-05 — Workflow Authoring And Publication](CAP-05-workflow-authoring-and-publication.md) | 0.1 | DRAFT; implementation blocked by prerequisite gates |

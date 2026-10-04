@@ -1,17 +1,19 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.4
-Status: DRAFT; planning/design/review approved, test-definition publication in progress
+Version: 0.5
+Status: IN_PROGRESS; WO-CAP-02-06 is DONE and WO-CAP-02-01 is implemented pending protected CI and implementation review
 Release: 0.1
 Assurance: EXTENDED
 
 ## Control summary
 
 **Result:** An Administrator can safely configure protected secrets, provider-neutral endpoints, versioned agents, governed tools, and enforceable operating limits.
-**Evidence:** Planning contract only; no implementation or acceptance evidence is claimed.
-**Main blocker:** CAP-02 test-definition publication and authenticated readback
-are not yet complete.
-**Next step:** Execute WO-CAP-02-06 before any behavioural workorder.
+**Evidence:** Protected run 37212285531 verified test-definition publication;
+WO-CAP-02-01 has local automated evidence but no protected-CI or human
+implementation-review evidence yet.
+**Main blocker:** WO-CAP-02-01 must pass protected CI and independent
+implementation review before it can become DONE.
+**Next step:** Review and merge the WO-CAP-02-01 feature branch into `test`.
 
 ## Goal and value
 
@@ -44,8 +46,8 @@ An Administrator can safely configure protected secrets, provider-neutral endpoi
 - Primary actor follows PRC-01.
 - Dependencies: CAP-01
 - CAP-00 and CAP-01 are accepted. Softwaretest.it Steering and CAP-01
-  reporting are operational, but CAP-02 test definitions require their own
-  publication receipt and readback before business implementation READY.
+  reporting are operational. Protected run 37212285531 supplied the separate
+  CAP-02 publication receipt and exact readback required for implementation.
 
 ## Binding rules
 
@@ -84,6 +86,24 @@ An Administrator can safely configure protected secrets, provider-neutral endpoi
 - Public contracts are schema-first and versioned; vendor semantics remain in adapters.
 - Cross-module access uses public contracts only; secrets remain protected references.
 - External effects require idempotency, bounded retry, and stable error translation.
+
+### Secret-key runtime contract
+
+- Persistent secret storage requires `APISTRA_SECRET_KEY_RING_FILE`; the
+  protected read-only JSON file contains a `keys` object mapping stable key IDs
+  to base64url-encoded 32-byte AES keys. It is never stored in the database,
+  repository, image, API, log, or evidence.
+- `APISTRA_SECRET_ACTIVE_KEY_ID` identifies the active envelope key without
+  containing key material; its default is `local-v1`.
+- Rotation adds a new key to the ring and changes the active ID. Previous keys
+  remain decrypt-only until a bounded re-encryption step has completed; unknown
+  or removed key IDs fail closed.
+- `APISTRA_INSTALLATION_ID` participates in authenticated associated data and
+  defaults to `local`. Project ID, secret-reference ID, and secret version are
+  also bound into the AES-GCM associated data.
+- Database-backed startup fails closed when the key file is absent. The
+  in-memory local/test adapter may use an ephemeral process key and is not a
+  persistent configuration.
 
 ## Architecture, security, and design
 
@@ -137,8 +157,8 @@ architecture, security, design, path, and CAP-02 readiness contracts.
 
 Design revision 0.4 was approved and the independent expectation,
 architecture, and security comparison was confirmed complete by the product
-owner on 2026-10-04. The eight atomic manual cases and five BDD scenarios are
-now locally defined. Publication and authenticated readback through
-WO-CAP-02-06 remain the only readiness gate. Until that gate passes,
-WO-CAP-02-01 through WO-CAP-02-05 remain DRAFT.
+owner on 2026-10-04. The eight atomic manual cases and five BDD scenarios were
+published and exactly read back in protected run 37212285531. WO-CAP-02-06 is
+DONE. WO-CAP-02-01 is the active implementation slice; later implementation
+workorders remain DRAFT until their declared predecessor is complete.
 

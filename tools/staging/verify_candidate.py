@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import http.cookiejar
 import json
 import os
 import secrets
 import subprocess
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -33,6 +35,9 @@ HTTP_POST = "POST"
 ATLAS_KEY = "ATLAS"
 HTTP_CREATED = 201
 HTTP_NO_CONTENT = 204
+SECRET_KEY_BYTES = 32
+SECRET_KEY_ID = "local-v1"
+CONTAINER_SECRET_MODE = 0o644
 HTTP_UNAUTHORIZED = 401
 HTTP_NOT_FOUND = 404
 DEFAULT_API_PORT = 18_080
@@ -47,6 +52,24 @@ def run(
         command, cwd=ROOT, env=env, check=check, text=True, capture_output=capture
     )
     return result.stdout.strip() if capture else ""
+
+
+def write_container_secret_json(path: Path, payload: dict[str, object]) -> None:
+    """Create a secret readable by the remapped, read-only container user.
+
+    The parent directory remains owner-only. The file itself needs the host-side
+    read bit for the container UID because Compose implements this secret as a
+    read-only bind mount.
+    """
+
+    descriptor = os.open(
+        path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+        CONTAINER_SECRET_MODE,
+    )
+    with os.fdopen(descriptor, "w", encoding=UTF8) as handle:
+        json.dump(payload, handle, sort_keys=True)
+        handle.write("\n")
 
 
 def get_json(url: str) -> dict[str, object]:
@@ -424,6 +447,35 @@ def image_ids(manifest: dict[str, object]) -> dict[str, str]:
     }
 
 
+def create_secret_key_ring() -> tuple[Path, Path]:
+    """Create one isolated synthetic key ring outside retained evidence."""
+
+    directory = Path(tempfile.mkdtemp(prefix="apistra-cap02-key-ring-"))
+    path = directory / "key-ring.json"
+    write_container_secret_json(
+        path,
+        {
+            "keys": {
+                SECRET_KEY_ID: base64.urlsafe_b64encode(
+                    secrets.token_bytes(SECRET_KEY_BYTES)
+                ).decode("ascii")
+            }
+        },
+    )
+    return directory, path
+
+
+def start_candidate(compose: list[str], env: dict[str, str]) -> None:
+    """Start the candidate and retain useful container output on failure."""
+
+    try:
+        run([*compose, "up", "--detach", "--wait"], env)
+    except subprocess.CalledProcessError:
+        run([*compose, "ps", "--all"], env, check=False)
+        run([*compose, "logs", "--no-color", "migrate", "api"], env, check=False)
+        raise
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
@@ -434,6 +486,7 @@ def main() -> int:
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding=UTF8))
     commit = manifest["source_commit"]
+    secret_directory, key_ring_path = create_secret_key_ring()
     env = os.environ.copy()
     env.update(
         {
@@ -447,12 +500,14 @@ def main() -> int:
             "APISTRA_WEB_PORT": str(args.web_port),
             "APISTRA_ENVIRONMENT": f"local-staging-{args.run_id}",
             "APISTRA_SECURE_COOKIES": "false",
+            "APISTRA_SECRET_KEY_RING_FILE_HOST": str(key_ring_path),
+            "APISTRA_SECRET_ACTIVE_KEY_ID": SECRET_KEY_ID,
         }
     )
     compose = ["docker", "compose", "--file", str(COMPOSE)]
     before = image_ids(manifest)
     try:
-        run([*compose, "up", "--detach", "--wait"], env)
+        start_candidate(compose, env)
         api = wait_for(f"http://127.0.0.1:{args.api_port}/health/ready", "ready")
         web = wait_for(f"http://127.0.0.1:{args.web_port}/api/health", "ready")
         if (
@@ -514,6 +569,8 @@ def main() -> int:
     finally:
         if not args.keep:
             run([*compose, "down", "--volumes", "--remove-orphans"], env, check=False)
+            key_ring_path.unlink(missing_ok=True)
+            secret_directory.rmdir()
 
 
 if __name__ == "__main__":

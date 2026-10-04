@@ -35,18 +35,19 @@ def test_cap02_manual_package_is_complete_and_independently_executable() -> None
         assert "## Required evidence and oracle" in text
 
 
-def test_cap02_review_and_design_gates_are_explicitly_scoped() -> None:
+def test_cap02_review_and_design_gates_remain_scoped_after_publication() -> None:
     review = (ROOT / "docs/planning/14-cap02-readiness-review.md").read_text(encoding="utf-8")
     design = (ROOT / "docs/planning/07-design-contract.md").read_text(encoding="utf-8")
-    assert "Status: APPROVED FOR WO-CAP-02-06" in review
+    assert "Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE" in review
     assert "Status: APPROVED." in design
     assert "not capability acceptance" in review.lower()
     assert "not implementation" in design.lower()
 
 
-def test_cap02_publication_workorder_owns_all_new_test_paths() -> None:
+def test_cap02_publication_workorder_is_done_and_retains_path_ownership() -> None:
     workorder = (ROOT / "docs/workorders/CAP-02/WO-CAP-02-06.md").read_text(encoding="utf-8")
-    assert "Status: READY" in workorder
+    assert "Status: DONE" in workorder
+    assert "protected run 37212285531" in workorder
     for path in (
         "docs/testing/manual/PRC-01/CAP-02/",
         "tests/bdd/features/cap_02/",

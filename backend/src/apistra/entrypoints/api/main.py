@@ -10,7 +10,13 @@ from fastapi import Cookie, FastAPI, Header, Request, Response, status
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from apistra.entrypoints.api.composition import build_identity_service, build_project_service
+from apistra.entrypoints.api.catalog import register_catalog_routes
+from apistra.entrypoints.api.composition import (
+    build_identity_service,
+    build_project_service,
+    build_secret_service,
+)
+from apistra.modules.catalog.application import SecretService
 from apistra.modules.identity.application import IdentityService, OperationResult
 from apistra.modules.identity.domain import (
     IdentityError,
@@ -378,6 +384,7 @@ def _register_audit_route(
     application: FastAPI,
     identity: IdentityService,
     projects: ProjectService,
+    secrets: SecretService,
 ) -> None:
     @application.get("/api/v1/audit-events", tags=["audit"], response_model=None)
     def list_audit_events(
@@ -418,8 +425,24 @@ def _register_audit_route(
             }
             for event in project_event_result.value
         ]
+        secret_event_result = secrets.audit_events(administrator_id)
+        if secret_event_result.value is None:
+            raise RuntimeError("Successful secret audit query returned no collection.")
+        secret_events: list[dict[str, object]] = [
+            {
+                FIELD_ID: str(event.id),
+                "event_type": event.event_type,
+                FIELD_CREATED_AT: event.created_at.isoformat(),
+                FIELD_CORRELATION_ID: event.correlation_id,
+                "actor": event.actor_username,
+                "subject_id": str(event.secret_reference_id),
+                "project_id": str(event.project_id),
+                "project_key": None,
+            }
+            for event in secret_event_result.value
+        ]
         events = sorted(
-            [*identity_events, *project_events],
+            [*identity_events, *project_events, *secret_events],
             key=lambda event: (
                 str(event[FIELD_CREATED_AT]),
                 str(event[FIELD_ID]),
@@ -546,6 +569,7 @@ def create_app(
     runtime_settings: RuntimeSettings | None = None,
     identity_service: IdentityService | None = None,
     project_service: ProjectService | None = None,
+    secret_service: SecretService | None = None,
 ) -> FastAPI:
     configured_settings = runtime_settings
 
@@ -554,6 +578,7 @@ def create_app(
 
     identity = identity_service or build_identity_service(current_settings())
     projects = project_service or build_project_service(current_settings())
+    secrets = secret_service or build_secret_service(current_settings())
     application = FastAPI(
         title="Apistra API",
         version=current_settings().version,
@@ -564,10 +589,18 @@ def create_app(
     _register_identity_creation_routes(application, identity, current_settings)
     _register_identity_session_routes(application, identity, current_settings)
     _register_project_collection_routes(application, identity, projects)
-    _register_audit_route(application, identity, projects)
+    _register_audit_route(application, identity, projects, secrets)
     _register_project_read_route(application, identity, projects)
     _register_project_update_route(application, identity, projects)
     _register_project_archive_route(application, identity, projects)
+    register_catalog_routes(
+        application,
+        lambda request, token, csrf, mutation: _authenticated(
+            identity, request, token, csrf, mutation=mutation
+        ),
+        projects,
+        secrets,
+    )
 
     return application
 

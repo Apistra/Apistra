@@ -93,3 +93,53 @@ source_modules =
     apistra.modules.identity.adapters
 forbidden_modules =
     apistra.entrypoints
+
+[importlinter:contract:catalog-domain-independence]
+name = ARCH-001 catalog domain independence
+type = forbidden
+source_modules =
+    apistra.modules.catalog.domain
+forbidden_modules =
+    apistra.modules.catalog.application
+    apistra.modules.catalog.ports
+    apistra.modules.catalog.adapters
+    apistra.entrypoints
+    cryptography
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:catalog-application-boundary]
+name = ARCH-002 catalog application controls use cases
+type = forbidden
+source_modules =
+    apistra.modules.catalog.application
+forbidden_modules =
+    apistra.modules.catalog.adapters
+    apistra.entrypoints
+    cryptography
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:catalog-ports-boundary]
+name = ARCH-003 catalog ports remain provider neutral
+type = forbidden
+source_modules =
+    apistra.modules.catalog.ports
+forbidden_modules =
+    apistra.modules.catalog.application
+    apistra.modules.catalog.adapters
+    apistra.entrypoints
+    cryptography
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:catalog-adapter-containment]
+name = ARCH-011 catalog adapters do not own composition
+type = forbidden
+source_modules =
+    apistra.modules.catalog.adapters
+forbidden_modules =
+    apistra.entrypoints
