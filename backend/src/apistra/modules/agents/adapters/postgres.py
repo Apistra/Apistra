@@ -17,7 +17,7 @@ from apistra.modules.agents.domain import (
 
 type Row = dict[str, Any]
 type MappingCursor = psycopg.Cursor[Row]
-FIELD_VERSION = "version"  # noqa: WPS226 - shared persisted-field name
+FIELD_VERSION = "version"
 
 
 class PostgresAgentStore:
