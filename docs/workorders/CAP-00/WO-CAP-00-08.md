@@ -1,6 +1,6 @@
 # WO-CAP-00-08 — Publish canonical Steering sources
 
-Version: 0.11-done
+Version: 0.12-done
 Status: DONE
 Status reason: GitHub Actions run 37182972206 verified the authenticated import receipts and complete export readback; the product owner reviewed and approved the result on 2026-10-04
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED; run 37182972206 imported 160 sources and verified the complete export without drift
 - Delivery class: operational-governance
 - Owned verification group: TST-WO-CAP-00-08
-- Specification revision: 0.11-done
+- Specification revision: 0.12-done
 
 ## Risk profile and escalation
 
@@ -56,8 +56,8 @@ One deterministic manifest represents every canonical `docs/capabilities/CAP-*.m
 - Map source evidence explicitly to the Steering-domain states `MISSING`, `PARTIAL`, `CURRENT`, `FAILED`, `STALE`, and `UNKNOWN`; do not reuse the unrelated file-scan evidence enum currently exposed by the OpenAPI component-name collision.
 - Write a lossless local outbox by default and require `--apply` for remote mutation.
 - Import deterministic ordered batches of at most 100 items with independent payload-bound idempotency keys, retain every redacted receipt, and compare every submitted item field through one complete export readback.
-- Validate Guide 1.2.0 Steering operations, scopes, headers, limits, status domain, failure recovery, and matching OpenAPI list/enum constraints before mutation.
-- Reconcile every receipt with `accepted_items + historical_items == submitted items`, validate the remote checksum shape, and retain a rejected remote receipt for diagnosis.
+- Validate Guide 1.3.0 Steering operations, scopes, headers, limits, status domain, payload-hash contract, failure recovery, and matching OpenAPI list/enum constraints before mutation.
+- Reconcile every receipt with `accepted_items + historical_items == submitted items`, require the declared current RFC 8785 receipt checksum to match the exact logical request, and retain a rejected remote receipt for diagnosis.
 - Add the confirmed operations and scope to public-contract preflight and add a separate protected CI-TS-19 step.
 - Document retry, evidence, secret, and runtime-independence boundaries.
 
@@ -102,7 +102,7 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 - `observed_at` is the last Git commit timestamp for the exact source path; authenticated CI checks out full history.
 - Missing optional state maps only to the API's explicit unknown/pending values. Unknown mandatory implementation state fails locally.
 - One stable source identifier and one payload hash determine idempotency. The same key is reused only for an identical payload.
-- Remote receipt/content checksums are validated for shape and retained, while correctness is established by exact field comparison because Guide 1.2.0 does not define the server receipt-checksum preimage.
+- New receipts must declare `rfc8785-sha256` and match the locally calculated JCS request checksum exactly; legacy checksums are accepted only for explicit v1 replays. Complete export comparison independently verifies semantic state.
 
 ## ARCH rules and pattern limits
 
@@ -124,14 +124,14 @@ An unlisted product, deployment, schema, or dependency change is a stop conditio
 
 1. The local manifest contains every canonical Capability and Workorder exactly once, preserves raw-source and payload hashes, and rejects an empty or duplicate scope.
 2. A simulated import proves ordered API-sized payload-bound writes, Steering-domain evidence mapping, current-plus-historical receipt reconciliation for every batch, one full export readback, and failure on a changed field or count.
-3. Public preflight verifies Guide 1.2.0 and matching OpenAPI Steering operations, limits, enums, scopes, headers, and recovery rules; CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
+3. Public preflight verifies Guide 1.3.0 and matching OpenAPI Steering operations, limits, enums, scopes, headers, payload-hash semantics, and recovery rules; CI-TS-19 runs separately from manual-definition publishing and CI-result reporting.
 4. A trusted-branch run accounts for every submitted item as accepted or historical, retains a well-formed remote payload checksum, and exports every submitted field without unexplained drift; the redacted receipt is retained.
 
 ## Steering criterion evidence
 
 - WO-CAP-00-08-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=Run 37182972206 generated and verified the unique 19-Capability and 141-Workorder manifest with source and content hashes.
 - WO-CAP-00-08-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=The hosted adapter suite passed batching, status mapping, receipt reconciliation, export readback, and retained negative cases.
-- WO-CAP-00-08-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=The public contract preflight and separate CI-TS-19 step passed in run 37182972206 against Guide 1.2.0.
+- WO-CAP-00-08-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=The public contract preflight passed locally against Guide 1.3.0; protected CI re-verifies the contract and separate CI-TS-19 publication on every trusted push.
 - WO-CAP-00-08-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-08 completion; reason=Run 37182972206 accepted 100 plus 60 sources and verified the complete export with no unexplained drift.
 
 ## Acceptance examples and test oracles

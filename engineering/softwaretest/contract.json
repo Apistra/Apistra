@@ -8,7 +8,7 @@
   "integration_guide": {
     "path": "/api/v1/integration-guides/ci.json",
     "contract": "softwaretest.it-ci-integration",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "revision_header": "If-Match",
     "idempotency_header": "Idempotency-Key",
     "cycle_operations": ["cycle_create", "cycle_item_create", "cycle_start", "run_start"],
@@ -36,6 +36,13 @@
       "maximum_criteria_per_item": 500,
       "maximum_decisions_per_item": 50,
       "list_page_size": 50
+    },
+    "steering_payload_hash_contract": {
+      "current_contract": "rfc8785-sha256",
+      "operation_version": "steering.import.v2",
+      "algorithm": "SHA-256",
+      "canonicalization_uri": "https://www.rfc-editor.org/rfc/rfc8785",
+      "legacy_contract": "legacy-drf-normalized-sha256"
     },
     "steering_evidence_statuses": ["MISSING", "PARTIAL", "CURRENT", "FAILED", "STALE", "UNKNOWN"],
     "steering_failure_codes": ["VALIDATION_ERROR", "REVISION_CONTENT_CONFLICT", "NOT_FOUND", "FORBIDDEN"]

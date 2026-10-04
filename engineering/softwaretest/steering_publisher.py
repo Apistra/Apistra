@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -40,6 +41,7 @@ FIELD_PAYLOAD = "payload"
 FIELD_SOURCE = "source"
 FIELD_ITEMS = "items"
 FIELD_PAYLOAD_SHA256 = "payload_sha256"
+FIELD_PAYLOAD_HASH_CONTRACT = "payload_hash_contract"
 FIELD_CRITERIA = "criteria"
 FIELD_STATUS = "status"
 FIELD_DUE_NOW = "due_now"
@@ -86,6 +88,9 @@ SOURCE_REVISION_SCALE = 100
 PROJECTION_REVISION = 2
 MAX_SOURCE_REVISION = 2_147_483_647
 CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+CURRENT_PAYLOAD_HASH_CONTRACT = "rfc8785-sha256"
+LEGACY_PAYLOAD_HASH_CONTRACT = "legacy-drf-normalized-sha256"
+MAX_IJSON_INTEGER = 9_007_199_254_740_991
 DATETIME_FIELDS = frozenset({"observed_at", "confirmed_at"})
 HEADING_PATTERN = re.compile(
     r"^# (?P<id>CAP-\d{2}|WO-CAP-\d{2}-\d{2}) — (?P<title>.+)$"
@@ -595,6 +600,54 @@ def stable_key(command_revision: str, manifest_hash: str) -> str:
     return f"apistra-steering-import-{digest}"
 
 
+def _validate_jcs_value(value: Any) -> None:
+    """Reject values outside the I-JSON subset used by Steering imports."""
+    if value is None or isinstance(value, (str, bool)):
+        return
+    if isinstance(value, int):
+        if abs(value) > MAX_IJSON_INTEGER:
+            raise ValueError("Steering hash integer is outside the I-JSON range")
+        return
+    if isinstance(value, float):
+        raise TypeError("Steering imports must not contain floating-point values")
+    if isinstance(value, list):
+        for item in value:
+            _validate_jcs_value(item)
+        return
+    if isinstance(value, dict):
+        if not all(isinstance(key, str) for key in value):
+            raise ValueError("Steering hash object keys must be strings")
+        for item in value.values():
+            _validate_jcs_value(item)
+        return
+    raise TypeError(f"Unsupported Steering hash value: {type(value).__name__}")
+
+
+def _jcs_ordered(value: Any) -> Any:
+    """Order object keys by UTF-16 code units as required by RFC 8785."""
+    if isinstance(value, dict):
+        return {
+            key: _jcs_ordered(value[key])
+            for key in sorted(value, key=lambda item: item.encode("utf-16-be"))
+        }
+    if isinstance(value, list):
+        return [_jcs_ordered(item) for item in value]
+    return value
+
+
+def steering_payload_sha256(payload: Any) -> str:
+    """Hash a Steering request using RFC 8785 for its schema-safe JSON subset."""
+    _validate_jcs_value(payload)
+    canonical = json.dumps(
+        _jcs_ordered(payload),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def import_payloads(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     """Split an ordered manifest into API-sized, independently replayable writes."""
     payload = manifest[FIELD_PAYLOAD]
@@ -614,12 +667,23 @@ def _validate_import_receipt(
 ) -> None:
     mismatches = []
     remote_hash = receipt.get(FIELD_PAYLOAD_SHA256)
+    hash_contract = receipt.get(FIELD_PAYLOAD_HASH_CONTRACT)
     accepted = receipt.get("accepted_items")
     historical = receipt.get("historical_items")
     if not isinstance(remote_hash, str) or not CONTENT_HASH_PATTERN.fullmatch(
         remote_hash
     ):
         mismatches.append("receipt payload_sha256 is invalid")
+    elif hash_contract == CURRENT_PAYLOAD_HASH_CONTRACT:
+        if remote_hash != steering_payload_sha256(batch_payload):
+            mismatches.append(
+                "receipt payload_sha256 differs from the JCS request hash"
+            )
+    elif hash_contract == LEGACY_PAYLOAD_HASH_CONTRACT:
+        if receipt.get("replayed") is not True:
+            mismatches.append("legacy receipt hash is only valid for a replay")
+    else:
+        mismatches.append("receipt payload_hash_contract is unsupported")
     if (
         type(accepted) is not int
         or type(historical) is not int
@@ -643,7 +707,7 @@ def _publish_batches(
 ) -> list[dict[str, Any]]:
     completed: list[dict[str, Any]] = []
     for batch_number, batch_payload in enumerate(import_payloads(manifest), 1):
-        batch_hash = payload_sha256(batch_payload)
+        batch_hash = steering_payload_sha256(batch_payload)
         remote_receipt: dict[str, Any] | None = None
         try:
             remote_receipt = requester(

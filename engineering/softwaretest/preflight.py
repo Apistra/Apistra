@@ -42,6 +42,14 @@ def _validate_steering_openapi(
     evidence = _property_schema(item, "evidence_status")
     evidence_name = str(evidence.get(REF_KEY, "")).rsplit("/", 1)[-1]
     evidence_values = _component_schema(document, evidence_name).get("enum")
+    receipt = _component_schema(document, "SteeringImportReceipt")
+    hash_contract = _property_schema(receipt, "payload_hash_contract")
+    hash_contract_schema = {}
+    all_of = hash_contract.get("allOf")
+    if isinstance(all_of, list) and all_of and isinstance(all_of[0], dict):
+        hash_contract_schema = all_of[0]
+    hash_contract_name = str(hash_contract_schema.get(REF_KEY, "")).rsplit("/", 1)[-1]
+    hash_contract_values = _component_schema(document, hash_contract_name).get("enum")
     limits = (
         (import_items.get("minItems"), batch["minimum_items"]),
         (import_items.get("maxItems"), batch["maximum_items"]),
@@ -60,6 +68,14 @@ def _validate_steering_openapi(
         errors.append("Steering evidence schema reference changed")
     if evidence_values != expected["steering_evidence_statuses"]:
         errors.append("Steering evidence OpenAPI enum changed")
+    expected_hash = expected.get("steering_payload_hash_contract", {})
+    if (
+        not isinstance(expected_hash, dict)
+        or hash_contract_name != "PayloadHashContractEnum"
+        or hash_contract_values
+        != [expected_hash.get("current_contract"), expected_hash.get("legacy_contract")]
+    ):
+        errors.append("Steering payload hash OpenAPI contract changed")
     return errors
 
 
@@ -213,6 +229,25 @@ def _validate_steering_statuses(
     return []
 
 
+def _validate_steering_payload_hash(
+    steering: dict[str, object], expected: dict[str, object]
+) -> list[str]:
+    observed = steering.get("payload_hash_contract", {})
+    wanted = expected.get("steering_payload_hash_contract", {})
+    if not isinstance(observed, dict) or not isinstance(wanted, dict):
+        return ["Steering payload hash guide is absent"]
+    compatibility = _mapping(_mapping(steering.get("idempotency")).get("compatibility"))
+    checks = (
+        observed.get("current_contract") == wanted.get("current_contract"),
+        observed.get("operation_version") == wanted.get("operation_version"),
+        observed.get("algorithm") == wanted.get("algorithm"),
+        observed.get("canonicalization_uri") == wanted.get("canonicalization_uri"),
+        wanted.get("legacy_contract") in str(compatibility.get("legacy", "")),
+        "new idempotency-key" in str(compatibility.get("key_rotation", "")).lower(),
+    )
+    return [] if all(checks) else ["Steering payload hash contract changed"]
+
+
 def _validate_steering_data(
     document: dict[str, object], expected: dict[str, object]
 ) -> list[str]:
@@ -246,6 +281,7 @@ def _validate_steering_data(
     errors.extend(message for valid, message in checks if not valid)
     errors.extend(_validate_steering_batch(steering, expected))
     errors.extend(_validate_steering_statuses(steering, expected))
+    errors.extend(_validate_steering_payload_hash(steering, expected))
     recovery = steering.get("failure_recovery", {})
     if not isinstance(recovery, dict) or not set(
         expected["steering_failure_codes"]

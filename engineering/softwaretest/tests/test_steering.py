@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -237,7 +238,8 @@ class SteeringPublisherTests(unittest.TestCase):
                     "accepted_items": len(payload["items"]),
                     "historical_items": 0,
                     "replayed": False,
-                    "payload_sha256": steering.payload_sha256(payload),
+                    "payload_sha256": steering.steering_payload_sha256(payload),
+                    "payload_hash_contract": "rfc8785-sha256",
                 }
             return {
                 "contract_version": "1.0",
@@ -285,7 +287,8 @@ class SteeringPublisherTests(unittest.TestCase):
             {
                 "accepted_items": 0,
                 "historical_items": 1,
-                "payload_sha256": "a" * 64,
+                "payload_sha256": steering.steering_payload_sha256(payload),
+                "payload_hash_contract": "rfc8785-sha256",
             },
             payload,
         )
@@ -295,6 +298,7 @@ class SteeringPublisherTests(unittest.TestCase):
                     "accepted_items": 0,
                     "historical_items": 0,
                     "payload_sha256": "a" * 64,
+                    "payload_hash_contract": "rfc8785-sha256",
                 },
                 payload,
             )
@@ -304,9 +308,62 @@ class SteeringPublisherTests(unittest.TestCase):
                     "accepted_items": -1,
                     "historical_items": 2,
                     "payload_sha256": "a" * 64,
+                    "payload_hash_contract": "rfc8785-sha256",
                 },
                 payload,
             )
+
+    def test_receipt_requires_declared_matching_jcs_hash(self) -> None:
+        payload = {"source": "apistra", "items": [{"external_id": "CAP-01"}]}
+        with self.assertRaisesRegex(ValueError, "differs from the JCS request hash"):
+            steering._validate_import_receipt(
+                {
+                    "accepted_items": 1,
+                    "historical_items": 0,
+                    "replayed": False,
+                    "payload_sha256": "a" * 64,
+                    "payload_hash_contract": "rfc8785-sha256",
+                },
+                payload,
+            )
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            steering._validate_import_receipt(
+                {
+                    "accepted_items": 1,
+                    "historical_items": 0,
+                    "replayed": False,
+                    "payload_sha256": steering.steering_payload_sha256(payload),
+                },
+                payload,
+            )
+
+    def test_legacy_receipt_hash_is_allowed_only_for_replay(self) -> None:
+        payload = {"items": [{"external_id": "CAP-01"}]}
+        receipt = {
+            "accepted_items": 1,
+            "historical_items": 0,
+            "replayed": True,
+            "payload_sha256": "a" * 64,
+            "payload_hash_contract": "legacy-drf-normalized-sha256",
+        }
+        steering._validate_import_receipt(receipt, payload)
+        receipt["replayed"] = False
+        with self.assertRaisesRegex(ValueError, "only valid for a replay"):
+            steering._validate_import_receipt(receipt, payload)
+
+    def test_steering_hash_rejects_values_outside_schema_safe_jcs_subset(self) -> None:
+        with self.assertRaisesRegex(TypeError, "floating-point"):
+            steering.steering_payload_sha256({"value": 1.5})
+        with self.assertRaisesRegex(ValueError, "I-JSON range"):
+            steering.steering_payload_sha256({"value": steering.MAX_IJSON_INTEGER + 1})
+
+    def test_steering_hash_orders_object_keys_as_utf16_code_units(self) -> None:
+        value = {"\ue000": 1, "\U00010000": 2}
+        canonical = '{"𐀀":2,"":1}'.encode()
+        self.assertEqual(
+            steering.steering_payload_sha256(value),
+            hashlib.sha256(canonical).hexdigest(),
+        )
 
     def test_second_batch_failure_retains_completed_batch_evidence(self) -> None:
         manifest = steering.build_manifest(
@@ -324,7 +381,8 @@ class SteeringPublisherTests(unittest.TestCase):
             return {
                 "accepted_items": len(payload["items"]),
                 "historical_items": 0,
-                "payload_sha256": steering.payload_sha256(payload),
+                "payload_sha256": steering.steering_payload_sha256(payload),
+                "payload_hash_contract": "rfc8785-sha256",
             }
 
         with self.assertRaises(steering.SteeringPublishError) as raised:
