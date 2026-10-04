@@ -54,7 +54,6 @@ STATUS_EVIDENCE_FAILED = "FAILED"
 STATUS_EVIDENCE_STALE = "STALE"
 STATUS_PENDING = "PENDING"
 STATUS_CONFIRMED = "CONFIRMED"
-CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
 SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
 STEERING_EVIDENCE_STATUSES = frozenset(
@@ -76,6 +75,9 @@ MAX_DELTA_LENGTH = 10_000
 MAX_NEXT_STEP_LENGTH = 500
 VERSION_MAJOR_SCALE = 1_000_000
 VERSION_MINOR_SCALE = 1_000
+SOURCE_REVISION_SCALE = 100
+PROJECTION_REVISION = 1
+MAX_SOURCE_REVISION = 2_147_483_647
 CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 DATETIME_FIELDS = frozenset({"observed_at", "confirmed_at"})
 HEADING_PATTERN = re.compile(
@@ -170,24 +172,30 @@ def _source_revision(version: str) -> int:
     major = int(match.group("major"))
     minor = int(match.group("minor"))
     patch = int(match.group("patch") or 0)
-    return major * VERSION_MAJOR_SCALE + minor * VERSION_MINOR_SCALE + patch + 1
+    document_revision = (
+        major * VERSION_MAJOR_SCALE + minor * VERSION_MINOR_SCALE + patch + 1
+    )
+    source_revision = document_revision * SOURCE_REVISION_SCALE + PROJECTION_REVISION
+    if source_revision > MAX_SOURCE_REVISION:
+        raise ValueError(f"source revision exceeds API limit: {version}")
+    return source_revision
 
 
 def _implementation_status(status: str) -> str:
     normalised = status.upper()
+    if normalised.startswith(("DRAFT", "READY")):
+        return STATUS_PLANNED
     if normalised.startswith(
         ("DONE", "ACCEPTED", SOURCE_STATUS_FINAL_ACCEPTANCE_READY)
     ):
         return STATUS_IMPLEMENTED
-    if "BLOCKED" in normalised:
+    if normalised.startswith("BLOCKED"):
         return STATUS_BLOCKED
     if (
         normalised.startswith("IN_PROGRESS")
         or "FINAL ACCEPTANCE PREPARATION" in normalised
     ):
         return STATUS_IN_PROGRESS
-    if normalised.startswith(("DRAFT", "READY")):
-        return STATUS_PLANNED
     raise ValueError(f"unsupported implementation status: {status}")
 
 
@@ -195,12 +203,19 @@ def _approval_status(status: str, approval: str) -> str:
     combined = f"{status}; {approval}".upper()
     if any(
         marker in combined
-        for marker in ("NOT APPROVED", "NOT YET APPROVED", "NOT ACCEPTED", "REMAINS")
+        for marker in ("NOT APPROVED", "NOT YET APPROVED", "NOT ACCEPTED")
     ):
         return STATUS_OPEN
     if any(
         marker in combined
-        for marker in ("HUMAN ACCEPTED", "IMPLEMENTATION AUTHORISED", "APPROVED")
+        for marker in (
+            "HUMAN ACCEPTED",
+            "IMPLEMENTATION AUTHORISED",
+            "APPROVED",
+            "REVIEWED",
+            "REVIEW COMPLETE",
+            "RESULT VERIFIED",
+        )
     ):
         return STATUS_APPROVED
     if status.upper().startswith("ACCEPTED"):
@@ -278,22 +293,15 @@ def git_observed_at(path: Path) -> str:
     return canonical_datetime(observed_at)
 
 
-def _criteria(
-    text: str, external_id: str, implementation_status: str
-) -> list[dict[str, Any]]:
+def _criteria(text: str, external_id: str) -> list[dict[str, Any]]:
     titles = _numbered_items(_section(text, "Acceptance criteria"))
-    status = (
-        CRITERION_PASSED
-        if implementation_status == STATUS_IMPLEMENTED
-        else CRITERION_UNKNOWN
-    )
     return [
         {
             FIELD_EXTERNAL_ID: f"{external_id}-AC-{index:02d}",
             FIELD_TITLE: title,
-            "status": status,
+            "status": CRITERION_UNKNOWN,
             "required": True,
-            "due_now": True,
+            "due_now": False,
             "exception_allowed": False,
             "gate": "",
             "reason": "",
@@ -364,7 +372,7 @@ def parse_source(path: Path, observed_at: str) -> dict[str, Any]:
         "due_gate": "",
         "observed_at": canonical_datetime(observed_at),
         "confirmed_at": None,
-        "criteria": _criteria(text, external_id, implementation_status),
+        "criteria": _criteria(text, external_id),
         "decisions": [],
     }
     _validate_lengths(item)
@@ -692,7 +700,7 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--outbox", type=Path, default=DEFAULT_OUTBOX)
     parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
-    parser.add_argument("--command-revision", default="steering-contract-v2")
+    parser.add_argument("--command-revision", default="steering-contract-v3")
     args = parser.parse_args()
     manifest = build_manifest()
     write_json_atomic(args.outbox, manifest)

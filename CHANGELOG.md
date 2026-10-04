@@ -69,6 +69,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ### Fixed
 
+- Corrected the Softwaretest.it Steering projection so explanatory blocker text cannot activate draft capabilities, completed item reviews remain distinct from later capability/production gates, criterion success is never inferred from item implementation, future criteria are not marked due without an explicit criterion-level due gate, and mapping changes advance source revisions monotonically.
 - Aligned the fail-closed Softwaretest.it preflight with Guide 1.2.0 and its Steering/OpenAPI limits, enums, scopes, operations, and recovery contract.
 - Reconciled Steering receipts across accepted and historical items, retained rejected remote receipts, and stopped guessing the undocumented server-checksum preimage while preserving exact complete-export verification.
 - Corrected Steering evidence-state mapping to the running API's `MISSING`, `PARTIAL`, `CURRENT`, `FAILED`, `STALE`, and `UNKNOWN` domain instead of the unrelated file-scan enum exposed by the current OpenAPI component-name collision.
