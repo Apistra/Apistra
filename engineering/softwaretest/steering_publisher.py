@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -76,6 +77,7 @@ MAX_NEXT_STEP_LENGTH = 500
 VERSION_MAJOR_SCALE = 1_000_000
 VERSION_MINOR_SCALE = 1_000
 CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+DATETIME_FIELDS = frozenset({"observed_at", "confirmed_at"})
 HEADING_PATTERN = re.compile(
     r"^# (?P<id>CAP-\d{2}|WO-CAP-\d{2}-\d{2}) — (?P<title>.+)$"
 )
@@ -437,6 +439,31 @@ def _compare_mapping(
         _compare_requested(value, actual[field], f"{path}.{field}", mismatches)
 
 
+def _parse_datetime(value: Any) -> datetime:
+    if not isinstance(value, str):
+        raise TypeError("date-time value must be a string")
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError("date-time value must include a timezone")
+    return parsed
+
+
+def _compare_datetime(
+    expected: Any, actual: Any, path: str, mismatches: list[str]
+) -> None:
+    if expected is None or actual is None:
+        if expected != actual:
+            mismatches.append(f"{path}: value differs")
+        return
+    try:
+        values_match = _parse_datetime(expected) == _parse_datetime(actual)
+    except (TypeError, ValueError):
+        mismatches.append(f"{path}: invalid date-time")
+        return
+    if not values_match:
+        mismatches.append(f"{path}: value differs")
+
+
 def _compare_sequence(
     expected: list[Any], actual: Any, path: str, mismatches: list[str]
 ) -> None:
@@ -453,6 +480,9 @@ def _compare_sequence(
 def _compare_requested(
     expected: Any, actual: Any, path: str, mismatches: list[str]
 ) -> None:
+    if path.rsplit(".", 1)[-1] in DATETIME_FIELDS:
+        _compare_datetime(expected, actual, path, mismatches)
+        return
     if isinstance(expected, dict):
         _compare_mapping(expected, actual, path, mismatches)
         return

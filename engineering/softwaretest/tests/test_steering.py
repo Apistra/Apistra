@@ -229,6 +229,71 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertIn("item count differs", mismatches)
         self.assertIn(f"{expected['external_id']}.title: value differs", mismatches)
 
+    def test_export_compares_rfc3339_timestamps_as_instants(self) -> None:
+        manifest = steering.build_manifest(
+            observed_at_provider=lambda _path: "2026-10-02T08:00:00.000Z"
+        )
+        exported = {
+            "items": [
+                {
+                    **item,
+                    "source": steering.SOURCE,
+                    "observed_at": item["observed_at"].replace(".000Z", "Z"),
+                    "content_sha256": "c" * 64,
+                }
+                for item in manifest["payload"]["items"]
+            ]
+        }
+        self.assertEqual(steering.verify_export(manifest, exported), [])
+
+        confirmed_mismatches: list[str] = []
+        steering._compare_requested(
+            {"confirmed_at": "2026-10-02T08:00:00.000Z"},
+            {"confirmed_at": "2026-10-02T10:00:00+02:00"},
+            "CAP-00",
+            confirmed_mismatches,
+        )
+        self.assertEqual(confirmed_mismatches, [])
+
+    def test_export_rejects_changed_or_invalid_timestamp_instants(self) -> None:
+        expected = {"observed_at": "2026-10-02T08:00:00.000Z"}
+        equivalent = {"observed_at": "2026-10-02T10:00:00+02:00"}
+        changed = {"observed_at": "2026-10-02T08:00:01Z"}
+        invalid = {"observed_at": "2026-10-02 08:00:00"}
+
+        equivalent_mismatches: list[str] = []
+        steering._compare_requested(
+            expected,
+            equivalent,
+            "CAP-00",
+            equivalent_mismatches,
+        )
+        self.assertEqual(equivalent_mismatches, [])
+
+        changed_mismatches: list[str] = []
+        steering._compare_requested(
+            expected,
+            changed,
+            "CAP-00",
+            changed_mismatches,
+        )
+        self.assertEqual(
+            changed_mismatches,
+            ["CAP-00.observed_at: value differs"],
+        )
+
+        invalid_mismatches: list[str] = []
+        steering._compare_requested(
+            expected,
+            invalid,
+            "CAP-00",
+            invalid_mismatches,
+        )
+        self.assertEqual(
+            invalid_mismatches,
+            ["CAP-00.observed_at: invalid date-time"],
+        )
+
     def test_failure_receipt_is_redacted_and_atomic(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "receipt.json"
