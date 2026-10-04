@@ -5,10 +5,13 @@ import type { FormEvent } from "react";
 
 import {
   bootstrapAdministrator,
+  csrfToken,
   currentSession,
   installationStatus,
+  missingSessionMessage,
+  rememberAuthenticatedSession,
+  revokeAuthenticatedSession,
   signIn,
-  signOut,
   type Credentials,
   type SessionView,
   focusErrorAlert,
@@ -23,7 +26,6 @@ import {
 } from "./internal/project-client";
 
 type Screen = "loading" | "sign-in" | "bootstrap" | "overview" | "create-project" | "audit" | "installation-status" | "not-found";
-const CSRF_STORAGE_KEY = "apistra.csrf";
 
 export function AdministrationApp({ requestedProjectId, initialView = "overview" }: {
   requestedProjectId?: string;
@@ -64,10 +66,7 @@ export function AdministrationApp({ requestedProjectId, initialView = "overview"
         } else if (activeSession) {
           await openOverview(activeSession);
         } else {
-          if (sessionStorage.getItem(CSRF_STORAGE_KEY)) {
-            sessionStorage.removeItem(CSRF_STORAGE_KEY);
-            setMessage("Your session has expired. Sign in again.");
-          }
+          setMessage(missingSessionMessage(sessionStorage));
           setScreen("sign-in");
         }
       })
@@ -78,20 +77,15 @@ export function AdministrationApp({ requestedProjectId, initialView = "overview"
   }, []);
 
   function acceptSession(receipt: SessionView & { csrf_token: string }) {
-    sessionStorage.setItem(CSRF_STORAGE_KEY, receipt.csrf_token);
+    rememberAuthenticatedSession(sessionStorage, receipt.csrf_token);
     return openOverview(receipt);
   }
 
   async function doSignOut() {
-    const csrf = sessionStorage.getItem(CSRF_STORAGE_KEY) ?? "";
-    try {
-      await signOut(csrf);
-    } finally {
-      sessionStorage.removeItem(CSRF_STORAGE_KEY);
-      setSession(null);
-      setProjects([]);
-      setScreen("sign-in");
-    }
+    await revokeAuthenticatedSession(sessionStorage);
+    setSession(null);
+    setProjects([]);
+    setScreen("sign-in");
   }
 
   if (screen === "loading") {
@@ -307,7 +301,7 @@ export function ProjectCreate({ onCancel, onCreated }: { onCancel: () => void; o
     event.preventDefault();
     if (!ready) { setError("This field is required."); return; }
     try {
-      const csrf = sessionStorage.getItem(CSRF_STORAGE_KEY) ?? "";
+      const csrf = csrfToken(sessionStorage);
       onCreated(await createProject({ name, key: key.toUpperCase() }, csrf, crypto.randomUUID()));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Project creation failed.");

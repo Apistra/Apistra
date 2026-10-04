@@ -62,6 +62,7 @@ services:
       APISTRA_ENVIRONMENT: ${APISTRA_ENVIRONMENT:-local-staging}
       APISTRA_FORCE_NOT_READY: ${APISTRA_API_FORCE_NOT_READY:-false}
       APISTRA_DATABASE_URL: postgresql://apistra:${APISTRA_DB_PASSWORD:?set APISTRA_DB_PASSWORD}@postgres:5432/apistra
+      APISTRA_SECURE_COOKIES: ${APISTRA_SECURE_COOKIES:-true}
     depends_on:
       migrate:
         condition: service_completed_successfully

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import http.cookiejar
 import json
 import os
 import secrets
@@ -71,11 +72,14 @@ def _bootstrap_administrator(web_base: str) -> tuple[str, str, dict[str, object]
         receipt = json.load(response)
         set_cookie = response.headers.get("set-cookie", "")
     if not all(
-        attribute in set_cookie
-        for attribute in ("HttpOnly", "Secure", "SameSite=strict")
+        attribute in set_cookie for attribute in ("HttpOnly", "SameSite=strict")
     ):
         raise RuntimeError(
             "administrator session cookie is missing required security attributes"
+        )
+    if "Secure" in set_cookie:
+        raise RuntimeError(
+            "loopback HTTP candidate issued a browser-incompatible Secure cookie"
         )
     session_cookie = set_cookie.split(";", 1)[0]
     if receipt.get("administrator", {}).get(FIELD_USERNAME) != username:
@@ -321,6 +325,8 @@ def apply_cap01_fixture(
 def verify_fixture_isolation(web_base: str, password: str) -> None:
     """Prove the packaged Atlas/Orion fixture through the public HTTP boundary."""
 
+    cookies = http.cookiejar.CookieJar()
+    browser = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies))
     sign_in = urllib.request.Request(
         f"{web_base}/api/v1/sessions",
         data=json.dumps({FIELD_USERNAME: "admin.alpha", "password": password}).encode(
@@ -332,19 +338,10 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
         },
         method=HTTP_POST,
     )
-    with urllib.request.urlopen(sign_in, timeout=5) as response:
+    with browser.open(sign_in, timeout=5) as response:
         receipt = json.load(response)
-        session_cookie = response.headers.get("set-cookie", "").split(";", 1)[0]
 
-    listed = json.load(
-        urllib.request.urlopen(
-            urllib.request.Request(
-                f"{web_base}/api/v1/projects",
-                headers={HEADER_COOKIE: session_cookie},
-            ),
-            timeout=3,
-        )
-    )
+    listed = json.load(browser.open(f"{web_base}/api/v1/projects", timeout=3))
     if [
         (item.get(FIELD_ID), item.get("name"), item.get(FIELD_KEY))
         for item in listed.get(FIELD_ITEMS, [])
@@ -365,13 +362,7 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
         "99999999-9999-4999-8999-999999999999",
     ):
         try:
-            urllib.request.urlopen(
-                urllib.request.Request(
-                    f"{web_base}/api/v1/projects/{project_id}",
-                    headers={HEADER_COOKIE: session_cookie},
-                ),
-                timeout=3,
-            )
+            browser.open(f"{web_base}/api/v1/projects/{project_id}", timeout=3)
         except urllib.error.HTTPError as error:
             if error.code != HTTP_NOT_FOUND:
                 raise
@@ -389,12 +380,11 @@ def verify_fixture_isolation(web_base: str, password: str) -> None:
     revoke = urllib.request.Request(
         f"{web_base}/api/v1/session",
         headers={
-            HEADER_COOKIE: session_cookie,
             HEADER_CSRF_TOKEN: receipt["csrf_token"],
         },
         method="DELETE",
     )
-    with urllib.request.urlopen(revoke, timeout=3) as response:
+    with browser.open(revoke, timeout=3) as response:
         if response.status != HTTP_NO_CONTENT:
             raise RuntimeError("fixture session revocation did not return 204")
 
@@ -456,6 +446,7 @@ def main() -> int:
             "APISTRA_DB_PASSWORD": secrets.token_urlsafe(DATABASE_PASSWORD_BYTES),
             "APISTRA_WEB_PORT": str(args.web_port),
             "APISTRA_ENVIRONMENT": f"local-staging-{args.run_id}",
+            "APISTRA_SECURE_COOKIES": "false",
         }
     )
     compose = ["docker", "compose", "--file", str(COMPOSE)]

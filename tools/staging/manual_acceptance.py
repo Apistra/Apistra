@@ -122,6 +122,7 @@ def _environment(
             "APISTRA_DB_PASSWORD": str(private["database_password"]),
             "APISTRA_WEB_PORT": str(state["web_port"]),
             "APISTRA_ENVIRONMENT": str(state["environment"]),
+            "APISTRA_SECURE_COOKIES": "false",
             "APISTRA_FIXTURE_GATE": f"apply-cap01-{state[FIELD_RUN_ID]}",
         }
     )

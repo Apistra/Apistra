@@ -24,6 +24,47 @@ export interface SessionView {
   expires_at: string;
 }
 
+export interface SessionStoragePort {
+  getItem(key: string): string | null;
+  removeItem(key: string): void;
+  setItem(key: string, value: string): void;
+}
+
+const CSRF_STORAGE_KEY = "apistra.csrf";
+const SESSION_OBSERVED_STORAGE_KEY = "apistra.session-observed";
+export const SESSION_EXPIRED_MESSAGE = "Your session has expired. Sign in again.";
+
+export function rememberAuthenticatedSession(
+  storage: SessionStoragePort,
+  csrfToken: string
+): void {
+  storage.setItem(CSRF_STORAGE_KEY, csrfToken);
+  storage.setItem(SESSION_OBSERVED_STORAGE_KEY, "true");
+}
+
+export function csrfToken(storage: SessionStoragePort): string {
+  return storage.getItem(CSRF_STORAGE_KEY) ?? "";
+}
+
+export function clearAuthenticatedSession(storage: SessionStoragePort): void {
+  storage.removeItem(CSRF_STORAGE_KEY);
+}
+
+export async function revokeAuthenticatedSession(
+  storage: SessionStoragePort,
+  revoke: (csrfToken: string) => Promise<void> = signOut
+): Promise<void> {
+  await revoke(csrfToken(storage));
+  clearAuthenticatedSession(storage);
+}
+
+export function missingSessionMessage(storage: SessionStoragePort): string | null {
+  const previousSessionWasObserved = storage.getItem(SESSION_OBSERVED_STORAGE_KEY) === "true";
+  clearAuthenticatedSession(storage);
+  storage.removeItem(SESSION_OBSERVED_STORAGE_KEY);
+  return previousSessionWasObserved ? SESSION_EXPIRED_MESSAGE : null;
+}
+
 export function focusErrorAlert(element: { focus: () => void } | null): void {
   element?.focus();
 }
