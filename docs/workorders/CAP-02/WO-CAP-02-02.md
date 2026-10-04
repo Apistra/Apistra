@@ -1,11 +1,11 @@
 # WO-CAP-02-02 — Implement model and embedding endpoint catalogue
 
-Version: 0.9-ready
-Status: READY
-Status reason: the bounded implementation and local automated evidence exist on `feature/cap02-endpoint-catalogue`; protected CI, independent implementation review, merge, and human workorder approval remain required before DONE
-Implementation state: IMPLEMENTED ON FEATURE BRANCH; REVIEW AND PROTECTED MERGE PENDING
-Evidence state: LOCAL STATIC, ARCHITECTURE, CONTRACT, BACKEND, FRONTEND, MIGRATION, POSTGRESQL, AND COVERAGE GATES VERIFIED; PROTECTED CI PENDING
-Approval state: INDEPENDENT IMPLEMENTATION REVIEW REQUIRED; HUMAN WORKORDER APPROVAL NOT YET GIVEN
+Version: 0.10-done
+Status: DONE
+Status reason: PR #33 merged the reviewed implementation to `test`; protected run 37228142970 passed the complete automated, candidate, staging/recovery, Steering, definition, and receipt-readback gates
+Implementation state: COMPLETE ON PROTECTED `test` AT `96dfa5e8b0226e9744dfa64c7a63783a11f055cf`
+Evidence state: VERIFIED FOR THIS WORKORDER — protected run 37228142970 and product-owner merge approval
+Approval state: INDEPENDENT IMPLEMENTATION REVIEW COMPLETE; HUMAN WORKORDER APPROVAL COMPLETE; CAPABILITY ACCEPTANCE REMAINS WITH WO-CAP-02-07
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-02
-- Specification revision: 0.9-ready; local evidence is bound to the current feature-branch tree and must be replaced by protected candidate evidence after merge
+- Specification revision: 0.10-done; completion evidence is bound to merge `96dfa5e8b0226e9744dfa64c7a63783a11f055cf` and protected run 37228142970
 
 ## Risk profile and escalation
 
@@ -39,7 +39,7 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 CAP-00 and CAP-01 are accepted baselines. WO-CAP-02-06 published and verified
 BDD-ENDPOINT-001 and MT-PRC-01-009. WO-CAP-02-01 is DONE on protected `test` at
-`dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a`. The feature branch now implements
+`dfa8319e7eb93c6ef3bd15c0ec3918a2bdd1ef9a`. PR #33 implemented
 the provider-neutral endpoint domain/application/port boundary, memory and
 PostgreSQL adapters, a versioned migration and OpenAPI contract, authenticated
 project-scoped HTTP routes, safe audit projection, DSN-005, and focused tests.
@@ -47,9 +47,12 @@ Save performs no DNS or network operation. Explicit testing resolves and
 approves every destination address before credential release, pins the selected
 address, rejects redirects, bounds time and response size, and confirms the
 configured model through the read-only OpenAI-compatible `/models` operation.
-The approved readiness review remains the expectation, architecture, security,
-design, and path authority. This is local implementation evidence, not DONE or
-capability acceptance.
+The product owner approved and merged the implementation to protected `test`
+as `96dfa5e8b0226e9744dfa64c7a63783a11f055cf` on 2026-10-04. Protected run
+37228142970 passed contracts/static analysis, architecture, tests, security and
+supply-chain checks, immutable candidate packaging, isolated staging/recovery,
+Steering and CAP-01/CAP-02 definition round-trips, and final receipt readback.
+This closes only this workorder and does not accept CAP-02.
 
 ## Target result
 
@@ -185,12 +188,24 @@ UI scope is DSN-005 from design revision 0.4 after its explicit product approval
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
 - **Evidence binding:** every executed result identifies specification revision 0.9-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
+## Steering criterion evidence
+
+- WO-CAP-02-02-AC-01: status=PASSED; due_now=true; gate=WO-CAP-02-02 completion; reason=The protected candidate registers project-scoped generative and embedding endpoints with explicit capabilities, opaque secret references, and an explicit bounded probe.
+- WO-CAP-02-02-AC-02: status=PASSED; due_now=true; gate=WO-CAP-02-02 completion; reason=Automated negative tests cover invalid configurations, unsupported capabilities, unreachable targets, unsafe address classes, DNS rebinding, redirects, timeout, and response-size limits without creating a usable endpoint.
+- WO-CAP-02-02-AC-03: status=PASSED; due_now=true; gate=WO-CAP-02-02 completion; reason=Project ownership, optimistic probe versioning, idempotent creation, credential release ordering, and attributable safe audit records passed the protected matrix.
+- WO-CAP-02-02-AC-04: status=PASSED; due_now=true; gate=WO-CAP-02-02 completion; reason=The versioned OpenAPI contract, PostgreSQL migration, compatibility tests, immutable candidate, isolated staging, and recovery passed protected run 37228142970.
+
 ## Expectation sources and independent review
 
 - Sources: confirmed product decisions, the linked capability, requirements REQ-003, REQ-004, REQ-005, REQ-013, REQ-014, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: An Administrator registers and validates versioned model and embedding endpoints with explicit capabilities and protected credentials.
 - Counterexample: Unsupported capability, invalid configuration, or unreachable endpoint produces a safe actionable result without persisting a usable endpoint.
 - The CAP-02 readiness review records the independent derivation/comparison and product-owner confirmation for this endpoint slice against the approved baseline. Any changed endpoint behavior, provider boundary, egress policy, credential flow, or test oracle invalidates that review and returns this workorder to DRAFT/BLOCKED.
+
+The product owner confirmed the requested review outcome by approving and
+merging PR #33 on 2026-10-04. This closes only WO-CAP-02-02; manual CAP-02
+execution, capability acceptance, release promotion, and production approval
+remain with their later gates.
 
 ## Required tests
 
@@ -223,7 +238,7 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Candidate commit/digests, configuration and identity scope, timestamps, attempts, and findings
 - No invented pass, approval, cost, duration, or external receipt
 
-### Current feature-branch evidence
+### Completion evidence
 
 - Python formatting and Ruff, strict mypy, selected flake8 conventions,
   Import Linter, TypeScript type checking, TypeScript architecture,
@@ -239,8 +254,10 @@ This workorder produces candidate-bound evidence but does not accept the capabil
 - Credential-safe tests prove offline save, deny-before-decrypt, all-answer DNS
   policy, link-local/metadata denial, bounded provider reads, redirect denial,
   timeout normalization, exact model discovery, and safe normalized outcomes.
-- These local results do not replace protected CI, immutable candidate/staging
-  evidence, independent implementation review, or human approval.
+- Protected run 37228142970 repeated the required repository, style, typing,
+  architecture, complexity, contract, backend, frontend, PostgreSQL, security,
+  immutable-candidate, isolated-staging, recovery, Steering, definition, and
+  receipt-readback gates for merge `96dfa5e`.
 
 ## Definition of Done
 

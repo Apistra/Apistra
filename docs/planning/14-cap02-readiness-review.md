@@ -1,12 +1,12 @@
 # CAP-02 Readiness Review
 
-Version: 0.5
+Version: 0.6
 Date: 2026-10-04
-Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE; WO-CAP-02-01 DONE; WO-CAP-02-02 LOCAL IMPLEMENTATION COMPLETE, REVIEW PENDING
+Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06, WO-CAP-02-01, AND WO-CAP-02-02 DONE; WO-CAP-02-03 READY
 Assurance: EXTENDED (`secrets`, `authorization`, `architecture_boundary`)
 Baseline commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
 Capability revision: CAP-02 0.4
-Workorder revision: WO-CAP-02-06 0.9-done; WO-CAP-02-01 0.10-done; WO-CAP-02-02 0.9-ready
+Workorder revision: WO-CAP-02-06 0.9-done; WO-CAP-02-01 0.10-done; WO-CAP-02-02 0.10-done; WO-CAP-02-03 0.9-ready
 
 ## Control summary
 
@@ -15,8 +15,8 @@ path, and test-definition delta is now concrete enough for review.
 
 **Implementation:** WO-CAP-02-01 provides the protected `catalog`
 secret-reference slice on `test`. Endpoint, agent, tool, policy, fixture, and
-acceptance work remains outside that completed result; WO-CAP-02-02 is now the
-single READY implementation slice.
+acceptance work remains outside those completed results; WO-CAP-02-03 is now
+the single READY implementation slice.
 
 **Evidence:** The repository observation and planning consistency checks can be
 executed locally. The rendered design references and exact interaction
@@ -30,9 +30,9 @@ and security contracts for baseline `d83810d181374171abc7118b37a5090b6c71bb7f`;
 the product owner reported it complete with no unresolved discrepancy. This is
 not capability acceptance, deployment, or production approval.
 
-**Next action:** Review WO-CAP-02-02 independently, run protected CI, and merge
-only after approval. Do not begin WO-CAP-02-03 before the endpoint slice passes
-those gates and receives explicit human workorder approval.
+**Next action:** Implement and review WO-CAP-02-03 on its own feature branch.
+Do not begin WO-CAP-02-04 before the agent-version slice passes protected CI
+and independent implementation review and receives explicit human approval.
 
 ## Baseline and observed delta
 
@@ -157,12 +157,12 @@ promotes to `staging` or `main`.
 | Expectation review | PASS | Human comparison independent of the implementing agent confirmed on 2026-10-04 |
 | CAP-02 test definitions | PASS | Eight definitions and five BDD scenarios are repository-authoritative |
 | Softwaretest.it CAP-02 publication | PASS | Protected run 37212285531; verified manifest `f0166d186cfc12bb8b45c0ade680869d49937f94bd67b3f4fd5837f507f36574` |
-| Product implementation | IN PROGRESS | WO-CAP-02-01 DONE from PR #31, merge `dfa8319`, protected run 37216514042, and product-owner review; WO-CAP-02-02 READY |
+| Product implementation | IN PROGRESS | WO-CAP-02-01 DONE from run 37216514042; WO-CAP-02-02 DONE from PR #33, merge `96dfa5e`, protected run 37228142970, and product-owner merge approval; WO-CAP-02-03 READY |
 | Capability acceptance | NOT DUE | WO-CAP-02-07 remains DRAFT |
 | Production approval | NOT GRANTED | Outside this review |
 
 ## Readiness decision
 
-WO-CAP-02-06 and WO-CAP-02-01 are DONE. WO-CAP-02-02 is the only READY
-implementation workorder. CAP-02 remains unaccepted, and no release promotion
-or production approval is inferred.
+WO-CAP-02-06, WO-CAP-02-01, and WO-CAP-02-02 are DONE. WO-CAP-02-03 is the
+only READY implementation workorder. CAP-02 remains unaccepted, and no release
+promotion or production approval is inferred.

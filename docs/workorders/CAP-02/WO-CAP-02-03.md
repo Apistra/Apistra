@@ -1,11 +1,11 @@
 # WO-CAP-02-03 — Implement versioned agents and explicit fallback
 
-Version: 0.8-draft
-Status: DRAFT
-Status reason: CAP-02 design/review and publication gates are complete, but required predecessor WO-CAP-02-02 is not DONE
+Version: 0.9-ready
+Status: READY
+Status reason: CAP-00/CAP-01, WO-CAP-02-06, WO-CAP-02-01, and WO-CAP-02-02 are complete; the approved CAP-02 expectation, architecture, security, design, path, and publication gates cover this agent-version slice
 Implementation state: NOT STARTED
-Evidence state: PREREQUISITE EVIDENCE PARTIAL; IMPLEMENTATION NOT EXECUTED
-Approval state: EXPECTATION REVIEW COMPLETE; EXECUTION BLOCKED BY PREDECESSOR
+Evidence state: PREREQUISITE EVIDENCE VERIFIED; IMPLEMENTATION NOT EXECUTED
+Approval state: APPROVED FOR EXECUTION; NOT YET DONE
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-03
-- Specification revision: 0.8-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,13 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; CAP-02 has no product implementation. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
+CAP-00 and CAP-01 are accepted baselines. WO-CAP-02-06 published and verified
+BDD-AGENT-001 and MT-PRC-01-010. WO-CAP-02-01 and WO-CAP-02-02 are DONE on
+protected `test`; the shared `catalog` module now supplies opaque secret
+references plus exact versioned endpoint references. No immutable agent
+version, explicit fallback binding, agent persistence, DSN-022 implementation,
+or WO-CAP-02-03 execution evidence exists yet. The approved readiness review
+remains the expectation, architecture, security, design, and path authority.
 
 ## Target result
 
@@ -89,18 +95,18 @@ Observed existing paths within the bounded change area:
 
 Planned additions to the bounded change area after READY:
 
-- PLANNED: `backend/src/apistra/modules/catalog/`
+- EXISTING: `backend/src/apistra/modules/catalog/`
 - PLANNED: `backend/src/apistra/modules/agents/`
 - PLANNED: `backend/src/apistra/modules/policies/`
-- PLANNED: `apps/web/src/features/catalog/`
+- EXISTING: `apps/web/src/features/catalog/`
 - PLANNED: `apps/web/src/features/agents/`
 - PLANNED: `apps/web/src/features/policies/`
-- PLANNED: `backend/tests/unit/cap_02/`
-- PLANNED: `backend/tests/component/cap_02/`
-- PLANNED: `backend/tests/contract/cap_02/`
-- PLANNED: `backend/tests/integration/cap_02/`
-- PLANNED: `tests/bdd/features/cap_02/`
-- PLANNED: `backend/src/apistra/platform/database/migrations/cap_02/`
+- EXISTING: `backend/tests/unit/cap_02/`
+- EXISTING: `backend/tests/component/cap_02/`
+- EXISTING: `backend/tests/contract/cap_02/`
+- EXISTING: `backend/tests/integration/cap_02/`
+- EXISTING: `tests/bdd/features/cap_02/`
+- EXISTING: `backend/src/apistra/platform/database/migrations/cap_02/`
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
 
@@ -161,7 +167,7 @@ UI scope is DSN-022 from design revision 0.4 after its explicit product approval
 - Sources: confirmed product decisions, the linked capability, requirements REQ-003, REQ-004, REQ-005, REQ-013, REQ-014, process PRC-01, and cited architecture/security/design contracts.
 - Positive expectation: A versioned agent selects its assigned endpoint and follows only its declared ordered fallback policy.
 - Counterexample: An undeclared provider or fallback is never selected when the primary endpoint fails.
-- Before READY, an independent derivation and comparison must record reviewer, revision, discrepancies, decisions, and human confirmation of critical expectations.
+- The CAP-02 readiness review records the independent derivation/comparison and product-owner confirmation for this agent-version slice against the approved baseline. Any changed agent-reference, fallback-order, endpoint-binding, ownership, or test oracle invalidates that review and returns this workorder to DRAFT/BLOCKED.
 
 ## Required tests
 
@@ -173,7 +179,7 @@ UI scope is DSN-022 from design revision 0.4 after its explicit product approval
 
 ## BDD and manual tests
 
-WO-CAP-02-06 defined, published, and exactly read back BDD-AGENT-001 and manual case MT-PRC-01-010. Execution remains with WO-CAP-02-07; WO-CAP-02-02 must become DONE before this workorder can become READY.
+WO-CAP-02-06 defined, published, and exactly read back BDD-AGENT-001 and manual case MT-PRC-01-010. Execution remains with WO-CAP-02-07.
 
 ## Softwaretest.it and CI reporting
 
