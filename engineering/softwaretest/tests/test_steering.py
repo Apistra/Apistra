@@ -126,9 +126,10 @@ class SteeringPublisherTests(unittest.TestCase):
         )
 
     def test_source_revision_includes_projection_contract_revision(self) -> None:
-        self.assertEqual(steering._source_revision("0.3"), 300_102)
-        self.assertEqual(steering._source_revision("0.10-ready"), 1_000_102)
-        self.assertEqual(steering._source_revision("1.1"), 100_100_102)
+        self.assertEqual(steering._source_revision("0.3"), 300_103)
+        self.assertEqual(steering._source_revision("0.10-ready"), 1_000_103)
+        self.assertEqual(steering._source_revision("1.1"), 100_100_103)
+        self.assertGreater(steering._source_revision("0.6"), 600_102)
         self.assertGreater(
             steering._source_revision("0.4"),
             steering._source_revision("0.3"),

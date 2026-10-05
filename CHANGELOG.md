@@ -6,6 +6,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Advanced the Softwaretest.it Steering projection revision to 3 after the delegated-publication mapping changed the payload of 121 otherwise unchanged workorders; every affected source now has a monotonic revision for protected import and readback.
 - Reconciled older completed CAP-00 through CAP-02 workorders with criterion-specific Steering evidence and monotonic source revisions, corrected the stale CAP-00 reporting mapping, and stopped treating delegated test-definition publication as a pending Steering import. The protected source import and its readback remain the authority for transmission success; capability acceptance is unchanged.
 - Updated the WO-CAP-02-05 and CAP-02 steering sources to reflect PR #40's protected merge and successful run 37293145775 without claiming the still-pending independent implementation review, human workorder acceptance, or CAP-02 capability acceptance.
 - Implemented the WO-CAP-02-05 limit-policy feature branch with exact project-scoped policy versions, explicit draft publication, signed-integer resource and cost boundaries, deterministic allow/warn/stop decisions, pre-effect denial, safe audit evidence, idempotency and optimistic conflicts, PostgreSQL migration, versioned API contract, DSN-019, and focused backend/web tests; protected CI and implementation approval remain pending.
