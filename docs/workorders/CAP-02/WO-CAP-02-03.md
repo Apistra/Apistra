@@ -1,11 +1,11 @@
 # WO-CAP-02-03 — Implement versioned agents and explicit fallback
 
-Version: 0.10-ready
-Status: READY
-Status reason: the bounded agent-version slice is implemented and locally verified, but remains READY until protected CI, independent implementation review, merge, and human approval complete the workorder
-Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED TO PROTECTED `test`
-Evidence state: LOCAL UNIT, COMPONENT, CONTRACT, ARCHITECTURE, POSTGRESQL MIGRATION/INTEGRATION, WEB, BUILD, AND 90% COVERAGE GATES VERIFIED; PROTECTED EVIDENCE PENDING
-Approval state: APPROVED FOR EXECUTION; IMPLEMENTATION REVIEW AND HUMAN WORKORDER APPROVAL PENDING
+Version: 0.11-done
+Status: DONE
+Status reason: PR #35 delivered the bounded agent-version slice to protected `test`; PR #36 repaired its Steering source revision, and protected run 37267844668 passed every required CI, packaging, staging, authenticated publication, exact readback, and receipt gate
+Implementation state: COMPLETE ON PROTECTED `test` AT MERGE `86a921161981952049a15a9d25479b15447e8a7a`
+Evidence state: PROTECTED RUN 37267844668 VERIFIED UNIT, COMPONENT, CONTRACT, ARCHITECTURE, SECURITY, MIGRATION/INTEGRATION, WEB, BUILD, COVERAGE, IMMUTABLE CANDIDATE, ISOLATED STAGING/RECOVERY, STEERING, DEFINITION, AND RECEIPT GATES
+Approval state: INDEPENDENT PRODUCT-OWNER IMPLEMENTATION REVIEW AND HUMAN WORKORDER APPROVAL COMPLETE THROUGH PR #35 AND PR #36 MERGES; CAPABILITY ACCEPTANCE REMAINS WITH WO-CAP-02-07
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-03
-- Specification revision: 0.10-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.11-done; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -40,12 +40,15 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 CAP-00 and CAP-01 are accepted baselines. WO-CAP-02-06 published and verified
 BDD-AGENT-001 and MT-PRC-01-010. WO-CAP-02-01 and WO-CAP-02-02 are DONE on
 protected `test`; the shared `catalog` module supplies opaque secret references
-plus exact versioned endpoint references. The feature branch now implements
+plus exact versioned endpoint references. Protected `test` now contains
 immutable project-scoped agent versions, explicit primary/fallback bindings,
 PostgreSQL persistence, versioned API contracts, safe audit evidence, and
 DSN-022. Tool and limits-policy fields retain exact optional references without
 implementing the separately owned catalogues or policies. Protected CI,
-independent implementation review, merge, and human approval remain open.
+independent product-owner review, merge, authenticated Steering publication,
+exact readback, receipt verification, and human workorder approval are complete.
+CAP-02 acceptance and the final unchanged-candidate manual matrix remain owned
+by WO-CAP-02-07.
 
 ## Target result
 
@@ -98,10 +101,10 @@ Observed existing paths within the bounded change area:
 Planned additions to the bounded change area after READY:
 
 - EXISTING: `backend/src/apistra/modules/catalog/`
-- PLANNED: `backend/src/apistra/modules/agents/`
+- EXISTING: `backend/src/apistra/modules/agents/`
 - PLANNED: `backend/src/apistra/modules/policies/`
 - EXISTING: `apps/web/src/features/catalog/`
-- PLANNED: `apps/web/src/features/agents/`
+- EXISTING: `apps/web/src/features/agents/`
 - PLANNED: `apps/web/src/features/policies/`
 - EXISTING: `backend/tests/unit/cap_02/`
 - EXISTING: `backend/tests/component/cap_02/`
@@ -162,7 +165,7 @@ UI scope is DSN-022 from design revision 0.4 after its explicit product approval
 - **Positive oracle:** A versioned agent selects its assigned endpoint and follows only its declared ordered fallback policy.
 - **Negative oracle:** An undeclared provider or fallback is never selected when the primary endpoint fails.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.11-done, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
