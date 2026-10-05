@@ -40,10 +40,17 @@ def test_cap02_review_and_design_gates_remain_scoped_after_publication() -> None
     capability = (
         ROOT / "docs/capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md"
     ).read_text(encoding="utf-8")
+    workorder = (ROOT / "docs/workorders/CAP-02/WO-CAP-02-05.md").read_text(
+        encoding="utf-8"
+    )
     design = (ROOT / "docs/planning/07-design-contract.md").read_text(encoding="utf-8")
     assert "Status: HISTORICAL READINESS SNAPSHOT" in review
     assert "Status: IN_PROGRESS;" in capability
-    assert "WO-CAP-02-05 is merged but awaits independent implementation review" in capability
+    assert "WO-CAP-02-05 is merged and accepted by the product owner" in capability
+    assert "awaits independent implementation review before DONE" in capability
+    assert "Status: READY" in workorder
+    assert "HUMAN ACCEPTED BY PRODUCT OWNER" in workorder
+    assert "INDEPENDENT IMPLEMENTATION REVIEW PENDING" in workorder
     assert "WO-CAP-02-07 remains DRAFT" in capability
     assert "Status: APPROVED." in design
     assert "not capability acceptance" in review.lower()
