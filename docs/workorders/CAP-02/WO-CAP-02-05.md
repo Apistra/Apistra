@@ -1,11 +1,11 @@
 # WO-CAP-02-05 — Implement configurable limits and budget decisions
 
-Version: 0.11-ready
+Version: 0.12-ready
 Status: READY
-Status reason: PR #40 is merged on protected test and run 37293145775 passed; independent implementation review and explicit human workorder acceptance remain pending
+Status reason: PR #40 is merged on protected test, run 37293145775 passed, and the product owner accepted the workorder on 2026-10-05; the independent implementation review remains pending before DONE
 Implementation state: COMPLETE ON PROTECTED `test` AT `e0556c59b4e64a15f0d5314194b5416f2bc9f7cf`
 Evidence state: PROTECTED RUN 37293145775 VERIFIED TESTS, ARCHITECTURE, CONTRACTS, SECURITY, IMMUTABLE CANDIDATE, ISOLATED STAGING/RECOVERY, AND AUTHENTICATED STEERING/DEFINITION/RECEIPT READBACK
-Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE PENDING
+Approval state: HUMAN ACCEPTED BY PRODUCT OWNER 2026-10-05 FOR PROTECTED TEST CANDIDATE e0556c59b4e64a15f0d5314194b5416f2bc9f7cf; INDEPENDENT IMPLEMENTATION REVIEW PENDING
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,11 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-05
-- Specification revision: 0.11-ready; the route, migration entrypoint, and web page path delta below still requires implementation review before acceptance
+- Specification revision: 0.12-ready; this source revision records product-owner acceptance without changing the 0.11-ready implementation expectations; the route, migration entrypoint, and web page path delta below still require independent implementation review before DONE
+
+## Product-owner acceptance record
+
+The product owner explicitly accepted WO-CAP-02-05 on 2026-10-05 after the protected PR #40 merge and green run 37293145775. This decision concerns the implemented limit-policy workorder on candidate `e0556c59b4e64a15f0d5314194b5416f2bc9f7cf`; it is not CAP-02 capability acceptance or production approval. The separate EXTENDED independent implementation review has not yet been recorded. Any material discrepancy found there requires a new decision and applicable change-impact checks before this workorder can become DONE.
 
 ## Risk profile and escalation
 
@@ -46,7 +50,8 @@ pre-effect budget decisions, PostgreSQL persistence, safe audit records,
 exact agent references, the versioned HTTP contract, and DSN-019. Protected
 run 37293145775 passed all required jobs, including authenticated publication
 and readback. Independent implementation review and human workorder acceptance
-remain due; this is not CAP-02 capability acceptance.
+has been granted by the product owner; the independent implementation review
+remains due. This is not CAP-02 capability acceptance.
 
 ## Target result
 

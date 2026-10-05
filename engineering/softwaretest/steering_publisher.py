@@ -87,7 +87,7 @@ VERSION_MAJOR_SCALE = 1_000_000
 VERSION_MINOR_SCALE = 1_000
 SOURCE_REVISION_SCALE = 100
 # Bump whenever mapping changes alter imported content without a document version bump.
-PROJECTION_REVISION = 3
+PROJECTION_REVISION = 4
 MAX_SOURCE_REVISION = 2_147_483_647
 CONTENT_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 CURRENT_PAYLOAD_HASH_CONTRACT = "rfc8785-sha256"
@@ -201,8 +201,13 @@ def _source_revision(version: str) -> int:
     return source_revision
 
 
-def _implementation_status(status: str) -> str:
+def _implementation_status(status: str, implementation_state: str = "") -> str:
     normalised = status.upper()
+    explicit_state = implementation_state.upper()
+    if normalised.startswith("READY") and explicit_state.startswith(
+        ("COMPLETE", "IMPLEMENTED")
+    ):
+        return STATUS_IMPLEMENTED
     if normalised.startswith(("DRAFT", "READY")):
         return STATUS_PLANNED
     if normalised.startswith(
@@ -407,7 +412,9 @@ def parse_source(path: Path, observed_at: str) -> dict[str, Any]:
     source_type = TYPE_WORKORDER if external_id.startswith("WO-") else TYPE_CAPABILITY
     relative_path = path.relative_to(ROOT).as_posix()
     status = _metadata(text, "Status")
-    implementation_status = _implementation_status(status)
+    implementation_status = _implementation_status(
+        status, _metadata(text, "Implementation state", required=False)
+    )
     goal = _section(text, "Target result", "Goal and value")
     item = {
         FIELD_EXTERNAL_ID: external_id,

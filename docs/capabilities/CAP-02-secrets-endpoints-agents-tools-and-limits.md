@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.13
-Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-04 are DONE, WO-CAP-02-05 is merged but awaits independent implementation review and human workorder acceptance, and WO-CAP-02-07 remains DRAFT
+Version: 0.14
+Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-04 are DONE, WO-CAP-02-05 is merged and accepted by the product owner but awaits independent implementation review before DONE, and WO-CAP-02-07 remains DRAFT
 Release: 0.1
 Assurance: EXTENDED
 
@@ -26,11 +26,11 @@ closure and every required authenticated Steering, definition, and receipt
 round-trip. PR #40 merged the limit-policy implementation as `e0556c5`;
 protected run 37293145775 passed the full CI matrix, immutable-candidate
 staging/recovery, and authenticated Steering, definition, and receipt readback.
-**Main blocker:** WO-CAP-02-05 still needs independent implementation review
-and explicit human workorder acceptance; WO-CAP-02-07 then owns unchanged-candidate
+**Main blocker:** WO-CAP-02-05 still needs independent implementation review;
+its human workorder acceptance was confirmed on 2026-10-05. WO-CAP-02-07 then owns unchanged-candidate
 staging, manual execution, reporting, and CAP-02 acceptance.
-**Next step:** Record the WO-CAP-02-05 implementation review and human workorder
-decision against the protected candidate; then prepare WO-CAP-02-07 without
+**Next step:** Record the WO-CAP-02-05 independent implementation review against
+the protected candidate; then prepare WO-CAP-02-07 without
 claiming capability acceptance or production approval.
 
 ## Goal and value
@@ -183,7 +183,7 @@ protected run 37228142970, and product-owner merge approval. WO-CAP-02-03 is
 DONE after PR #35, PR #36, merge `86a9211`, protected run 37267844668, and
 product-owner merge approval. WO-CAP-02-04 is DONE after PR #38, merge
 `90d4f29`, protected run 37276401385, and product-owner merge approval.
-WO-CAP-02-05 is merged and its protected CI is green, but independent
-implementation review and human workorder acceptance remain open;
+WO-CAP-02-05 is merged, its protected CI is green, and the product owner
+accepted the workorder on 2026-10-05, but independent implementation review remains open;
 WO-CAP-02-07 remains DRAFT until its declared predecessor is complete.
 

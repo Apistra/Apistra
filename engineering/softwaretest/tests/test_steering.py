@@ -61,6 +61,8 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "CONFIRMED")
         self.assertEqual(items["WO-CAP-00-01"]["transmission_status"], "NOT_REQUIRED")
         self.assertEqual(items["WO-CAP-00-05"]["transmission_status"], "CONFIRMED")
+        self.assertEqual(items["WO-CAP-02-05"]["implementation_status"], "IMPLEMENTED")
+        self.assertEqual(items["WO-CAP-02-05"]["approval_status"], "APPROVED")
 
     def test_completed_workorders_have_explicit_due_criterion_results(self) -> None:
         manifest = steering.build_manifest(
@@ -126,9 +128,9 @@ class SteeringPublisherTests(unittest.TestCase):
         )
 
     def test_source_revision_includes_projection_contract_revision(self) -> None:
-        self.assertEqual(steering._source_revision("0.3"), 300_103)
-        self.assertEqual(steering._source_revision("0.10-ready"), 1_000_103)
-        self.assertEqual(steering._source_revision("1.1"), 100_100_103)
+        self.assertEqual(steering._source_revision("0.3"), 300_104)
+        self.assertEqual(steering._source_revision("0.10-ready"), 1_000_104)
+        self.assertEqual(steering._source_revision("1.1"), 100_100_104)
         self.assertGreater(steering._source_revision("0.6"), 600_102)
         self.assertGreater(
             steering._source_revision("0.4"),
@@ -145,6 +147,16 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(
             steering._implementation_status("BLOCKED"),
             steering.STATUS_BLOCKED,
+        )
+        self.assertEqual(
+            steering._implementation_status(
+                "READY", "COMPLETE ON PROTECTED test; independent review pending"
+            ),
+            steering.STATUS_IMPLEMENTED,
+        )
+        self.assertEqual(
+            steering._implementation_status("READY", "NOT STARTED"),
+            steering.STATUS_PLANNED,
         )
 
     def test_approval_mapping_keeps_item_and_later_gates_separate(self) -> None:
