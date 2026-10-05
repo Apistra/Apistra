@@ -1,6 +1,6 @@
 # WO-CAP-02-04 — Implement governed tool contracts and approval classification
 
-Version: 0.11-done
+Version: 0.12-done
 Status: DONE
 Status reason: PR #38 delivered the reviewed governed-tool slice to protected `test`; protected run 37276401385 passed every required CI, packaging, staging, authenticated publication, exact readback, and receipt gate
 Implementation state: COMPLETE ON PROTECTED `test` AT MERGE `90d4f2951afdabb5647e171675d1f4e8f953c8b6`
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-04
-- Specification revision: 0.11-done; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.12-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -158,6 +158,13 @@ UI scope is DSN-023 plus its DSN-019 approval-policy link from design revision 0
 2. A tool with an unknown schema or ambiguous write classification cannot be published or executed.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-02-04-AC-01: status=PASSED; due_now=true; gate=WO-CAP-02-04 completion; reason=PR #38 and protected run 37276401385 verified governed tool versions with input/output schemas and deterministic read/write approval classification.
+- WO-CAP-02-04-AC-02: status=PASSED; due_now=true; gate=WO-CAP-02-04 completion; reason=Negative schema and permission tests reject unknown contracts and ambiguous write classification before publication or execution.
+- WO-CAP-02-04-AC-03: status=PASSED; due_now=true; gate=WO-CAP-02-04 completion; reason=The protected tool slice verified project ownership, immutable versions, conflict checks, and attributable safe audit records.
+- WO-CAP-02-04-AC-04: status=PASSED; due_now=true; gate=WO-CAP-02-04 completion; reason=The versioned tool contract, PostgreSQL migration, compatibility tests, isolated staging, and recovery passed run 37276401385.
 
 ## Acceptance examples and test oracles
 

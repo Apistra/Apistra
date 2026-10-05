@@ -1,12 +1,20 @@
 # CAP-02 Readiness Review
 
-Version: 0.7
+Version: 0.8
 Date: 2026-10-05
-Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE; WO-CAP-02-01 THROUGH WO-CAP-02-03 DONE; WO-CAP-02-04 READY
+Status: HISTORICAL READINESS SNAPSHOT; see the canonical CAP-02 and Workorder sources for current execution status
 Assurance: EXTENDED (`secrets`, `authorization`, `architecture_boundary`)
 Baseline commit: `d83810d181374171abc7118b37a5090b6c71bb7f`
 Capability revision: CAP-02 0.9
 Workorder revision: WO-CAP-02-06 0.9-done; WO-CAP-02-01 0.10-done; WO-CAP-02-02 0.10-done; WO-CAP-02-03 0.11-done; WO-CAP-02-04 0.9-ready
+
+This review records the readiness decision at its stated baseline. Its
+implementation/gate rows below are historical, not a live status board. The
+current status is maintained in
+[CAP-02](../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
+and the linked canonical Workorders; in particular WO-CAP-02-05 is merged
+with protected CI green but still awaits independent implementation review
+and explicit human workorder acceptance, while WO-CAP-02-07 remains DRAFT.
 
 ## Control summary
 

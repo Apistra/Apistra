@@ -59,6 +59,32 @@ class SteeringPublisherTests(unittest.TestCase):
         self.assertEqual(items["WO-CAP-00-08"]["approval_status"], "APPROVED")
         self.assertEqual(items["WO-CAP-00-08"]["evidence_status"], "CURRENT")
         self.assertEqual(items["WO-CAP-00-08"]["transmission_status"], "CONFIRMED")
+        self.assertEqual(items["WO-CAP-00-01"]["transmission_status"], "NOT_REQUIRED")
+        self.assertEqual(items["WO-CAP-00-05"]["transmission_status"], "CONFIRMED")
+
+    def test_completed_workorders_have_explicit_due_criterion_results(self) -> None:
+        manifest = steering.build_manifest(
+            observed_at_provider=lambda _path: OBSERVED_AT
+        )
+        for source in manifest["sources"]:
+            path = steering.ROOT / source["source_path"]
+            if not path.name.startswith("WO-"):
+                continue
+            if not steering._metadata(
+                path.read_text(encoding="utf-8"), "Status"
+            ).startswith("DONE"):
+                continue
+            criteria = source["payload"]["criteria"]
+            self.assertTrue(criteria, path.name)
+            self.assertTrue(
+                all(
+                    row["due_now"]
+                    and row["status"] in {"PASSED", "NOT_APPLICABLE"}
+                    and row["reason"]
+                    for row in criteria
+                ),
+                path.name,
+            )
 
     def test_acceptance_criteria_require_explicit_source_evidence(self) -> None:
         manifest = steering.build_manifest(

@@ -37,8 +37,14 @@ def test_cap02_manual_package_is_complete_and_independently_executable() -> None
 
 def test_cap02_review_and_design_gates_remain_scoped_after_publication() -> None:
     review = (ROOT / "docs/planning/14-cap02-readiness-review.md").read_text(encoding="utf-8")
+    capability = (
+        ROOT / "docs/capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md"
+    ).read_text(encoding="utf-8")
     design = (ROOT / "docs/planning/07-design-contract.md").read_text(encoding="utf-8")
-    assert "Status: IMPLEMENTATION ACTIVE; WO-CAP-02-06 DONE" in review
+    assert "Status: HISTORICAL READINESS SNAPSHOT" in review
+    assert "Status: IN_PROGRESS;" in capability
+    assert "WO-CAP-02-05 is merged but awaits independent implementation review" in capability
+    assert "WO-CAP-02-07 remains DRAFT" in capability
     assert "Status: APPROVED." in design
     assert "not capability acceptance" in review.lower()
     assert "not implementation" in design.lower()

@@ -1,6 +1,6 @@
 # WO-CAP-00-02 — Create the monorepo walking skeleton
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: the revision 0.6 walking skeleton passed the complete protected test workflow
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-00-02
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. A missing package, bypassed boundary, empty architecture scope, or undeclared business behavior fails the bootstrap contract.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-00-02-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-02 completion; reason=Run 36875393087 started the declared API, worker, and web entrypoints and passed health plus non-empty architecture-scope checks.
+- WO-CAP-00-02-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-02 completion; reason=The protected architecture and contract checks rejected the negative bootstrap fixtures for empty scopes, bypassed boundaries, and missing packages.
+- WO-CAP-00-02-AC-03: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-02 completion; reason=The CAP-00 walking skeleton introduces no mutable business state or business use case; project-owned state transitions begin in CAP-01.
+- WO-CAP-00-02-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-02 completion; reason=The declared health boundary and bootstrap package contracts passed the protected matrix; this workorder introduced no persisted business schema migration.
 
 ## Acceptance examples and test oracles
 

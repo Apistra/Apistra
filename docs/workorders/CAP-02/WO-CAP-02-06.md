@@ -1,6 +1,6 @@
 # WO-CAP-02-06 — Publish and verify CAP-02 test definitions
 
-Version: 0.9-done
+Version: 0.10-done
 Status: DONE
 Status reason: protected test run 37212285531 published and field-/step-level read back all CAP-02 definitions
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED; cycle `fe50655d-4f88-414f-ba75-541cb5184de2`
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-02-06
-- Specification revision: 0.9-done; receipt is bound to protected run 37212285531 and its exact source payload
+- Specification revision: 0.10-done receipt is bound to protected run 37212285531 and its exact source payload
 
 ## Risk profile and escalation
 
@@ -145,6 +145,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. Every business process has a complete manual package starting at logged-out sign-in, with atomic role-prefixed action/observation steps, concrete synthetic data, and one matching expected result per step.
 3. Publication is idempotent and field-/order-level read-back matches the local version and checksums.
 4. Definition, publication, fixture readiness, execution, result reporting, and capability acceptance remain distinct statuses.
+
+## Steering criterion evidence
+
+- WO-CAP-02-06-AC-01: status=PASSED; due_now=true; gate=WO-CAP-02-06 completion; reason=The CAP-02 catalog maps externally observable criteria to BDD-SECRET-001, BDD-ENDPOINT-001, BDD-AGENT-001, BDD-TOOL-001, and BDD-LIMIT-001 or documents non-applicability.
+- WO-CAP-02-06-AC-02: status=PASSED; due_now=true; gate=WO-CAP-02-06 completion; reason=The published MT-PRC-01-007 through MT-PRC-01-014 package contains the reviewed signed-out, role-specific, atomic steps and synthetic fixture references; execution remains with WO-CAP-02-07.
+- WO-CAP-02-06-AC-03: status=PASSED; due_now=true; gate=WO-CAP-02-06 completion; reason=Protected run 37212285531 published all CAP-02 definitions and verified exact field- and step-level readback and repeatable publication.
+- WO-CAP-02-06-AC-04: status=PASSED; due_now=true; gate=WO-CAP-02-06 completion; reason=WO-CAP-02-06 publishes definitions only; fixture readiness, manual staging execution, result reporting, and human CAP-02 acceptance remain separate obligations of WO-CAP-02-07.
 
 ## Acceptance examples and test oracles
 

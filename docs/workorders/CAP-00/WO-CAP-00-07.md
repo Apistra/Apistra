@@ -1,6 +1,6 @@
 # WO-CAP-00-07 — Complete bootstrap candidate gate
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: the full candidate matrix, staging/recovery, external receipts, independent review, and human acceptance are recorded
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-00-07
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. The complete required matrix passes on one unchanged commit/candidate with current suite and input fingerprints.
 3. The same digests are staged manually; migration, health, smoke, observability, controlled failure, recovery, and all assigned manual cases pass with confirmed reporting.
 4. An authorised human accepts the exact capability/candidate/environment evidence package; no production approval is inferred.
+
+## Steering criterion evidence
+
+- WO-CAP-00-07-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-07 completion; reason=The prerequisite CAP-00 workorders were DONE and the accepted candidate had no recorded blocking or expired exception.
+- WO-CAP-00-07-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-07 completion; reason=Run 36875393087 bound the complete required matrix, fingerprints, candidate commit e1619a0d6fe5d5edd7cca1c88a57e5b9845084e6, and external receipts.
+- WO-CAP-00-07-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-07 completion; reason=The accepted candidate passed isolated staging, health, smoke, controlled failure, recovery, and assigned reporting checks without image substitution.
+- WO-CAP-00-07-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-07 completion; reason=The product owner accepted the CAP-00 candidate on 2026-09-30; the source explicitly withholds production approval.
 
 ## Acceptance examples and test oracles
 

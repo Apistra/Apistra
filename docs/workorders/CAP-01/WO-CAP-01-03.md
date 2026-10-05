@@ -1,6 +1,6 @@
 # WO-CAP-01-03 — Implement project-context enforcement and audit
 
-Version: 0.8-done
+Version: 0.9-done
 Status: DONE
 Status reason: owned implementation, conformance review, local immutable staging/recovery, and hosted CI matrix complete; capability acceptance remains with WO-CAP-01-05
 Implementation state: COMPLETE AT `0e4b8674f39102860416ee4614c64a1aa19647dd`
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-01-04; APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-03
-- Specification revision: 0.8-done; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -146,6 +146,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. A missing or mismatched project context fails before data access and cannot be bypassed through a direct API call.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-01-03-AC-01: status=PASSED; due_now=true; gate=WO-CAP-01-03 completion; reason=The project-context component and integration tests verified authenticated project context before project-owned use cases reach repositories or adapters.
+- WO-CAP-01-03-AC-02: status=PASSED; due_now=true; gate=WO-CAP-01-03 completion; reason=Missing, mismatched, anonymous, and foreign-project context tests reject direct API requests before protected data access.
+- WO-CAP-01-03-AC-03: status=PASSED; due_now=true; gate=WO-CAP-01-03 completion; reason=Project-bound application and adapter paths passed the owned local and hosted architecture, authorization, and audit checks.
+- WO-CAP-01-03-AC-04: status=PASSED; due_now=true; gate=WO-CAP-01-03 completion; reason=The project-context boundary is covered by versioned API/consumer contracts and the applicable compatibility matrix; this workorder added no independent persisted schema.
 
 ## Acceptance examples and test oracles
 

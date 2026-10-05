@@ -1,6 +1,6 @@
 # WO-CAP-01-01 — Implement local Administrator bootstrap and revocable session
 
-Version: 0.8-done
+Version: 0.9-done
 Status: DONE
 Status reason: implementation snapshot c5601e4 passed the complete owned local and hosted CI matrix
 Implementation state: COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED by WO-CAP-01-04; released testcase keys APISTRA-TC-000002 through APISTRA-TC-000007
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-01-01
-- Specification revision: 0.8-done; implementation evidence is bound to snapshot c5601e4
+- Specification revision: 0.9-done implementation evidence is bound to snapshot c5601e4
 
 ## Risk profile and escalation
 
@@ -164,6 +164,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. A replayed bootstrap or revoked session is rejected without revealing account or session data.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-01-01-AC-01: status=PASSED; due_now=true; gate=WO-CAP-01-01 completion; reason=The owned CAP-01 bootstrap and session tests plus implementation snapshot c5601e4 verified exactly one initial Administrator and revocable local sessions.
+- WO-CAP-01-01-AC-02: status=PASSED; due_now=true; gate=WO-CAP-01-01 completion; reason=The negative bootstrap and session tests reject replay and revoked sessions without disclosing account or session data.
+- WO-CAP-01-01-AC-03: status=PASSED; due_now=true; gate=WO-CAP-01-01 completion; reason=The bootstrap/session use cases enforce project context where relevant, replay protection, and attributable safe audit behavior in the owned local and hosted matrix.
+- WO-CAP-01-01-AC-04: status=PASSED; due_now=true; gate=WO-CAP-01-01 completion; reason=The versioned identity/session contract and applicable persistence compatibility checks passed the owned local and hosted matrix; later capability acceptance stayed with WO-CAP-01-05.
 
 ## Acceptance examples and test oracles
 
