@@ -15,6 +15,8 @@ from apistra.modules.catalog.domain.endpoints import (
     NetworkProfile,
     ProviderProtocol,
 )
+from apistra.modules.policies.adapters.memory import InMemoryPolicyStore
+from apistra.modules.policies.application import PolicyService
 
 OWNER = UUID("00000000-0000-0000-0000-000000000001")
 PROJECT = UUID("00000000-0000-0000-0000-000000000002")
@@ -207,6 +209,61 @@ def test_agent_accepts_only_exact_same_project_tool_versions() -> None:
     assert created.value.tool_versions == (exact,)
     assert stale.error.code == "agent.invalid_input"
     assert duplicate.error.code == "agent.invalid_input"
+
+
+def test_agent_accepts_only_exact_same_project_limit_policy_version() -> None:
+    endpoint_store = InMemoryEndpointStore()
+    endpoints = EndpointService(endpoint_store, Unused(), Unused(), Unused(), Clock())
+    tools = ToolService(InMemoryToolStore(), Clock())
+    policies = PolicyService(InMemoryPolicyStore(), Clock())
+    agents = AgentService(InMemoryAgentStore(), endpoints, tools, Clock(), policies)
+    primary = endpoint(endpoint_store, "primary")
+    policy = policies.create_limit_policy_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "interactive-default",
+        300,
+        10,
+        20_000,
+        150,
+        "EUR",
+        2,
+        30,
+        60,
+        None,
+        "policy-v1",
+        "corr-policy",
+    ).value
+    exact = VersionReference(policy.policy_id, policy.version)
+    created = agents.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "Research Analyst",
+        "Use evidence.",
+        primary,
+        None,
+        (),
+        exact,
+        "agent-v1",
+        "corr-agent",
+    )
+    stale = agents.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "Research Analyst",
+        "Use evidence.",
+        primary,
+        None,
+        (),
+        VersionReference(policy.policy_id, 99),
+        "agent-stale",
+        "corr-stale",
+    )
+    assert created.value.limits_policy_version == exact
+    assert stale.error.code == "agent.invalid_input"
 
 
 def test_input_idempotency_version_and_unavailable_failures_are_explicit() -> None:

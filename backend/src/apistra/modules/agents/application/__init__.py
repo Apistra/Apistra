@@ -16,6 +16,7 @@ from apistra.modules.agents.domain import (
 )
 from apistra.modules.agents.ports import AgentClock, AgentStore
 from apistra.modules.catalog.public import EndpointPurpose, EndpointService, ToolService
+from apistra.modules.policies.public import PolicyService
 
 MAXIMUM_NAME_LENGTH = 128
 MAXIMUM_INSTRUCTIONS_LENGTH = 32_768
@@ -38,11 +39,13 @@ class AgentService:
         endpoints: EndpointService,
         tools: ToolService,
         clock: AgentClock,
+        policies: PolicyService | None = None,
     ) -> None:
         self._store = store
         self._endpoints = endpoints
         self._tools = tools
         self._clock = clock
+        self._policies = policies
 
     def create_version(
         self,
@@ -71,6 +74,7 @@ class AgentService:
             primary_endpoint,
             fallback_endpoint,
             tool_versions,
+            limits_policy_version,
             idempotency_key,
         )
         if validation:
@@ -136,6 +140,7 @@ class AgentService:
         primary: VersionReference,
         fallback: VersionReference | None,
         tools: tuple[VersionReference, ...],
+        limits_policy: VersionReference | None,
         idempotency_key: str,
     ) -> AgentError | None:
         if not 1 <= len(name) <= MAXIMUM_NAME_LENGTH:
@@ -166,6 +171,15 @@ class AgentService:
         ):
             return self._invalid(
                 "Tool reference must identify an exact tool version in the same project."
+            )
+        if limits_policy and (
+            self._policies is None
+            or not self._policies.exact_limit_policy_available(
+                owner_id, project_id, limits_policy.id, limits_policy.version
+            )
+        ):
+            return self._invalid(
+                "Limits policy reference must identify an exact policy version in the same project."
             )
         return None
 

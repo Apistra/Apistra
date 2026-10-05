@@ -1,11 +1,11 @@
 # WO-CAP-02-05 — Implement configurable limits and budget decisions
 
-Version: 0.9-ready
+Version: 0.10-ready
 Status: READY
-Status reason: predecessor WO-CAP-02-04 is DONE on protected `test`, and the approved expectation, architecture, security, design, repository-path, test-definition, and authenticated publication gates are complete
-Implementation state: NOT STARTED
-Evidence state: READY PREREQUISITES VERIFIED; IMPLEMENTATION NOT EXECUTED
-Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE NOT YET DUE
+Status reason: execution prerequisites remain satisfied and the feature branch implements the policy slice; protected CI, independent implementation review, merge, authenticated post-merge readback, and human workorder acceptance remain pending
+Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED
+Evidence state: LOCAL CONTRACT, UNIT, COMPONENT, INTEGRATION, ARCHITECTURE, STATIC, WEB, AND COVERAGE GATES VERIFIED; PROTECTED RESULT PENDING
+Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE PENDING
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-05
-- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.10-ready; the route, migration entrypoint, and web page path delta below requires implementation review before acceptance
 
 ## Risk profile and escalation
 
@@ -37,12 +37,14 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish the WO-CAP-02-05 implementation result.
 CAP-00 and CAP-01 are accepted baselines, and WO-CAP-02-01 through
-WO-CAP-02-04 are DONE on protected `test`. The readiness review at
-`../../planning/14-cap02-readiness-review.md` records the approved expectations,
-observed paths, and satisfied execution prerequisites. Configurable limits and
-budget decisions have not yet been implemented.
+WO-CAP-02-04 are DONE on protected `test`. PR #39 merge `7d5a7a3` and protected
+run 37277830127 verified the WO-CAP-02-04 closure, Steering publication,
+CAP-02 definitions, and authenticated receipt readback. This feature branch
+implements project-scoped immutable limit-policy versions, deterministic
+pre-effect budget decisions, PostgreSQL persistence, safe audit records,
+exact agent references, the versioned HTTP contract, and DSN-019. These are
+feature-branch results; protected CI and human implementation review remain due.
 
 ## Target result
 
@@ -109,6 +111,25 @@ Planned additions to the bounded change area after READY:
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
 
+Observed implementation path reconciliation for revision 0.10 (2026-10-05):
+
+- EXISTING and directly affected: `backend/src/apistra/entrypoints/api/main.py`,
+  `backend/src/apistra/entrypoints/migration.py`, and
+  `apps/web/src/features/administration/public.tsx`.
+- PLANNED child paths within approved ADR-019 roots:
+  `backend/src/apistra/entrypoints/api/limits.py`,
+  `backend/src/apistra/platform/database/migrations/cap_02/005_limit_policies.sql`,
+  `apps/web/src/features/policies/limits.tsx`,
+  `apps/web/src/features/policies/limits.test.ts`,
+  `apps/web/src/features/policies/internal/limit-client.ts`,
+  `apps/web/src/app/projects/[projectId]/policies/limits/page.tsx`,
+  `contracts/openapi/cap02-limits.openapi.json`, and focused `test_limit_*`
+  files under the listed CAP-02 test roots.
+- The delta adds no top-level root or cross-module private import. Its explicit
+  route/page and schema-version changes are part of the implementation review;
+  the pre-implementation expectation approval is not represented as approval
+  of this new path observation.
+
 Architecture path gate: ADR-019 top-level roots are DECIDED; planned child paths still require this workorder's expectation and architecture review before READY.
 
 Path boundary: The EXISTING and PLANNED paths together form the upper bound after READY, not an instruction to touch every path. While this workorder is DRAFT/BLOCKED it authorises no implementation. An unlisted path, a new top-level root, a private cross-module import, or cross-module table access is a stop condition requiring observed impact, specification revision, and review.
@@ -130,6 +151,30 @@ Path boundary: The EXISTING and PLANNED paths together form the upper bound afte
 - Mutable administration uses optimistic concurrency; no global CQRS or Event Sourcing is introduced.
 
 UI scope is DSN-019 from design revision 0.4 after its explicit product approval; no other page is authorised.
+
+### Concrete policy and decision contract
+
+- The first policy version is published; later versions are immutable drafts
+  until an explicit publish transition. Published versions never change their
+  configured limits. A run or agent reference may use only an exact published
+  version in its own project.
+- All six hard limits are required and strictly positive: duration in seconds,
+  calls, tokens, cost in integer minor currency units, concurrency, and request
+  count per exact window in seconds. `currency` is an uppercase three-letter
+  code. Observations must be non-negative safe JSON integers; the observed
+  rate window must equal the policy window.
+- An observation at a hard boundary is allowed; one unit above it is denied.
+  Optional 1–99% warning thresholds yield `WARN` while remaining within every
+  hard limit. A hard violation always yields `DENY`/`STOP`, even if other limits
+  are only warnings. No protected callback runs after denial or audit failure.
+- Each evaluation records the exact policy version, all six boundaries and
+  observed values, currency, decision, action, actor, project, UTC time, and
+  correlation ID. This evidence contains no credential or provider payload.
+- Creating a version requires a 1–128 character idempotency key. Later versions
+  require an exact quoted `If-Match`; stale versions return a conflict. A
+  missing or foreign version is unavailable without existence disclosure.
+  The HTTP evaluation endpoint is a side-effect-free local decision probe;
+  runtime execution must call the application gate before any protected effect.
 
 ## ARCH rules and pattern limits
 

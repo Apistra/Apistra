@@ -145,7 +145,10 @@ def build_policy_service(settings: RuntimeSettings) -> PolicyService:
 
 
 def build_agent_service(
-    settings: RuntimeSettings, endpoints: EndpointService, tools: ToolService
+    settings: RuntimeSettings,
+    endpoints: EndpointService,
+    tools: ToolService,
+    policies: PolicyService,
 ) -> AgentService:
     """Compose immutable agent-version persistence."""
 
@@ -155,4 +158,4 @@ def build_agent_service(
         store = InMemoryAgentStore()
     else:
         raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
-    return AgentService(store, endpoints, tools, UtcClock())
+    return AgentService(store, endpoints, tools, UtcClock(), policies)

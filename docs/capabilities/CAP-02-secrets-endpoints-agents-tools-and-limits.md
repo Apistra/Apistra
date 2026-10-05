@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.11
-Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-04 are DONE, and WO-CAP-02-05 is READY
+Version: 0.12
+Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-04 are DONE, and WO-CAP-02-05 is in implementation review
 Release: 0.1
 Assurance: EXTENDED
 
@@ -21,10 +21,15 @@ Steering, definition, and receipt round-trip.
 PR #38, merge `90d4f29`, and protected run 37276401385 verify the reviewed
 WO-CAP-02-04 governed-tool slice and every required authenticated Steering,
 definition, and receipt round-trip.
+PR #39, merge `7d5a7a3`, and protected run 37277830127 verify the WO-CAP-02-04
+closure and every required authenticated Steering, definition, and receipt
+round-trip. The limit-policy feature branch has local implementation evidence;
+its protected result and implementation approval are pending.
 **Main blocker:** CAP-02 still requires WO-CAP-02-05 and the unchanged-candidate
 acceptance workorder WO-CAP-02-07.
-**Next step:** Implement WO-CAP-02-05 on its own feature branch without
-expanding beyond configurable limits, budget decisions, and DSN-019.
+**Next step:** Review and merge WO-CAP-02-05 after protected feature and PR
+checks; then verify the merged `test` run and complete its human workorder
+approval before starting WO-CAP-02-07.
 
 ## Goal and value
 
@@ -176,6 +181,6 @@ protected run 37228142970, and product-owner merge approval. WO-CAP-02-03 is
 DONE after PR #35, PR #36, merge `86a9211`, protected run 37267844668, and
 product-owner merge approval. WO-CAP-02-04 is DONE after PR #38, merge
 `90d4f29`, protected run 37276401385, and product-owner merge approval.
-WO-CAP-02-05 is READY; WO-CAP-02-07 remains DRAFT until its declared
-predecessor is complete.
+WO-CAP-02-05 is under implementation review; WO-CAP-02-07 remains DRAFT
+until its declared predecessor is complete.
 
