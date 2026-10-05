@@ -1,8 +1,8 @@
 # WO-CAP-02-07 — Accept CAP-02 on local staging
 
-Version: 0.9-draft
+Version: 0.10-draft
 Status: DRAFT
-Status reason: CAP-02 publication, WO-CAP-02-01, and WO-CAP-02-02 are complete; implementation workorders WO-CAP-02-03 through WO-CAP-02-05 remain open
+Status reason: CAP-02 publication and WO-CAP-02-01 through WO-CAP-02-03 are complete; implementation workorders WO-CAP-02-04 and WO-CAP-02-05 remain open
 Implementation state: NOT STARTED
 Evidence state: PREREQUISITE EVIDENCE PARTIAL; FINAL ACCEPTANCE NOT EXECUTED
 Approval state: ACCEPTANCE CONTRACT REVIEWED; EXECUTION BLOCKED BY OPEN IMPLEMENTATION WORKORDERS
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: DEFINITIONS PUBLISHED AND VERIFIED by WO-CAP-02-06; candidate-bound execution remains required here
 - Delivery class: capability-acceptance
 - Owned verification group: TST-WO-CAP-02-07
-- Specification revision: 0.9-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.10-draft; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,12 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this final acceptance result. CAP-00 and CAP-01 are accepted baselines, and WO-CAP-02-01 plus WO-CAP-02-02 are integrated on protected `test`; CAP-02 still has no complete frozen capability candidate. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
+Current evidence does not establish this final acceptance result. CAP-00 and
+CAP-01 are accepted baselines, and WO-CAP-02-01 through WO-CAP-02-03 are
+integrated on protected `test`; CAP-02 still has no complete frozen capability
+candidate. The readiness review at
+`../../planning/14-cap02-readiness-review.md` records the observed paths and
+remaining gates.
 
 ## Target result
 
@@ -139,7 +144,7 @@ No new UI is authorised unless the capability design contract explicitly assigns
 - **Positive oracle:** The full required matrix and manual package pass on the exact candidate digests deployed to the named staging environment, followed by explicit human acceptance.
 - **Negative oracle:** A changed digest, missing/stale/skipped mandatory result, failed recovery, absent receipt, or missing human decision blocks capability acceptance.
 - **Boundary oracle:** Acceptance covers the declared minimum and maximum supported configuration plus timeout, retry, concurrency, recovery, and compatibility edges applicable to the capability.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.10-draft, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
