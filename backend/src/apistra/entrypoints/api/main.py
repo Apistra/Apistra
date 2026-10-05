@@ -21,6 +21,7 @@ from apistra.entrypoints.api.composition import (
     build_secret_service,
     build_tool_service,
 )
+from apistra.entrypoints.api.limits import register_limit_routes
 from apistra.entrypoints.api.tools import register_tool_routes
 from apistra.modules.agents.application import AgentService
 from apistra.modules.catalog.application import SecretService
@@ -524,6 +525,23 @@ def _register_audit_route(
             }
             for event in policy_event_result.value
         ]
+        limit_event_result = policies.limit_audit_events(administrator_id)
+        if limit_event_result.value is None:
+            raise RuntimeError("Successful limit-policy audit query returned no collection.")
+        limit_events: list[dict[str, object]] = [
+            {
+                FIELD_ID: str(event.id),
+                FIELD_EVENT_TYPE: event.event_type,
+                FIELD_CREATED_AT: event.created_at.isoformat(),
+                FIELD_CORRELATION_ID: event.correlation_id,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.policy_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: None,
+                "details": event.details,
+            }
+            for event in limit_event_result.value
+        ]
         events = sorted(
             [
                 *identity_events,
@@ -533,6 +551,7 @@ def _register_audit_route(
                 *agent_events,
                 *tool_events,
                 *policy_events,
+                *limit_events,
             ],
             key=lambda event: (
                 str(event[FIELD_CREATED_AT]),
@@ -677,7 +696,7 @@ def create_app(
     endpoints = endpoint_service or build_endpoint_service(current_settings(), secrets)
     tools = tool_service or build_tool_service(current_settings())
     policies = policy_service or build_policy_service(current_settings())
-    agents = agent_service or build_agent_service(current_settings(), endpoints, tools)
+    agents = agent_service or build_agent_service(current_settings(), endpoints, tools, policies)
     application = FastAPI(
         title="Apistra API",
         version=current_settings().version,
@@ -718,6 +737,14 @@ def create_app(
         ),
         projects,
         tools,
+        policies,
+    )
+    register_limit_routes(
+        application,
+        lambda request, token, csrf, mutation: _authenticated(
+            identity, request, token, csrf, mutation=mutation
+        ),
+        projects,
         policies,
     )
 

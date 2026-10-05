@@ -1,0 +1,52 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Apistra CAP-02 limit policies", "version": "0.1.0" },
+  "paths": {
+    "/api/v1/projects/{project_id}/policies/limits": { "get": {}, "post": {} },
+    "/api/v1/projects/{project_id}/policies/limits/{policy_id}/versions": { "get": {}, "post": {} },
+    "/api/v1/projects/{project_id}/policies/limits/{policy_id}/versions/{policy_version}:publish": { "post": {} },
+    "/api/v1/projects/{project_id}/policies/limits/{policy_id}/versions/{policy_version}:evaluate": { "post": {} }
+  },
+  "components": {
+    "schemas": {
+      "LimitPolicyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name", "maximum_duration_seconds", "maximum_calls", "maximum_tokens",
+          "maximum_cost_minor_units", "currency", "maximum_concurrency",
+          "rate_limit_requests", "rate_limit_window_seconds"
+        ],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "maximum_duration_seconds": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "maximum_calls": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "maximum_tokens": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "maximum_cost_minor_units": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "maximum_concurrency": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "rate_limit_requests": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "rate_limit_window_seconds": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "warning_threshold_percent": { "type": ["integer", "null"], "minimum": 1, "maximum": 99 }
+        }
+      },
+      "LimitEvaluationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "duration_seconds", "calls", "tokens", "cost_minor_units",
+          "concurrency", "requests_in_window", "rate_window_seconds"
+        ],
+        "properties": {
+          "duration_seconds": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "calls": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "tokens": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "cost_minor_units": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "concurrency": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "requests_in_window": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "rate_window_seconds": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+        }
+      }
+    }
+  }
+}
