@@ -814,6 +814,23 @@ def write_failure_receipt(
     write_json_atomic(path, redact(payload, (token,)))
 
 
+def safe_failure_summary(error: Exception) -> str:
+    """Expose actionable protocol metadata without response bodies or secrets."""
+    cause = error.cause if isinstance(error, SteeringPublishError) else error
+    parts = [type(error).__name__]
+    if isinstance(error, SteeringPublishError):
+        parts.append(f"phase={error.phase}")
+        if error.batch_number is not None:
+            parts.append(f"batch={error.batch_number}")
+    if isinstance(cause, ApiError):
+        parts.append(f"http={cause.status}")
+        if cause.code:
+            parts.append(f"code={cause.code}")
+        if cause.request_id:
+            parts.append(f"request_id={cause.request_id}")
+    return " ".join(parts)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
@@ -857,7 +874,8 @@ def main() -> int:
             error=error,
         )
         print(
-            f"Softwaretest.it steering round-trip failed safely: {type(error).__name__}"
+            "Softwaretest.it steering round-trip failed safely: "
+            f"{safe_failure_summary(error)}"
         )
         return 1
 
