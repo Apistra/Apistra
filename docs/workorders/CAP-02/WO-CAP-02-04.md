@@ -1,11 +1,11 @@
 # WO-CAP-02-04 — Implement governed tool contracts and approval classification
 
-Version: 0.9-ready
+Version: 0.10-ready
 Status: READY
-Status reason: predecessor WO-CAP-02-03 is DONE on protected `test`, and the approved expectation, architecture, security, design, repository-path, test-definition, and authenticated publication gates are complete
-Implementation state: NOT STARTED
-Evidence state: READY PREREQUISITES VERIFIED; IMPLEMENTATION NOT EXECUTED
-Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE NOT YET DUE
+Status reason: the bounded implementation is complete on `feature/cap02-governed-tools`; protected CI, authenticated publication/readback, independent implementation review, merge, and human workorder approval remain pending
+Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED TO PROTECTED `test`
+Evidence state: LOCAL STATIC, ARCHITECTURE, UNIT, COMPONENT, CONTRACT, POSTGRESQL MIGRATION/INTEGRATION, WEB, BUILD, AND 90 PERCENT COVERAGE GATES PASS; PROTECTED CI AND EXTERNAL RECEIPTS PENDING
+Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; INDEPENDENT IMPLEMENTATION REVIEW AND HUMAN WORKORDER ACCEPTANCE PENDING
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-04
-- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.10-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,12 +37,15 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish the WO-CAP-02-04 implementation result.
 CAP-00 and CAP-01 are accepted baselines, and WO-CAP-02-01 through
-WO-CAP-02-03 are DONE on protected `test`. The readiness review at
-`../../planning/14-cap02-readiness-review.md` records the approved expectations,
-observed paths, and satisfied execution prerequisites. Governed tool contracts
-and approval classification have not yet been implemented.
+WO-CAP-02-03 are DONE on protected `test`. The feature branch now implements
+immutable project-scoped tool versions, explicit JSON input/output schemas,
+deterministic READ/WRITE/ADMINISTRATIVE effects, exact approval exceptions,
+fail-closed timeout decisions, PostgreSQL persistence, safe audit events,
+versioned HTTP contracts, exact agent tool-version validation, and DSN-023.
+Local verification passes; this status deliberately does not claim protected
+CI, authenticated Softwaretest.it receipts, independent implementation review,
+merge, human workorder acceptance, or CAP-02 acceptance.
 
 ## Target result
 
@@ -96,10 +99,10 @@ Planned additions to the bounded change area after READY:
 
 - EXISTING: `backend/src/apistra/modules/catalog/`
 - EXISTING: `backend/src/apistra/modules/agents/`
-- PLANNED: `backend/src/apistra/modules/policies/`
+- EXISTING ON FEATURE BRANCH: `backend/src/apistra/modules/policies/`
 - EXISTING: `apps/web/src/features/catalog/`
 - EXISTING: `apps/web/src/features/agents/`
-- PLANNED: `apps/web/src/features/policies/`
+- EXISTING ON FEATURE BRANCH: `apps/web/src/features/policies/`
 - EXISTING: `backend/tests/unit/cap_02/`
 - EXISTING: `backend/tests/component/cap_02/`
 - EXISTING: `backend/tests/contract/cap_02/`
@@ -159,7 +162,7 @@ UI scope is DSN-023 plus its DSN-019 approval-policy link from design revision 0
 - **Positive oracle:** A governed tool exposes a versioned input/output contract and a deterministic read/write approval classification.
 - **Negative oracle:** A tool with an unknown schema or ambiguous write classification cannot be published or executed.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.9-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.10-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

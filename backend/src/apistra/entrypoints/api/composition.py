@@ -16,10 +16,14 @@ from apistra.modules.catalog.adapters.probe import (
     DenyByDefaultDestinationPolicy,
     OpenAiCompatibleEndpointProbe,
 )
+from apistra.modules.catalog.adapters.tool_memory import InMemoryToolStore
+from apistra.modules.catalog.adapters.tool_postgres import PostgresToolStore
 from apistra.modules.catalog.application import SecretService
 from apistra.modules.catalog.application.endpoints import EndpointService
+from apistra.modules.catalog.application.tools import ToolService
 from apistra.modules.catalog.ports import SecretStore
 from apistra.modules.catalog.ports.endpoints import EndpointStore
+from apistra.modules.catalog.ports.tools import ToolStore
 from apistra.modules.identity.adapters.memory import InMemoryIdentityStore
 from apistra.modules.identity.adapters.postgres import PostgresIdentityStore
 from apistra.modules.identity.adapters.security import (
@@ -29,6 +33,10 @@ from apistra.modules.identity.adapters.security import (
 )
 from apistra.modules.identity.application import IdentityService
 from apistra.modules.identity.ports import IdentityStore
+from apistra.modules.policies.adapters.memory import InMemoryPolicyStore
+from apistra.modules.policies.adapters.postgres import PostgresPolicyStore
+from apistra.modules.policies.application import PolicyService
+from apistra.modules.policies.ports import PolicyStore
 from apistra.modules.projects.adapters.memory import InMemoryProjectStore
 from apistra.modules.projects.adapters.postgres import PostgresProjectStore
 from apistra.modules.projects.application import ProjectService
@@ -112,7 +120,33 @@ def build_endpoint_service(settings: RuntimeSettings, secrets: SecretService) ->
     )
 
 
-def build_agent_service(settings: RuntimeSettings, endpoints: EndpointService) -> AgentService:
+def build_tool_service(settings: RuntimeSettings) -> ToolService:
+    """Compose immutable governed-tool persistence."""
+
+    if settings.database_url:
+        store: ToolStore = PostgresToolStore(settings.database_url)
+    elif settings.environment in LOCAL_ENVIRONMENTS:
+        store = InMemoryToolStore()
+    else:
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
+    return ToolService(store, UtcClock())
+
+
+def build_policy_service(settings: RuntimeSettings) -> PolicyService:
+    """Compose deterministic approval-policy persistence."""
+
+    if settings.database_url:
+        store: PolicyStore = PostgresPolicyStore(settings.database_url)
+    elif settings.environment in LOCAL_ENVIRONMENTS:
+        store = InMemoryPolicyStore()
+    else:
+        raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
+    return PolicyService(store, UtcClock())
+
+
+def build_agent_service(
+    settings: RuntimeSettings, endpoints: EndpointService, tools: ToolService
+) -> AgentService:
     """Compose immutable agent-version persistence."""
 
     if settings.database_url:
@@ -121,4 +155,4 @@ def build_agent_service(settings: RuntimeSettings, endpoints: EndpointService) -
         store = InMemoryAgentStore()
     else:
         raise RuntimeError(DATABASE_REQUIRED_MESSAGE)
-    return AgentService(store, endpoints, UtcClock())
+    return AgentService(store, endpoints, tools, UtcClock())

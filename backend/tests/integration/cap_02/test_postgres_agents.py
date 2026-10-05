@@ -13,8 +13,10 @@ from apistra.modules.agents.domain import AgentVersionStatus, VersionReference
 from apistra.modules.catalog.adapters.crypto import AesGcmSecretCipher
 from apistra.modules.catalog.adapters.endpoint_postgres import PostgresEndpointStore
 from apistra.modules.catalog.adapters.postgres import PostgresSecretStore
+from apistra.modules.catalog.adapters.tool_postgres import PostgresToolStore
 from apistra.modules.catalog.application import SecretService
 from apistra.modules.catalog.application.endpoints import EndpointService
+from apistra.modules.catalog.application.tools import ToolService
 from apistra.modules.catalog.domain import SecretMaterial
 from apistra.modules.catalog.domain.endpoints import (
     ApprovedDestination,
@@ -116,7 +118,9 @@ def test_postgres_agent_versions_are_immutable_scoped_idempotent_and_audited() -
         "endpoint",
         "endpoint-corr",
     ).value
-    service = AgentService(PostgresAgentStore(dsn), endpoints, clock)
+    service = AgentService(
+        PostgresAgentStore(dsn), endpoints, ToolService(PostgresToolStore(dsn), clock), clock
+    )
     reference = VersionReference(endpoint.id, endpoint.version)
     first = service.create_version(
         owner,

@@ -5,7 +5,9 @@ from apistra.modules.agents.adapters.memory import InMemoryAgentStore
 from apistra.modules.agents.application import AgentService
 from apistra.modules.agents.domain import AgentVersionStatus, VersionReference
 from apistra.modules.catalog.adapters.endpoint_memory import InMemoryEndpointStore
+from apistra.modules.catalog.adapters.tool_memory import InMemoryToolStore
 from apistra.modules.catalog.application.endpoints import EndpointService
+from apistra.modules.catalog.application.tools import JSON_SCHEMA_DIALECT, ToolService
 from apistra.modules.catalog.domain.endpoints import (
     EndpointPurpose,
     EndpointStatus,
@@ -17,6 +19,7 @@ from apistra.modules.catalog.domain.endpoints import (
 OWNER = UUID("00000000-0000-0000-0000-000000000001")
 PROJECT = UUID("00000000-0000-0000-0000-000000000002")
 NOW = datetime(2026, 10, 4, 20, tzinfo=UTC)
+SCHEMA = {"$schema": JSON_SCHEMA_DIALECT, "type": "object"}
 
 
 class Clock:
@@ -61,7 +64,9 @@ def service() -> tuple[AgentService, VersionReference, VersionReference]:
     endpoint_store = InMemoryEndpointStore()
     endpoints = EndpointService(endpoint_store, Unused(), Unused(), Unused(), Clock())
     return (
-        AgentService(InMemoryAgentStore(), endpoints, Clock()),
+        AgentService(
+            InMemoryAgentStore(), endpoints, ToolService(InMemoryToolStore(), Clock()), Clock()
+        ),
         endpoint(endpoint_store, "primary"),
         endpoint(endpoint_store, "fallback"),
     )
@@ -137,6 +142,71 @@ def test_foreign_stale_and_duplicate_endpoint_references_are_rejected() -> None:
     )
     assert duplicate.error.code == "agent.invalid_input"
     assert foreign.error.code == "agent.invalid_input"
+
+
+def test_agent_accepts_only_exact_same_project_tool_versions() -> None:
+    endpoint_store = InMemoryEndpointStore()
+    endpoints = EndpointService(endpoint_store, Unused(), Unused(), Unused(), Clock())
+    tool_store = InMemoryToolStore()
+    tools = ToolService(tool_store, Clock())
+    agents = AgentService(InMemoryAgentStore(), endpoints, tools, Clock())
+    primary = endpoint(endpoint_store, "primary")
+    tool = tools.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "research-readonly",
+        "Search indexed documents.",
+        SCHEMA,
+        SCHEMA,
+        "READ",
+        ("search",),
+        "tool-v1",
+        "corr-tool",
+    ).value
+    exact = VersionReference(tool.tool_id, tool.version)
+    created = agents.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "Research Analyst",
+        "Use evidence.",
+        primary,
+        None,
+        (exact,),
+        None,
+        "agent-v1",
+        "corr-agent",
+    )
+    stale = agents.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "Research Analyst",
+        "Use evidence.",
+        primary,
+        None,
+        (VersionReference(tool.tool_id, 99),),
+        None,
+        "agent-stale",
+        "corr-agent-stale",
+    )
+    duplicate = agents.create_version(
+        OWNER,
+        "admin.alpha",
+        PROJECT,
+        "Research Analyst",
+        "Use evidence.",
+        primary,
+        None,
+        (exact, exact),
+        None,
+        "agent-duplicate",
+        "corr-agent-duplicate",
+    )
+    assert created.value.tool_versions == (exact,)
+    assert stale.error.code == "agent.invalid_input"
+    assert duplicate.error.code == "agent.invalid_input"
 
 
 def test_input_idempotency_version_and_unavailable_failures_are_explicit() -> None:

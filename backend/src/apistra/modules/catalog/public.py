@@ -2,6 +2,7 @@
 
 from apistra.modules.catalog.application import SecretResult, SecretService
 from apistra.modules.catalog.application.endpoints import EndpointResult, EndpointService
+from apistra.modules.catalog.application.tools import ToolResult, ToolService
 from apistra.modules.catalog.domain import SecretErrorCode, SecretReference, SecretStatus
 from apistra.modules.catalog.domain.endpoints import (
     EndpointErrorCode,
@@ -11,6 +12,12 @@ from apistra.modules.catalog.domain.endpoints import (
     NetworkProfile,
     ProbeOutcome,
     ProviderProtocol,
+)
+from apistra.modules.catalog.domain.tools import (
+    ToolError,
+    ToolErrorCode,
+    ToolVersion,
+    ToolVersionStatus,
 )
 
 __all__ = [
@@ -28,4 +35,10 @@ __all__ = [
     "SecretResult",
     "SecretService",
     "SecretStatus",
+    "ToolError",
+    "ToolErrorCode",
+    "ToolResult",
+    "ToolService",
+    "ToolVersion",
+    "ToolVersionStatus",
 ]

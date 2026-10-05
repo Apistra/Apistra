@@ -255,7 +255,7 @@ function ProjectOverview({ currentProject, onCreate, onInstallationStatus, onPro
         <label>Current project<select aria-label="Current project" value={currentProject} onChange={(event) => onProjectChange(event.target.value)}><option value="">No project selected</option>{projects.filter((item) => item.status === "ACTIVE").map((project) => <option key={project.id} value={project.id}>{project.key} · {project.name}</option>)}</select></label>
         <AdministratorMenu onInstallationStatus={onInstallationStatus} onSignOut={onSignOut} />
       </header>
-      <nav aria-label="Project navigation"><a aria-current="page" href="/">Overview</a>{currentProject ? <><a href={`/projects/${currentProject}/secrets`}>Secrets</a><a href={`/projects/${currentProject}/endpoints`}>Endpoints</a></> : null}<a href="/audit">Audit</a></nav>
+      <nav aria-label="Project navigation"><a aria-current="page" href="/">Overview</a>{currentProject ? <><a href={`/projects/${currentProject}/secrets`}>Secrets</a><a href={`/projects/${currentProject}/endpoints`}>Model Endpoints</a><a href={`/projects/${currentProject}/agents`}>Agents</a><a href={`/projects/${currentProject}/tools`}>Tools</a></> : null}<a href="/audit">Audit</a></nav>
       <div className="workspace-content">
         <p className="eyebrow">Installation secured</p>
         <h1 id="project-overview-title">Project overview</h1>

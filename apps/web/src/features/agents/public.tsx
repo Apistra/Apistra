@@ -40,7 +40,7 @@ export function AgentVersionsApp({ projectId }: { projectId: string }) {
     <header className="workspace-header"><div><p className="eyebrow">Apistra administration</p><strong>{session.administrator.username}</strong></div></header>
     <nav aria-label="Project navigation">
       <a href={`/projects/${projectId}`}>Overview</a><a href={`/projects/${projectId}/secrets`}>Secrets</a>
-      <a href={`/projects/${projectId}/endpoints`}>Endpoints</a><a aria-current="page" href={`/projects/${projectId}/agents`}>Agents</a><a href="/audit">Audit</a>
+      <a href={`/projects/${projectId}/endpoints`}>Model Endpoints</a><a aria-current="page" href={`/projects/${projectId}/agents`}>Agents</a><a href={`/projects/${projectId}/tools`}>Tools</a><a href="/audit">Audit</a>
     </nav>
     <div className="workspace-content">
       <p className="eyebrow">Immutable configuration</p><h1 id="agent-versions-title">Agent versions</h1>
