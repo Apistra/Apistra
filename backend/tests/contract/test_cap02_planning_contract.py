@@ -40,9 +40,7 @@ def test_cap02_review_and_design_gates_remain_scoped_after_publication() -> None
     capability = (
         ROOT / "docs/capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md"
     ).read_text(encoding="utf-8")
-    workorder = (ROOT / "docs/workorders/CAP-02/WO-CAP-02-05.md").read_text(
-        encoding="utf-8"
-    )
+    workorder = (ROOT / "docs/workorders/CAP-02/WO-CAP-02-05.md").read_text(encoding="utf-8")
     design = (ROOT / "docs/planning/07-design-contract.md").read_text(encoding="utf-8")
     assert "Status: HISTORICAL READINESS SNAPSHOT" in review
     assert "Status: IN_PROGRESS;" in capability
