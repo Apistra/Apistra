@@ -16,12 +16,16 @@ from apistra.entrypoints.api.composition import (
     build_agent_service,
     build_endpoint_service,
     build_identity_service,
+    build_policy_service,
     build_project_service,
     build_secret_service,
+    build_tool_service,
 )
+from apistra.entrypoints.api.tools import register_tool_routes
 from apistra.modules.agents.application import AgentService
 from apistra.modules.catalog.application import SecretService
 from apistra.modules.catalog.application.endpoints import EndpointService
+from apistra.modules.catalog.application.tools import ToolService
 from apistra.modules.identity.application import IdentityService, OperationResult
 from apistra.modules.identity.domain import (
     IdentityError,
@@ -29,6 +33,7 @@ from apistra.modules.identity.domain import (
     IssuedSession,
     SessionContext,
 )
+from apistra.modules.policies.application import PolicyService
 from apistra.modules.projects.application import ProjectService
 from apistra.modules.projects.domain import Project, ProjectError, ProjectErrorCode
 from apistra.platform.observability.logging import configure_logging, log_event
@@ -397,6 +402,8 @@ def _register_audit_route(
     secrets: SecretService,
     endpoints: EndpointService,
     agents: AgentService,
+    tools: ToolService,
+    policies: PolicyService,
 ) -> None:
     @application.get("/api/v1/audit-events", tags=["audit"], response_model=None)
     def list_audit_events(
@@ -485,8 +492,48 @@ def _register_audit_route(
             }
             for event in agent_event_result.value
         ]
+        tool_event_result = tools.audit_events(administrator_id)
+        if tool_event_result.value is None:
+            raise RuntimeError("Successful tool audit query returned no collection.")
+        tool_events: list[dict[str, object]] = [
+            {
+                FIELD_ID: str(event.id),
+                FIELD_EVENT_TYPE: event.event_type,
+                FIELD_CREATED_AT: event.created_at.isoformat(),
+                FIELD_CORRELATION_ID: event.correlation_id,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.tool_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: None,
+            }
+            for event in tool_event_result.value
+        ]
+        policy_event_result = policies.audit_events(administrator_id)
+        if policy_event_result.value is None:
+            raise RuntimeError("Successful policy audit query returned no collection.")
+        policy_events: list[dict[str, object]] = [
+            {
+                FIELD_ID: str(event.id),
+                FIELD_EVENT_TYPE: event.event_type,
+                FIELD_CREATED_AT: event.created_at.isoformat(),
+                FIELD_CORRELATION_ID: event.correlation_id,
+                FIELD_ACTOR: event.actor_username,
+                FIELD_SUBJECT_ID: str(event.tool_id),
+                FIELD_PROJECT_ID: str(event.project_id),
+                FIELD_PROJECT_KEY: None,
+            }
+            for event in policy_event_result.value
+        ]
         events = sorted(
-            [*identity_events, *project_events, *secret_events, *endpoint_events, *agent_events],
+            [
+                *identity_events,
+                *project_events,
+                *secret_events,
+                *endpoint_events,
+                *agent_events,
+                *tool_events,
+                *policy_events,
+            ],
             key=lambda event: (
                 str(event[FIELD_CREATED_AT]),
                 str(event[FIELD_ID]),
@@ -616,6 +663,8 @@ def create_app(
     secret_service: SecretService | None = None,
     endpoint_service: EndpointService | None = None,
     agent_service: AgentService | None = None,
+    tool_service: ToolService | None = None,
+    policy_service: PolicyService | None = None,
 ) -> FastAPI:
     configured_settings = runtime_settings
 
@@ -626,7 +675,9 @@ def create_app(
     projects = project_service or build_project_service(current_settings())
     secrets = secret_service or build_secret_service(current_settings())
     endpoints = endpoint_service or build_endpoint_service(current_settings(), secrets)
-    agents = agent_service or build_agent_service(current_settings(), endpoints)
+    tools = tool_service or build_tool_service(current_settings())
+    policies = policy_service or build_policy_service(current_settings())
+    agents = agent_service or build_agent_service(current_settings(), endpoints, tools)
     application = FastAPI(
         title="Apistra API",
         version=current_settings().version,
@@ -637,7 +688,9 @@ def create_app(
     _register_identity_creation_routes(application, identity, current_settings)
     _register_identity_session_routes(application, identity, current_settings)
     _register_project_collection_routes(application, identity, projects)
-    _register_audit_route(application, identity, projects, secrets, endpoints, agents)
+    _register_audit_route(
+        application, identity, projects, secrets, endpoints, agents, tools, policies
+    )
     _register_project_read_route(application, identity, projects)
     _register_project_update_route(application, identity, projects)
     _register_project_archive_route(application, identity, projects)
@@ -657,6 +710,15 @@ def create_app(
         ),
         projects,
         agents,
+    )
+    register_tool_routes(
+        application,
+        lambda request, token, csrf, mutation: _authenticated(
+            identity, request, token, csrf, mutation=mutation
+        ),
+        projects,
+        tools,
+        policies,
     )
 
     return application

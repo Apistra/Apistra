@@ -192,3 +192,53 @@ source_modules =
     apistra.modules.agents.adapters
 forbidden_modules =
     apistra.entrypoints
+
+[importlinter:contract:policies-domain-independence]
+name = ARCH-001 policies domain independence
+type = forbidden
+source_modules =
+    apistra.modules.policies.domain
+forbidden_modules =
+    apistra.modules.policies.application
+    apistra.modules.policies.ports
+    apistra.modules.policies.adapters
+    apistra.modules.catalog
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:policies-application-boundary]
+name = ARCH-002 policies application controls use cases
+type = forbidden
+source_modules =
+    apistra.modules.policies.application
+forbidden_modules =
+    apistra.modules.policies.adapters
+    apistra.modules.catalog
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:policies-ports-boundary]
+name = ARCH-003 policies ports remain provider neutral
+type = forbidden
+source_modules =
+    apistra.modules.policies.ports
+forbidden_modules =
+    apistra.modules.policies.application
+    apistra.modules.policies.adapters
+    apistra.modules.catalog
+    apistra.entrypoints
+    fastapi
+    psycopg
+    pydantic
+
+[importlinter:contract:policies-adapter-containment]
+name = ARCH-011 policies adapters do not own composition
+type = forbidden
+source_modules =
+    apistra.modules.policies.adapters
+forbidden_modules =
+    apistra.entrypoints

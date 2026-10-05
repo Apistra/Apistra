@@ -15,7 +15,7 @@ from apistra.modules.agents.domain import (
     VersionReference,
 )
 from apistra.modules.agents.ports import AgentClock, AgentStore
-from apistra.modules.catalog.public import EndpointPurpose, EndpointService
+from apistra.modules.catalog.public import EndpointPurpose, EndpointService, ToolService
 
 MAXIMUM_NAME_LENGTH = 128
 MAXIMUM_INSTRUCTIONS_LENGTH = 32_768
@@ -32,9 +32,16 @@ class AgentResult[T]:
 
 
 class AgentService:
-    def __init__(self, store: AgentStore, endpoints: EndpointService, clock: AgentClock) -> None:
+    def __init__(
+        self,
+        store: AgentStore,
+        endpoints: EndpointService,
+        tools: ToolService,
+        clock: AgentClock,
+    ) -> None:
         self._store = store
         self._endpoints = endpoints
+        self._tools = tools
         self._clock = clock
 
     def create_version(
@@ -63,6 +70,7 @@ class AgentService:
             normalized_instructions,
             primary_endpoint,
             fallback_endpoint,
+            tool_versions,
             idempotency_key,
         )
         if validation:
@@ -127,6 +135,7 @@ class AgentService:
         instructions: str,
         primary: VersionReference,
         fallback: VersionReference | None,
+        tools: tuple[VersionReference, ...],
         idempotency_key: str,
     ) -> AgentError | None:
         if not 1 <= len(name) <= MAXIMUM_NAME_LENGTH:
@@ -147,6 +156,17 @@ class AgentService:
                     "Endpoint reference must identify an exact generative endpoint "
                     "version in the same project."
                 )
+        if len(set(tools)) != len(tools):
+            return self._invalid("Tool version references must be unique.")
+        if any(
+            not self._tools.exact_reference_available(
+                owner_id, project_id, reference.id, reference.version
+            )
+            for reference in tools
+        ):
+            return self._invalid(
+                "Tool reference must identify an exact tool version in the same project."
+            )
         return None
 
     @staticmethod
