@@ -1,11 +1,11 @@
 # WO-CAP-02-04 — Implement governed tool contracts and approval classification
 
-Version: 0.10-ready
-Status: READY
-Status reason: the bounded implementation is complete on `feature/cap02-governed-tools`; protected CI, authenticated publication/readback, independent implementation review, merge, and human workorder approval remain pending
-Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED TO PROTECTED `test`
-Evidence state: LOCAL STATIC, ARCHITECTURE, UNIT, COMPONENT, CONTRACT, POSTGRESQL MIGRATION/INTEGRATION, WEB, BUILD, AND 90 PERCENT COVERAGE GATES PASS; PROTECTED CI AND EXTERNAL RECEIPTS PENDING
-Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; INDEPENDENT IMPLEMENTATION REVIEW AND HUMAN WORKORDER ACCEPTANCE PENDING
+Version: 0.11-done
+Status: DONE
+Status reason: PR #38 delivered the reviewed governed-tool slice to protected `test`; protected run 37276401385 passed every required CI, packaging, staging, authenticated publication, exact readback, and receipt gate
+Implementation state: COMPLETE ON PROTECTED `test` AT MERGE `90d4f2951afdabb5647e171675d1f4e8f953c8b6`
+Evidence state: PROTECTED RUN 37276401385 VERIFIED UNIT, COMPONENT, CONTRACT, ARCHITECTURE, SECURITY, MIGRATION/INTEGRATION, WEB, BUILD, COVERAGE, IMMUTABLE CANDIDATE, ISOLATED STAGING/RECOVERY, STEERING, DEFINITION, AND RECEIPT GATES
+Approval state: INDEPENDENT PRODUCT-OWNER IMPLEMENTATION REVIEW AND HUMAN WORKORDER APPROVAL COMPLETE THROUGH PR #38 MERGE; CAPABILITY ACCEPTANCE REMAINS WITH WO-CAP-02-07
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-04
-- Specification revision: 0.10-ready; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.11-done; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -43,9 +43,11 @@ immutable project-scoped tool versions, explicit JSON input/output schemas,
 deterministic READ/WRITE/ADMINISTRATIVE effects, exact approval exceptions,
 fail-closed timeout decisions, PostgreSQL persistence, safe audit events,
 versioned HTTP contracts, exact agent tool-version validation, and DSN-023.
-Local verification passes; this status deliberately does not claim protected
-CI, authenticated Softwaretest.it receipts, independent implementation review,
-merge, human workorder acceptance, or CAP-02 acceptance.
+Protected run 37276401385 verifies the merged implementation, immutable
+candidate, isolated staging/recovery, and authenticated Softwaretest.it
+Steering, definition, and receipt round-trips. The product-owner merge confirms
+the implementation review and workorder approval. CAP-02 acceptance and the
+final unchanged-candidate manual matrix remain owned by WO-CAP-02-07.
 
 ## Target result
 
@@ -162,7 +164,7 @@ UI scope is DSN-023 plus its DSN-019 approval-policy link from design revision 0
 - **Positive oracle:** A governed tool exposes a versioned input/output contract and a deterministic read/write approval classification.
 - **Negative oracle:** A tool with an unknown schema or ambiguous write classification cannot be published or executed.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.10-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.11-done, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 
