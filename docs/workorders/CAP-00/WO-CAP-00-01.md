@@ -1,6 +1,6 @@
 # WO-CAP-00-01 — Establish repository governance and planning checks
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: revision 0.6 repository, governance, and protected hosted checks passed on the accepted candidate
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: repository-governance
 - Owned verification group: TST-WO-CAP-00-01
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. Conflicting licensing, contribution, support, warranty, privacy, security, or release statements are resolved or explicitly blocking.
 3. Required roles, decision rights, escalation, review triggers, and evidence retention are actionable.
 4. Qualified human/legal approval is recorded where required; automated checks do not substitute for it.
+
+## Steering criterion evidence
+
+- WO-CAP-00-01-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-01 completion; reason=The revision 0.6 governance package and protected planning checks identify the authority, scope, revision, and limitations of repository-facing claims.
+- WO-CAP-00-01-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-01 completion; reason=The reviewed governance and licensing sources explicitly resolve the applicable public statements or retain unresolved matters as named gates; the protected repository checks passed.
+- WO-CAP-00-01-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-01 completion; reason=The accepted governance package records roles, decision rights, escalation, review triggers, and evidence retention; protected run 36875393087 revalidated its repository checks.
+- WO-CAP-00-01-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-01 completion; reason=The product-owner review was recorded on 2026-09-30; no separate legal certification was required by the approved CAP-00 scope, and this result does not claim one.
 
 ## Acceptance examples and test oracles
 

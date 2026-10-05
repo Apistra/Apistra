@@ -1,6 +1,6 @@
 # WO-CAP-00-04 — Establish isolated local staging and recovery
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: isolated staging, controlled failure, and unchanged-image recovery passed on the accepted candidate
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-00-04
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. An automatic deployment, shared-state collision, changed digest, failed recovery, or missing marker leaves staging verification failed.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-00-04-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-04 completion; reason=Run 36875393087 verified the exact candidate digests in isolated staging with health and deployment markers, controlled failure, and unchanged-image recovery.
+- WO-CAP-00-04-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-04 completion; reason=The staging and recovery gate fails on changed digests, missing markers, failed recovery, or shared-state collision; no automatic production deployment is authorised.
+- WO-CAP-00-04-AC-03: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-04 completion; reason=This workorder verifies deployment and recovery; it does not add mutable project-owned business operations or redelivery handlers.
+- WO-CAP-00-04-AC-04: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-04 completion; reason=This workorder introduces no public API or persisted business schema delta; it exercises the already versioned candidate and its recovery contract.
 
 ## Acceptance examples and test oracles
 

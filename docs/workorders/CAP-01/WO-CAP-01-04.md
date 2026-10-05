@@ -1,6 +1,6 @@
 # WO-CAP-01-04 — Publish and verify PRC-01 test definitions
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: all six reviewed definitions are released and exact field-/step-level read-back plus idempotent replay are verified
 Implementation state: DEFINITION PUBLISHER AND PROTECTED CI HANDOFF COMPLETE
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: cycle `2f5b1800-d187-474f-94ae-5686aefc2d0e`; testcases `APISTRA-TC-000002` through `APISTRA-TC-000007`
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-01-04
-- Specification revision: 0.6-draft; published manifest SHA-256 `b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done published manifest SHA-256 `b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b`; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -131,6 +131,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. Every business process has a complete manual package starting at logged-out sign-in, with atomic role-prefixed action/observation steps, concrete synthetic data, and one matching expected result per step.
 3. Publication is idempotent and field-/order-level read-back matches the local version and checksums.
 4. Definition, publication, fixture readiness, execution, result reporting, and capability acceptance remain distinct statuses.
+
+## Steering criterion evidence
+
+- WO-CAP-01-04-AC-01: status=PASSED; due_now=true; gate=WO-CAP-01-04 completion; reason=The reviewed CAP-01 test catalog links each externally observable criterion to its published manual case and any applicable automated BDD identifier or explicit non-applicability.
+- WO-CAP-01-04-AC-02: status=PASSED; due_now=true; gate=WO-CAP-01-04 completion; reason=Six published PRC-01 cases contain role-specific signed-out entry, atomic steps, concrete synthetic data, and matching expected results; execution remained with WO-CAP-01-05.
+- WO-CAP-01-04-AC-03: status=PASSED; due_now=true; gate=WO-CAP-01-04 completion; reason=The six definition versions passed exact field- and step-level readback plus idempotent replay against the retained manifest checksum b36935d8f0653d95739c259c7a41f3a1c6880ff9d67614111e7e87ce36176e5b.
+- WO-CAP-01-04-AC-04: status=PASSED; due_now=true; gate=WO-CAP-01-04 completion; reason=The source and publication receipts distinguish prepared definitions from staging fixtures, manual execution, result reporting, and the later CAP-01 human acceptance.
 
 ## Acceptance examples and test oracles
 

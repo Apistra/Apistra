@@ -61,6 +61,7 @@ STATUS_EVIDENCE_FAILED = "FAILED"
 STATUS_EVIDENCE_STALE = "STALE"
 STATUS_PENDING = "PENDING"
 STATUS_CONFIRMED = "CONFIRMED"
+STATUS_NOT_REQUIRED = "NOT_REQUIRED"
 CRITERION_PASSED = "PASSED"
 CRITERION_UNKNOWN = "UNKNOWN"
 SOURCE_STATUS_FINAL_ACCEPTANCE_READY = "FINAL ACCEPTANCE READY"
@@ -100,7 +101,7 @@ IDENTIFIER_PATTERN = re.compile(r"\b(?:WO-)?CAP-\d{2}(?:-\d{2})?\b")
 NUMBERED_ITEM_PATTERN = re.compile(r"^\d+\.\s+(.+)$")
 CRITERION_STATE_PATTERN = re.compile(
     r"^- (?P<id>(?:WO-)?CAP-\d{2}(?:-\d{2})?-AC-\d{2}): "
-    r"status=(?P<status>PASSED|UNKNOWN); "
+    r"status=(?P<status>PASSED|NOT_APPLICABLE|UNKNOWN); "
     r"due_now=(?P<due_now>true|false); "
     r"gate=(?P<gate>[^;]*); reason=(?P<reason>.+)$"
 )
@@ -261,6 +262,10 @@ def _transmission_status(text: str) -> str:
     if not mapping:
         return STATUS_UNKNOWN
     value = mapping.group(1).upper()
+    # This source field describes the workorder's test-definition/reporting
+    # obligation, not the receipt for the Steering import being performed now.
+    if "NOT PUBLISHED; ASSIGNED TO" in value:
+        return STATUS_NOT_REQUIRED
     if "NOT PUBLISHED" in value or "PARTIAL" in value:
         return STATUS_PENDING
     if "PUBLISHED" in value or "TESTCASES" in value:

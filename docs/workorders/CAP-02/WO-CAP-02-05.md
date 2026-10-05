@@ -1,10 +1,10 @@
 # WO-CAP-02-05 — Implement configurable limits and budget decisions
 
-Version: 0.10-ready
+Version: 0.11-ready
 Status: READY
-Status reason: execution prerequisites remain satisfied and the feature branch implements the policy slice; protected CI, independent implementation review, merge, authenticated post-merge readback, and human workorder acceptance remain pending
-Implementation state: COMPLETE ON FEATURE BRANCH; NOT YET MERGED
-Evidence state: LOCAL CONTRACT, UNIT, COMPONENT, INTEGRATION, ARCHITECTURE, STATIC, WEB, AND COVERAGE GATES VERIFIED; PROTECTED RESULT PENDING
+Status reason: PR #40 is merged on protected test and run 37293145775 passed; independent implementation review and explicit human workorder acceptance remain pending
+Implementation state: COMPLETE ON PROTECTED `test` AT `e0556c59b4e64a15f0d5314194b5416f2bc9f7cf`
+Evidence state: PROTECTED RUN 37293145775 VERIFIED TESTS, ARCHITECTURE, CONTRACTS, SECURITY, IMMUTABLE CANDIDATE, ISOLATED STAGING/RECOVERY, AND AUTHENTICATED STEERING/DEFINITION/RECEIPT READBACK
 Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE PENDING
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-05
-- Specification revision: 0.10-ready; the route, migration entrypoint, and web page path delta below requires implementation review before acceptance
+- Specification revision: 0.11-ready; the route, migration entrypoint, and web page path delta below still requires implementation review before acceptance
 
 ## Risk profile and escalation
 
@@ -40,11 +40,13 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 CAP-00 and CAP-01 are accepted baselines, and WO-CAP-02-01 through
 WO-CAP-02-04 are DONE on protected `test`. PR #39 merge `7d5a7a3` and protected
 run 37277830127 verified the WO-CAP-02-04 closure, Steering publication,
-CAP-02 definitions, and authenticated receipt readback. This feature branch
-implements project-scoped immutable limit-policy versions, deterministic
+CAP-02 definitions, and authenticated receipt readback. PR #40 merged the
+project-scoped immutable limit-policy versions, deterministic
 pre-effect budget decisions, PostgreSQL persistence, safe audit records,
-exact agent references, the versioned HTTP contract, and DSN-019. These are
-feature-branch results; protected CI and human implementation review remain due.
+exact agent references, the versioned HTTP contract, and DSN-019. Protected
+run 37293145775 passed all required jobs, including authenticated publication
+and readback. Independent implementation review and human workorder acceptance
+remain due; this is not CAP-02 capability acceptance.
 
 ## Target result
 
@@ -204,7 +206,7 @@ UI scope is DSN-019 from design revision 0.4 after its explicit product approval
 - **Positive oracle:** A run receives versioned hard limits and records a deterministic allow, warn, or stop budget decision.
 - **Negative oracle:** A request exceeding a hard limit performs no additional model, connector, or tool effect.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.9-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.11-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

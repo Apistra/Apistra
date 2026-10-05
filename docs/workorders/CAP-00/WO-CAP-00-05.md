@@ -1,6 +1,6 @@
 # WO-CAP-00-05 — Establish Softwaretest.it publishing readiness
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: guide 1.1.0 and the authenticated create/import/finalize/readback contract are implemented and verified
 Implementation state: IMPLEMENTED
@@ -15,10 +15,10 @@ Assurance: EXTENDED
 - Process: PRC-07
 - Capability contract: ../../capabilities/CAP-00-reproducible-delivery-walking-skeleton.md
 - CI test group: TST-WO-CAP-00-05
-- Softwaretest.it mapping: PARTIAL; CAP-00 integration definition and anchor testcase exist, but no accepted execution receipt exists
+- Softwaretest.it mapping: PUBLISHED AND VERIFIED; the CAP-00 anchor testcase and the candidate-bound COMPLETE/PASSED report with three CONFIRMED receipts were read back in run 36875393087
 - Delivery class: test-definition-and-publication
 - Owned verification group: TST-WO-CAP-00-05
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -109,6 +109,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. Every business process has a complete manual package starting at logged-out sign-in, with atomic role-prefixed action/observation steps, concrete synthetic data, and one matching expected result per step.
 3. Publication is idempotent and field-/order-level read-back matches the local version and checksums.
 4. Definition, publication, fixture readiness, execution, result reporting, and capability acceptance remain distinct statuses.
+
+## Steering criterion evidence
+
+- WO-CAP-00-05-AC-01: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-05 completion; reason=CAP-00 is a technical bootstrap without externally observable business-process acceptance criteria; later business BDD packages are owned by their capability publication workorders.
+- WO-CAP-00-05-AC-02: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-05 completion; reason=This readiness workorder does not define a business process; atomic manual process packages are owned by the later capability-specific definition workorders.
+- WO-CAP-00-05-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-05 completion; reason=The authenticated create/import/finalize/readback contract and retained three CONFIRMED receipts were verified in run 36875393087; later definition packages have separate publication gates.
+- WO-CAP-00-05-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-05 completion; reason=The CAP-00 readiness contract and separate definition, execution, reporting, and capability-acceptance gates remain explicit; the COMPLETE/PASSED report is not a manual test result.
 
 ## Acceptance examples and test oracles
 

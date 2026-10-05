@@ -1,6 +1,6 @@
 # WO-CAP-00-06 — Provide synthetic staging fixtures
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: synthetic fixtures and their negative proofs passed the complete protected revision 0.6 workflow
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-00-06
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. A non-deterministic identifier, real credential, cross-project reference, or reset outside the fixture namespace fails the fixture contract.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-00-06-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-06 completion; reason=The documented deterministic synthetic fixture command and protected run 36875393087 verified project isolation and reset within the fixture namespace.
+- WO-CAP-00-06-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-06 completion; reason=Negative fixture proofs reject nondeterministic identifiers, real credentials, cross-project references, and reset outside the fixture namespace.
+- WO-CAP-00-06-AC-03: status=PASSED; due_now=true; gate=WO-CAP-00-06 completion; reason=Fixture writes and reset stay in the synthetic project-scoped namespace; the protected fixture and repository proof contracts passed run 36875393087.
+- WO-CAP-00-06-AC-04: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-06 completion; reason=The fixture generator adds no public application API or persisted business schema migration; its own input and output contract is versioned in the test package.
 
 ## Acceptance examples and test oracles
 

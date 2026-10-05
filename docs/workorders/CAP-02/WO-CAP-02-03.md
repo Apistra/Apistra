@@ -1,6 +1,6 @@
 # WO-CAP-02-03 — Implement versioned agents and explicit fallback
 
-Version: 0.11-done
+Version: 0.12-done
 Status: DONE
 Status reason: PR #35 delivered the bounded agent-version slice to protected `test`; PR #36 repaired its Steering source revision, and protected run 37267844668 passed every required CI, packaging, staging, authenticated publication, exact readback, and receipt gate
 Implementation state: COMPLETE ON PROTECTED `test` AT MERGE `86a921161981952049a15a9d25479b15447e8a7a`
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-03
-- Specification revision: 0.11-done; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.12-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -159,6 +159,13 @@ UI scope is DSN-022 from design revision 0.4 after its explicit product approval
 2. An undeclared provider or fallback is never selected when the primary endpoint fails.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-02-03-AC-01: status=PASSED; due_now=true; gate=WO-CAP-02-03 completion; reason=PR #35 and protected run 37267844668 verified immutable agent versions with exact assigned endpoint references and declared fallback order.
+- WO-CAP-02-03-AC-02: status=PASSED; due_now=true; gate=WO-CAP-02-03 completion; reason=Agent negative tests reject undeclared providers and fallbacks when the primary endpoint fails; the protected contract and integration matrix passed.
+- WO-CAP-02-03-AC-03: status=PASSED; due_now=true; gate=WO-CAP-02-03 completion; reason=The protected agent-version slice verified project ownership, exact version references, conflict handling, and safe audit/diagnostic boundaries.
+- WO-CAP-02-03-AC-04: status=PASSED; due_now=true; gate=WO-CAP-02-03 completion; reason=The versioned agent API/contract, persistence migration, compatibility tests, isolated staging, and recovery passed run 37267844668.
 
 ## Acceptance examples and test oracles
 

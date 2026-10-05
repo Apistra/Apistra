@@ -1,6 +1,6 @@
 # WO-CAP-00-03 — Package immutable container candidates
 
-Version: 0.6-draft
+Version: 0.7-done
 Status: DONE
 Status reason: immutable packaging and external candidate-bound reporting passed in the protected workflow
 Implementation state: IMPLEMENTED
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: NOT PUBLISHED; assigned to the capability test-definition workorder
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-00-03
-- Specification revision: 0.6-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.7-done earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -107,6 +107,13 @@ No new UI is authorised unless the capability design contract explicitly assigns
 2. A mutable tag, digest mismatch, missing component, incomplete provenance, or secret-bearing build output prevents candidate publication.
 3. All state changes are project-scoped, version/conflict checked where mutable, idempotent where redelivery is possible, and attributable through safe audit/diagnostic correlations.
 4. Every public or persisted delta has a versioned contract and tested migration/compatibility behavior, or explicit evidence that no such delta exists.
+
+## Steering criterion evidence
+
+- WO-CAP-00-03-AC-01: status=PASSED; due_now=true; gate=WO-CAP-00-03 completion; reason=Run 36875393087 built content-addressed API, worker, and web images with a digest-bound manifest, checksums, dependency inventory, and SPDX SBOM.
+- WO-CAP-00-03-AC-02: status=PASSED; due_now=true; gate=WO-CAP-00-03 completion; reason=The protected packaging and secret-scan gates rejected missing or mismatched candidate inputs and secret-bearing build output before publication.
+- WO-CAP-00-03-AC-03: status=NOT_APPLICABLE; due_now=true; gate=WO-CAP-00-03 completion; reason=Immutable packaging changes no mutable project-owned business state and performs no business redelivery operation.
+- WO-CAP-00-03-AC-04: status=PASSED; due_now=true; gate=WO-CAP-00-03 completion; reason=The manifest, checksums, image digests, and SBOM are versioned candidate artifacts; no application-persisted schema delta belongs to this packaging workorder.
 
 ## Acceptance examples and test oracles
 
