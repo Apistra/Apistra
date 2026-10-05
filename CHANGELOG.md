@@ -6,6 +6,7 @@ The format follows Keep a Changelog and the project follows Semantic Versioning 
 
 ## [Unreleased]
 
+- Recorded the product-owner acceptance of the implemented WO-CAP-02-05 limit-policy slice against its protected candidate while retaining the separate independent implementation review as the remaining workorder-DONE gate. Steering projection revision 4 now reports its explicit completed implementation as `IMPLEMENTED` even while the canonical workorder remains `READY`; CAP-02 remains in progress.
 - Advanced the Softwaretest.it Steering projection revision to 3 after the delegated-publication mapping changed the payload of 121 otherwise unchanged workorders; every affected source now has a monotonic revision for protected import and readback.
 - Reconciled older completed CAP-00 through CAP-02 workorders with criterion-specific Steering evidence and monotonic source revisions, corrected the stale CAP-00 reporting mapping, and stopped treating delegated test-definition publication as a pending Steering import. The protected source import and its readback remain the authority for transmission success; capability acceptance is unchanged.
 - Updated the WO-CAP-02-05 and CAP-02 steering sources to reflect PR #40's protected merge and successful run 37293145775 without claiming the still-pending independent implementation review, human workorder acceptance, or CAP-02 capability acceptance.
