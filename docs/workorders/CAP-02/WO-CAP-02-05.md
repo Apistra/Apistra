@@ -1,11 +1,11 @@
 # WO-CAP-02-05 — Implement configurable limits and budget decisions
 
-Version: 0.8-draft
-Status: DRAFT
-Status reason: CAP-02 design/review and publication gates are complete, but required predecessor WO-CAP-02-04 is not DONE
+Version: 0.9-ready
+Status: READY
+Status reason: predecessor WO-CAP-02-04 is DONE on protected `test`, and the approved expectation, architecture, security, design, repository-path, test-definition, and authenticated publication gates are complete
 Implementation state: NOT STARTED
-Evidence state: PREREQUISITE EVIDENCE PARTIAL; IMPLEMENTATION NOT EXECUTED
-Approval state: EXPECTATION REVIEW COMPLETE; EXECUTION BLOCKED BY PREDECESSOR
+Evidence state: READY PREREQUISITES VERIFIED; IMPLEMENTATION NOT EXECUTED
+Approval state: EXPECTATION REVIEW AND HUMAN EXECUTION APPROVAL COMPLETE; IMPLEMENTATION REVIEW AND WORKORDER ACCEPTANCE NOT YET DUE
 Capability: [CAP-02](../../capabilities/CAP-02-secrets-endpoints-agents-tools-and-limits.md)
 Assurance: EXTENDED
 
@@ -18,7 +18,7 @@ Assurance: EXTENDED
 - Softwaretest.it mapping: PUBLISHED AND VERIFIED by WO-CAP-02-06; execution remains with WO-CAP-02-07
 - Delivery class: implementation
 - Owned verification group: TST-WO-CAP-02-05
-- Specification revision: 0.8-draft; earlier evidence requires explicit change-impact validation before reuse
+- Specification revision: 0.9-ready; earlier evidence requires explicit change-impact validation before reuse
 
 ## Risk profile and escalation
 
@@ -37,7 +37,12 @@ Stop and reassess the profile, specification, tests, and dependent evidence if i
 
 ## Context and current behavior
 
-Current evidence does not establish this 0.7 workorder result. CAP-00 and CAP-01 are accepted baselines; CAP-02 has no product implementation. The readiness review at `../../planning/14-cap02-readiness-review.md` records the observed paths and remaining gates.
+Current evidence does not establish the WO-CAP-02-05 implementation result.
+CAP-00 and CAP-01 are accepted baselines, and WO-CAP-02-01 through
+WO-CAP-02-04 are DONE on protected `test`. The readiness review at
+`../../planning/14-cap02-readiness-review.md` records the approved expectations,
+observed paths, and satisfied execution prerequisites. Configurable limits and
+budget decisions have not yet been implemented.
 
 ## Target result
 
@@ -89,18 +94,18 @@ Observed existing paths within the bounded change area:
 
 Planned additions to the bounded change area after READY:
 
-- PLANNED: `backend/src/apistra/modules/catalog/`
-- PLANNED: `backend/src/apistra/modules/agents/`
-- PLANNED: `backend/src/apistra/modules/policies/`
-- PLANNED: `apps/web/src/features/catalog/`
-- PLANNED: `apps/web/src/features/agents/`
-- PLANNED: `apps/web/src/features/policies/`
-- PLANNED: `backend/tests/unit/cap_02/`
-- PLANNED: `backend/tests/component/cap_02/`
-- PLANNED: `backend/tests/contract/cap_02/`
-- PLANNED: `backend/tests/integration/cap_02/`
-- PLANNED: `tests/bdd/features/cap_02/`
-- PLANNED: `backend/src/apistra/platform/database/migrations/cap_02/`
+- EXISTING: `backend/src/apistra/modules/catalog/`
+- EXISTING: `backend/src/apistra/modules/agents/`
+- EXISTING: `backend/src/apistra/modules/policies/`
+- EXISTING: `apps/web/src/features/catalog/`
+- EXISTING: `apps/web/src/features/agents/`
+- EXISTING: `apps/web/src/features/policies/`
+- EXISTING: `backend/tests/unit/cap_02/`
+- EXISTING: `backend/tests/component/cap_02/`
+- EXISTING: `backend/tests/contract/cap_02/`
+- EXISTING: `backend/tests/integration/cap_02/`
+- EXISTING: `tests/bdd/features/cap_02/`
+- EXISTING: `backend/src/apistra/platform/database/migrations/cap_02/`
 
 Workorder-class boundary: Product implementation only inside the listed module, feature, contract, focused-test, optional migration, composition-root, and directly affected documentation paths.
 
@@ -154,7 +159,7 @@ UI scope is DSN-019 from design revision 0.4 after its explicit product approval
 - **Positive oracle:** A run receives versioned hard limits and records a deterministic allow, warn, or stop budget decision.
 - **Negative oracle:** A request exceeding a hard limit performs no additional model, connector, or tool effect.
 - **Boundary oracle:** Declared empty, minimum, maximum, timeout, concurrency, version, conflict, and ownership boundaries applicable to this result produce explicit documented outcomes.
-- **Evidence binding:** every executed result identifies specification revision 0.7, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
+- **Evidence binding:** every executed result identifies specification revision 0.9-ready, suite/input fingerprints, commit or candidate, environment, attempt, and evidence reference.
 
 ## Expectation sources and independent review
 

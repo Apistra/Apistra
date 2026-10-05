@@ -1,7 +1,7 @@
 # CAP-02 — Secrets Endpoints Agents Tools And Limits
 
-Version: 0.10
-Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-03 are DONE, and the WO-CAP-02-04 implementation awaits protected CI, review, merge, and acceptance
+Version: 0.11
+Status: IN_PROGRESS; WO-CAP-02-06 and WO-CAP-02-01 through WO-CAP-02-04 are DONE, and WO-CAP-02-05 is READY
 Release: 0.1
 Assurance: EXTENDED
 
@@ -18,15 +18,13 @@ definition, and receipt round-trips.
 PR #35, PR #36, merge `86a9211`, and protected run 37267844668 verify the
 reviewed WO-CAP-02-03 agent-version slice and every required authenticated
 Steering, definition, and receipt round-trip.
-The WO-CAP-02-04 feature branch locally verifies governed tool contracts,
-deterministic approval classification, exact agent tool-version references,
-PostgreSQL persistence, versioned API contracts, and DSN-023.
-**Main blocker:** WO-CAP-02-04 still requires protected CI, authenticated
-publication/readback, independent implementation review, merge, and explicit
-human workorder approval. CAP-02 then still requires WO-CAP-02-05 and the
-unchanged-candidate acceptance workorder WO-CAP-02-07.
-**Next step:** Review and merge the bounded WO-CAP-02-04 candidate only after
-all required protected gates pass; do not infer CAP-02 acceptance.
+PR #38, merge `90d4f29`, and protected run 37276401385 verify the reviewed
+WO-CAP-02-04 governed-tool slice and every required authenticated Steering,
+definition, and receipt round-trip.
+**Main blocker:** CAP-02 still requires WO-CAP-02-05 and the unchanged-candidate
+acceptance workorder WO-CAP-02-07.
+**Next step:** Implement WO-CAP-02-05 on its own feature branch without
+expanding beyond configurable limits, budget decisions, and DSN-019.
 
 ## Goal and value
 
@@ -176,6 +174,8 @@ DONE. WO-CAP-02-01 is also DONE after protected run 37216514042 and explicit
 product-owner implementation approval. WO-CAP-02-02 is DONE after PR #33,
 protected run 37228142970, and product-owner merge approval. WO-CAP-02-03 is
 DONE after PR #35, PR #36, merge `86a9211`, protected run 37267844668, and
-product-owner merge approval. WO-CAP-02-04 is READY; later implementation
-workorders remain DRAFT until their declared predecessor is complete.
+product-owner merge approval. WO-CAP-02-04 is DONE after PR #38, merge
+`90d4f29`, protected run 37276401385, and product-owner merge approval.
+WO-CAP-02-05 is READY; WO-CAP-02-07 remains DRAFT until its declared
+predecessor is complete.
 
